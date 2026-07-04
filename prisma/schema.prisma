@@ -73,6 +73,11 @@ model Empresa {
   status      String   @default("Ativo")
   statusType  String   @default("success")
   
+  // Integração Meta (Graph API)
+  metaPageId      String?
+  igAccountId     String?
+  metaAccessToken String?
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
