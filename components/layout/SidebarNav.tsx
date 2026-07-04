@@ -24,7 +24,7 @@ const navItems = [
   {
     group: 'Configurações',
     items: [
-      { href: '/dashboard/admin', label: 'Admin', icon: '⚙️' },
+      { href: '/dashboard/configuracoes', label: 'Configurações', icon: '⚙️' },
     ],
   },
 ]
