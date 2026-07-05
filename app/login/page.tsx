@@ -11,7 +11,14 @@ export default function LoginPage() {
   return (
     <div className={styles.page}>
       {/* Background Icon (Zero Gravity) */}
-      <img src="/icon.svg" alt="Background Icon" className={styles.bgIcon} />
+      <img src="/icon_1.svg" alt="Background Icon" className={styles.bgIcon} />
+
+      {/* Ocean Sunset Reflection */}
+      <div className={styles.oceanReflection} />
+
+      {/* Light Pulses */}
+      <div className={`${styles.pulse} ${styles.pulse1}`} />
+      <div className={`${styles.pulse} ${styles.pulse2}`} />
 
       {/* Background glows */}
       <div className={`${styles.glow} ${styles.glowTop}`} />

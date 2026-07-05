@@ -142,7 +142,13 @@
   z-index: 0;
   opacity: 0.03;
   pointer-events: none;
-  animation: zeroGravity 150s linear infinite;
+  animation: zeroGravity 150s cubic-bezier(0.4, 0, 0.2, 1) infinite, pulseOpacity 25s ease-in-out infinite alternate;
+}
+
+@keyframes pulseOpacity {
+  0% { opacity: 0.01; }
+  50% { opacity: 0.04; }
+  100% { opacity: 0.02; }
 }
 
 @keyframes zeroGravity {
@@ -151,3 +157,56 @@
   66% { transform: translate(-52%, -48%) rotate(240deg) scale(0.95); }
   100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
 }
+
+/* Ocean Sunset Reflection */
+.oceanReflection {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(180deg, rgba(250, 70, 22, 0.15) 0%, rgba(250, 70, 22, 0) 100%);
+  filter: blur(100px);
+  z-index: 0;
+  animation: waveMotion 15s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes waveMotion {
+  0% { transform: translateY(10%) scaleY(1); opacity: 0.5; }
+  50% { transform: translateY(-5%) scaleY(1.1); opacity: 0.8; }
+  100% { transform: translateY(15%) scaleY(0.9); opacity: 0.4; }
+}
+
+/* Light Pulses */
+.pulse {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 70, 22, 0.3) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.pulse1 {
+  top: 20%;
+  left: 15%;
+  animation: slowPulse 20s ease-in-out infinite 5s;
+}
+
+.pulse2 {
+  bottom: 30%;
+  right: 15%;
+  animation: slowPulse 25s ease-in-out infinite 12s;
+}
+
+@keyframes slowPulse {
+  0% { opacity: 0; transform: scale(0.8); }
+  20% { opacity: 0.6; transform: scale(1.2); }
+  40% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
