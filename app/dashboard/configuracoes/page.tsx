@@ -16,8 +16,10 @@ export default async function ConfiguracoesPage() {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   const isMetaConnected = !!user?.metaAccessToken
 
-  // Busca os usuários autorizados
-  const authorizedUsers = await prisma.user.findMany()
+  // Busca apenas os usuários com acesso real (admin ou colaborador), excluindo visitantes
+  const authorizedUsers = await prisma.user.findMany({
+    where: { role: { in: ['admin', 'colaborador'] } }
+  })
 
   const isAdmin = session.user.role?.toLowerCase() === 'admin'
 
