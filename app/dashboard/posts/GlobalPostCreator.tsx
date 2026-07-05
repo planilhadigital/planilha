@@ -157,12 +157,12 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
         <h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Programar Posts</h1>
       </div>
 
-      {/* EDITOR PANEL (COMPACTADO) */}
-      <div className={styles.editorPanel} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', gridColumn: 'span 2' }}>
+      {/* EDITOR PANEL */}
+      <div className={styles.editorPanel} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', gridColumn: 'span 2' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
           {/* Lado Esquerdo do Editor */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div>
               <div className={styles.stepTitle}>
                 <span className={styles.stepNumber}>1</span> {empresas.length === 1 ? 'Conta Selecionada' : 'Selecione as contas'}
@@ -206,24 +206,24 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
               <div className={styles.stepTitle}>
                 <span className={styles.stepNumber}>2</span> Selecione canais
               </div>
-              <div className={styles.channelSelector}>
+              <div className={styles.channelSelector} style={{ gap: '0.5rem' }}>
                 <button 
                   className={styles.channelBtn} 
                   data-active={postForm.canais.instagram}
                   onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
-                  style={{ padding: '0.8rem', borderRadius: '50%' }}
+                  style={{ padding: '0.5rem', borderRadius: '50%' }}
                   title="Instagram"
                 >
-                  <FaInstagram size={24} />
+                  <FaInstagram size={18} />
                 </button>
                 <button 
                   className={styles.channelBtn} 
                   data-active={postForm.canais.facebook}
                   onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
-                  style={{ padding: '0.8rem', borderRadius: '50%' }}
+                  style={{ padding: '0.5rem', borderRadius: '50%' }}
                   title="Facebook"
                 >
-                  <FaFacebook size={24} />
+                  <FaFacebook size={18} />
                 </button>
               </div>
             </div>
@@ -246,18 +246,18 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
                         }
                       }}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        padding: '0.5rem 1rem', borderRadius: 'var(--r-full)',
-                        border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
-                        background: isActive ? 'var(--accent-dim)' : 'var(--bg-deep)',
-                        color: isActive ? 'var(--accent)' : 'var(--text-muted)',
-                        cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.85rem'
-                      }}
-                    >
-                      {fmt === 'Feed' && <Layout size={14} />}
-                      {fmt === 'Reels' && <Film size={14} />}
-                      {fmt === 'Stories' && <Copy size={14} />}
-                      {fmt === 'Carrossel' && <ImageIcon size={14} />}
+                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      padding: '0.4rem 0.75rem', borderRadius: 'var(--r-full)',
+                      border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                      background: isActive ? 'var(--accent-dim)' : 'var(--bg-deep)',
+                      color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.75rem'
+                    }}
+                  >
+                    {fmt === 'Feed' && <Layout size={12} />}
+                    {fmt === 'Reels' && <Film size={12} />}
+                    {fmt === 'Stories' && <Copy size={12} />}
+                    {fmt === 'Carrossel' && <ImageIcon size={12} />}
                       {fmt}
                     </button>
                   )
