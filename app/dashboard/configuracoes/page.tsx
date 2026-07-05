@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Settings, Users, Link as LinkIcon, Shield, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { revalidatePath } from 'next/cache'
+import RoleManager from './RoleManager'
 
 export default async function ConfiguracoesPage() {
   const session = await getServerSession(authOptions)
@@ -16,9 +17,9 @@ export default async function ConfiguracoesPage() {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   const isMetaConnected = !!user?.metaAccessToken
 
-  // Busca apenas os usuários com acesso real (admin ou colaborador), excluindo visitantes
+  // Busca todos os usuários ordenados por email para que o Admin possa promover visitantes
   const authorizedUsers = await prisma.user.findMany({
-    where: { role: { in: ['admin', 'colaborador'] } }
+    orderBy: { email: 'asc' }
   })
 
   const isAdmin = session.user.role?.toLowerCase() === 'admin'
@@ -153,7 +154,9 @@ export default async function ConfiguracoesPage() {
                     {authorizedUsers.map((u: any) => (
                       <tr key={u.email}>
                         <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.email}</td>
-                        <td><span className="badge badge-accent">{u.role}</span></td>
+                        <td>
+                          <RoleManager userId={u.id} currentRole={u.role || 'visitante'} />
+                        </td>
                         <td><span className="badge badge-success">Ativo</span></td>
                       </tr>
                     ))}
