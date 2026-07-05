@@ -4,14 +4,14 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Pega a empresa e verifica acesso
     const empresa = await prisma.empresa.findFirst({

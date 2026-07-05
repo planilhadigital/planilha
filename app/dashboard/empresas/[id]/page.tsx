@@ -1,16 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
 
-export default function EmpresaSettingsPage({ params }: { params: { id: string } }) {
+export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [empresa, setEmpresa] = useState<any>(null)
   const [metaPages, setMetaPages] = useState<any[]>([])
   const [selectedPageId, setSelectedPageId] = useState('')
+  const [loading, setLoading] = useState(true)
   
   const [activeTab, setActiveTab] = useState<'metricas' | 'config' | 'posts'>('metricas')
   const [insightsData, setInsightsData] = useState<any>(null)
@@ -32,7 +34,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
     async function loadData() {
       try {
         // Busca os dados da empresa
-        const empRes = await fetch(`/api/empresas/${params.id}`)
+        const empRes = await fetch(`/api/empresas/${id}`)
         if (!empRes.ok) throw new Error('Empresa não encontrada')
         const empData = await empRes.json()
         setEmpresa(empData)
@@ -57,14 +59,14 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       }
     }
     loadData()
-  }, [params.id])
+  }, [id])
 
   useEffect(() => {
     async function loadInsights() {
       if (activeTab === 'metricas' && empresa?.igAccountId) {
         setLoadingInsights(true)
         try {
-          const res = await fetch(`/api/empresas/${params.id}/insights?days=${period}`)
+          const res = await fetch(`/api/empresas/${id}/insights?days=${period}`)
           if (res.ok) {
             const data = await res.json()
             setInsightsData(data)
@@ -77,7 +79,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       }
     }
     loadInsights()
-  }, [activeTab, empresa?.igAccountId, params.id, period])
+  }, [activeTab, empresa?.igAccountId, id, period])
 
   // Carrega posts se a aba for posts
   useEffect(() => {
@@ -85,7 +87,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       if (activeTab === 'posts') {
         setLoadingPosts(true)
         try {
-          const res = await fetch(`/api/empresas/${params.id}/posts`)
+          const res = await fetch(`/api/empresas/${id}/posts`)
           if (res.ok) {
             const data = await res.json()
             setPosts(data.posts || [])
@@ -98,7 +100,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       }
     }
     loadPosts()
-  }, [activeTab, params.id])
+  }, [activeTab, id])
 
   const handleSave = async () => {
     setSaving(true)
@@ -108,7 +110,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       const selectedPage = metaPages.find(p => p.id === selectedPageId)
       const igAccountId = selectedPage?.instagram_business_account?.id || null
 
-      const res = await fetch(`/api/empresas/${params.id}`, {
+      const res = await fetch(`/api/empresas/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -135,7 +137,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
     setSavingPost(true)
 
     try {
-      const res = await fetch(`/api/empresas/${params.id}/posts`, {
+      const res = await fetch(`/api/empresas/${id}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postForm)
@@ -207,7 +209,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
                     <h3>@{insightsData.profile.username}</h3>
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                       <Link 
-                        href={`/report/${params.id}?days=${period}`} 
+                        href={`/report/${id}?days=${period}`} 
                         target="_blank" 
                         className="btn btn-secondary btn-sm"
                       >

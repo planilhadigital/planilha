@@ -3,9 +3,10 @@ import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
 import styles from './page.module.css'
 import ClientChart from './ClientChart' // Precisaremos extrair o Recharts para um Client Component
 
-export default async function PublicReportPage({ params, searchParams }: { params: { id: string }, searchParams: { days?: string } }) {
-  const { id } = params
-  const days = searchParams.days ? parseInt(searchParams.days, 10) : 28
+export default async function PublicReportPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ days?: string }> }) {
+  const { id } = await params
+  const searchParamsObj = await searchParams
+  const days = searchParamsObj.days ? parseInt(searchParamsObj.days, 10) : 28
 
   // Busca a empresa
   const empresa = await prisma.empresa.findUnique({

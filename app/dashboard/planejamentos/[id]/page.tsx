@@ -1,19 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import styles from './page.module.css'
 
-export default function QuadroPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
+export default function QuadroPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [board, setBoard] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/planejamentos/${params.id}`)
+        const res = await fetch(`/api/planejamentos/${id}`)
         if (res.ok) {
           const data = await res.json()
           setBoard(data.planejamento)
@@ -25,7 +24,7 @@ export default function QuadroPage({ params }: { params: { id: string } }) {
       }
     }
     load()
-  }, [params.id])
+  }, [id])
 
   if (loading) return <div className={styles.loading}>Carregando quadro...</div>
   if (!board) return <div className={styles.loading}>Quadro não encontrado.</div>
