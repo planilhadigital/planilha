@@ -1,9 +1,13 @@
 .sidebar {
   width: var(--sidebar-w);
   min-height: 100vh;
-  background: rgba(14, 20, 32, 0.7);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background-color: #151414;
+  background-image: 
+    linear-gradient(to bottom right, transparent 30%, #151414 90%),
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+  background-position: center top;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
