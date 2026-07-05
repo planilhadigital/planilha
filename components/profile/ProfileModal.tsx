@@ -149,6 +149,7 @@ export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProp
                   <input type="text" className="input" value={lastName} onChange={e => setLastName(e.target.value)} required style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-deep)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }} />
                 </div>
               </div>
+              <div>
                 <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>E-mail</label>
                 <input type="email" className="input" value={email} disabled style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-deep)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text-muted)', cursor: 'not-allowed' }} />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Vinculado à sua conta Google</span>
