@@ -158,7 +158,7 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       </div>
 
       {/* EDITOR PANEL */}
-      <div className={styles.editorPanel} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', gridColumn: 'span 2' }}>
+      <div className={styles.editorPanel} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', gridColumn: 'span 2', backgroundColor: '#151414', backgroundImage: `radial-gradient(circle at 15% 10%, rgba(250,70,22,0.12), transparent 60%), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`, backgroundSize: '100% 100%, 30px 30px, 30px 30px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 0 6px #0A0A0A, 0 0 0 7px rgba(255,255,255,0.05)', borderRadius: 'var(--r-xl)', padding: '1.5rem', margin: '7px 0 7px 7px' }}>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
           {/* Lado Esquerdo do Editor */}
@@ -391,7 +391,7 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       </div>
 
       {/* PREVIEW PANEL */}
-      <div className={styles.previewPanel}>
+      <div className={styles.previewPanel} style={{ backgroundColor: '#151414', backgroundImage: `radial-gradient(circle at 80% 10%, rgba(250,70,22,0.10), transparent 60%), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`, backgroundSize: '100% 100%, 30px 30px, 30px 30px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 0 6px #0A0A0A, 0 0 0 7px rgba(255,255,255,0.05)', borderRadius: 'var(--r-xl)', margin: '7px 7px 7px 0' }}>
         <div className={styles.stepTitle} style={{ justifyContent: 'center' }}>
           Preview: {postForm.formatos.join(', ') || 'Nenhum'}
         </div>
