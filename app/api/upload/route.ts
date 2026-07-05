@@ -24,9 +24,22 @@ export async function POST(request: Request) {
     const secretAccessKey = process.env.S3_SECRET_KEY || ''
     const bucketName = process.env.S3_BUCKET_NAME || ''
     
+    // Fallback: Salvar localmente se não houver nuvem configurada (apenas para ambiente local)
     if (!bucketName || !accessKeyId || !secretAccessKey) {
-       console.error("Variáveis de ambiente S3 ausentes. Configure S3_BUCKET_NAME, S3_ACCESS_KEY e S3_SECRET_KEY.")
-       return NextResponse.json({ error: 'Servidor de arquivos (Cloud) não configurado no .env' }, { status: 500 })
+       console.warn("Aviso: S3_BUCKET_NAME, S3_ACCESS_KEY e S3_SECRET_KEY não estão configurados. Salvando localmente (NÃO RECOMENDADO PARA VERCEL).")
+       
+       const { writeFileSync, mkdirSync } = require('fs')
+       const { join } = require('path')
+       
+       const uploadDir = join(process.cwd(), 'public', 'uploads')
+       try {
+         mkdirSync(uploadDir, { recursive: true })
+       } catch (e) {}
+       
+       const filePath = join(uploadDir, fileName)
+       writeFileSync(filePath, buffer)
+       
+       return NextResponse.json({ url: `/uploads/${fileName}` })
     }
 
     const s3Client = new S3Client({
@@ -43,13 +56,10 @@ export async function POST(request: Request) {
       Key: fileName,
       Body: buffer,
       ContentType: file.type,
-      // ACL: 'public-read' // Maioria dos novos buckets recomendam usar Bucket Policies ao invés de ACL
     })
 
     await s3Client.send(command)
     
-    // A URL final. Se estiver usando R2, pode ser que precise setar S3_PUBLIC_URL.
-    // O fallback usa o padrão da AWS se não houver endpoint customizado.
     const publicBaseUrl = process.env.S3_PUBLIC_URL || 
                           (endpoint ? `${endpoint}/${bucketName}` : `https://${bucketName}.s3.${region}.amazonaws.com`)
     
@@ -57,7 +67,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: fileUrl })
   } catch (error: any) {
-    console.error('Erro no upload para nuvem:', error)
-    return NextResponse.json({ error: 'Erro ao fazer upload do arquivo para a nuvem' }, { status: 500 })
+    console.error('Erro no upload:', error)
+    return NextResponse.json({ error: 'Erro ao fazer upload do arquivo' }, { status: 500 })
   }
 }
