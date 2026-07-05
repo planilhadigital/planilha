@@ -21,6 +21,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
   const [savingPost, setSavingPost] = useState(false)
+  const [period, setPeriod] = useState(28)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -63,7 +64,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       if (activeTab === 'metricas' && empresa?.igAccountId) {
         setLoadingInsights(true)
         try {
-          const res = await fetch(`/api/empresas/${params.id}/insights`)
+          const res = await fetch(`/api/empresas/${params.id}/insights?days=${period}`)
           if (res.ok) {
             const data = await res.json()
             setInsightsData(data)
@@ -76,7 +77,7 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       }
     }
     loadInsights()
-  }, [activeTab, empresa?.igAccountId, params.id])
+  }, [activeTab, empresa?.igAccountId, params.id, period])
 
   // Carrega posts se a aba for posts
   useEffect(() => {
@@ -202,7 +203,21 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
               <div className={styles.profileCard}>
                 <img src={insightsData.profile.avatar} alt="Avatar" className={styles.profileAvatar} />
                 <div className={styles.profileInfo}>
-                  <h3>@{insightsData.profile.username}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3>@{insightsData.profile.username}</h3>
+                    <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-elevated)', padding: '4px', borderRadius: 'var(--r-md)' }}>
+                      {[7, 14, 28].map(d => (
+                        <button 
+                          key={d} 
+                          onClick={() => setPeriod(d)}
+                          className={`btn btn-sm ${period === d ? 'btn-primary' : 'btn-ghost'}`}
+                          style={{ minWidth: '40px', padding: '4px 8px', fontSize: '0.8rem' }}
+                        >
+                          {d}D
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <div className={styles.profileStats}>
                     <span><strong>{insightsData.profile.followers}</strong> Seguidores</span>
                     <span><strong>{insightsData.profile.postsCount}</strong> Posts</span>
@@ -212,11 +227,11 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
 
               <div className={styles.kpiGrid}>
                 <div className={styles.kpiCard}>
-                  <div className={styles.kpiLabel}>Alcance (28d)</div>
+                  <div className={styles.kpiLabel}>Alcance ({period}d)</div>
                   <div className={styles.kpiValue}>{insightsData.insights?.total?.reach || 0}</div>
                 </div>
                 <div className={styles.kpiCard}>
-                  <div className={styles.kpiLabel}>Impressões (28d)</div>
+                  <div className={styles.kpiLabel}>Impressões ({period}d)</div>
                   <div className={styles.kpiValue}>{insightsData.insights?.total?.impressions || 0}</div>
                 </div>
               </div>

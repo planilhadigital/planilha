@@ -28,10 +28,15 @@ export async function getInstagramProfile(igAccountId: string, accessToken: stri
   }
 }
 
-export async function getInstagramInsights(igAccountId: string, accessToken: string) {
+export async function getInstagramInsights(igAccountId: string, accessToken: string, days: number = 28) {
   try {
-    // Busca alcance (reach) e impressões dos últimos 28 dias
-    const res = await fetch(`https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach&period=day&access_token=${accessToken}`)
+    // Calculando timestamps (limite do Facebook para 'day' é 30 dias por request, então travamos no max 28 por segurança).
+    const safeDays = Math.min(days, 30);
+    const until = Math.floor(Date.now() / 1000);
+    const since = until - (safeDays * 86400); // 86400s = 1 dia
+
+    const url = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach&period=day&since=${since}&until=${until}&access_token=${accessToken}`
+    const res = await fetch(url)
     const data = await res.json()
     
     if (data.error) throw new Error(data.error.message)

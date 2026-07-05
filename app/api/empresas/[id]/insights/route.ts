@@ -26,21 +26,26 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     // Pega o token global do usuário
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+    const account = await prisma.contaConectada.findFirst({
+      where: { userId: session.user.id, provider: 'facebook' }
     })
 
-    if (!user?.metaAccessToken) {
-      return NextResponse.json({ error: 'Conta da Meta não conectada globalmente' }, { status: 400 })
+    if (!account) {
+      return NextResponse.json({ error: 'Conta do Facebook não conectada' }, { status: 400 })
     }
 
     if (!empresa.igAccountId) {
       return NextResponse.json({ error: 'Esta empresa não tem uma conta do Instagram Business vinculada.' }, { status: 400 })
     }
 
+    // Pega o parametro days da URL (ex: ?days=7), default 28
+    const { searchParams } = new URL(request.url)
+    const daysParam = searchParams.get('days')
+    const days = daysParam ? parseInt(daysParam, 10) : 28
+
     // Busca dados reais
-    const profile = await getInstagramProfile(empresa.igAccountId, user.metaAccessToken)
-    const insights = await getInstagramInsights(empresa.igAccountId, user.metaAccessToken)
+    const profile = await getInstagramProfile(empresa.igAccountId, account.access_token)
+    const insights = await getInstagramInsights(empresa.igAccountId, account.access_token, days)
 
     return NextResponse.json({
       profile,
