@@ -18,8 +18,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Conta da Meta não conectada' }, { status: 400 })
     }
 
-    // Busca as páginas gerenciadas pelo usuário
-    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account&access_token=${user.metaAccessToken}`)
+    // Busca as páginas gerenciadas pelo usuário e informações aninhadas do Instagram
+    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account{id,username,profile_picture_url}&access_token=${user.metaAccessToken}`)
     const pagesData = await pagesRes.json()
 
     if (pagesData.error) {
