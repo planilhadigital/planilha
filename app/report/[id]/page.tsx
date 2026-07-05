@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
 import styles from './page.module.css'
-import ClientChart from './ClientChart' 
+import dynamic from 'next/dynamic'
+const ClientChart = dynamic(() => import('./ClientChart'), { ssr: false })
 import PrintButton from './PrintButton'
 import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai'
 
