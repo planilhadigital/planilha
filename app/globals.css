@@ -10,11 +10,11 @@
    TOKENS
 ================================================================ */
 :root {
-  /* Background */
-  --bg-deep:     #0B0F1A;
-  --bg-surface:  #131B2E;
-  --bg-elevated: #1E293B;
-  --bg-overlay:  rgba(11, 15, 26, 0.85);
+  /* Background - Minimalist Dark */
+  --bg-deep:     #050505;
+  --bg-surface:  #111111;
+  --bg-elevated: #1a1a1a;
+  --bg-overlay:  rgba(5, 5, 5, 0.85);
 
   /* Accent — laranja Ilha Digital (#FA4616 extraído do SVG planilha.svg) */
   --accent:          #FA4616;
@@ -24,15 +24,15 @@
   --accent-border:   rgba(250, 70, 22, 0.28);
   --accent-gradient: linear-gradient(135deg, #FA4616 34%, #F84D1C 42%, #F9632D 55%, #F98749 70%, #F8B86F 88%, #F8E08E 100%);
 
-  /* Texto */
+  /* Texto - High Contrast Minimalist */
   --text-primary:   #FFFFFF;
-  --text-secondary: #F9F7F2;   /* cor do "plan" no SVG */
-  --text-body:      #94A3B8;
-  --text-muted:     #64748B;
+  --text-secondary: #EEEEEE;
+  --text-body:      #A0A0A0;
+  --text-muted:     #666666;
 
-  /* Bordas */
-  --border:         rgba(255, 255, 255, 0.07);
-  --border-hover:   rgba(255, 255, 255, 0.14);
+  /* Bordas - Subtle */
+  --border:         #222222;
+  --border-hover:   #333333;
   --border-focus:   rgba(250, 70, 22, 0.50);
   --border-accent:  rgba(250, 70, 22, 0.28);
 
