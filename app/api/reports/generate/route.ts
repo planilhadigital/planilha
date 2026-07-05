@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     }
 
     // Verificar se usuário tem acesso
-    const hasAccess = empresa.usuarios.some(u => u.id === session.user.id)
+    const hasAccess = empresa.usuarios.some((u: { id: string }) => u.id === session.user.id)
     if (!hasAccess) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
