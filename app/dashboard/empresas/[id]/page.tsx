@@ -22,6 +22,13 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   const [posts, setPosts] = useState<any[]>([])
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
+  
+  const [configForm, setConfigForm] = useState({
+    avatarUrl: '',
+    websiteUrl: '',
+    instagramUrl: '',
+    facebookUrl: ''
+  })
   const [savingPost, setSavingPost] = useState(false)
   const [period, setPeriod] = useState(28)
   const [saving, setSaving] = useState(false)
@@ -39,6 +46,12 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         const empData = await empRes.json()
         setEmpresa(empData)
         setSelectedPageId(empData.metaPageId || '')
+        setConfigForm({
+          avatarUrl: empData.avatarUrl || '',
+          websiteUrl: empData.websiteUrl || '',
+          instagramUrl: empData.instagramUrl || '',
+          facebookUrl: empData.facebookUrl || ''
+        })
 
         // Busca as páginas do Facebook do usuário
         const pagesRes = await fetch('/api/meta/pages')
@@ -115,7 +128,8 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           metaPageId: selectedPageId,
-          igAccountId: igAccountId
+          igAccountId: igAccountId,
+          ...configForm
         })
       })
 
@@ -161,14 +175,37 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>{empresa.name}</h1>
-          <p className={styles.subtitle}>Configurações da Empresa</p>
+      <div className={styles.premiumHeader}>
+        <div className={styles.headerLeft}>
+          {empresa.avatarUrl ? (
+            <img src={empresa.avatarUrl} alt={empresa.name} className={styles.companyLogo} />
+          ) : (
+            <div className={styles.companyLogo}>{empresa.name.charAt(0).toUpperCase()}</div>
+          )}
+          <div className={styles.companyTitleContainer}>
+            <h1 className={styles.companyName}>{empresa.name}</h1>
+            <div className={styles.badgesContainer}>
+              {empresa.metaPageId && <span className={styles.badgeLinked}>✅ Página Vinculada</span>}
+              {empresa.igAccountId && <span className={styles.badgeLinked}>✅ Insta Vinculado</span>}
+            </div>
+          </div>
         </div>
-        <Link href="/dashboard" className="btn btn-ghost">
-          ← Voltar ao Dashboard
-        </Link>
+        <div className={styles.headerRight}>
+          <div className={styles.quickLinks}>
+            {empresa.websiteUrl && (
+              <a href={empresa.websiteUrl} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Website">🌐</a>
+            )}
+            {empresa.instagramUrl && (
+              <a href={empresa.instagramUrl} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Instagram">📸</a>
+            )}
+            {empresa.facebookUrl && (
+              <a href={empresa.facebookUrl} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Facebook">📘</a>
+            )}
+          </div>
+          <Link href="/dashboard" className="btn btn-ghost btn-sm">
+            ← Voltar ao Dashboard
+          </Link>
+        </div>
       </div>
 
       <div className={styles.tabs}>
@@ -408,47 +445,104 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       )}
 
       {activeTab === 'config' && (
-        <div className={styles.card}>
-        <h2 className={styles.cardTitle}>Integração com Redes Sociais</h2>
-        
-        {metaPages.length === 0 ? (
-          <div className={styles.alertWarning}>
-            <span>⚠️ Sua conta não possui Páginas do Facebook vinculadas ou você ainda não conectou seu Facebook na aba de Configurações globais.</span>
-            <Link href="/dashboard/configuracoes" className="btn btn-primary" style={{ width: 'fit-content' }}>
-              Ir para Configurações Globais
-            </Link>
-          </div>
-        ) : (
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Selecione a Página do Facebook desta empresa</label>
-            <select 
-              className={styles.select}
-              value={selectedPageId}
-              onChange={(e) => setSelectedPageId(e.target.value)}
-            >
-              <option value="">-- Nenhuma página vinculada --</option>
-              {metaPages.map(page => (
-                <option key={page.id} value={page.id}>
-                  {page.name} {page.instagram_business_account ? '(+ Instagram)' : ''}
-                </option>
-              ))}
-            </select>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-              Dica: Para o Instagram funcionar, ele precisa ser uma conta Profissional/Criador vinculada à sua Página do Facebook.
-            </p>
-          </div>
-        )}
+        <div className={styles.configLayout}>
+          {/* Perfil da Empresa */}
+          <div className={styles.configSection}>
+            <h2 className={styles.cardTitle}>Perfil da Empresa</h2>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label}>URL da Foto de Perfil (Avatar)</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }}
+                value={configForm.avatarUrl} 
+                onChange={(e) => setConfigForm({...configForm, avatarUrl: e.target.value})} 
+                placeholder="https://..." 
+              />
+            </div>
 
-        <div className={styles.actions}>
-          <button 
-            className="btn btn-primary" 
-            onClick={handleSave} 
-            disabled={saving || metaPages.length === 0}
-          >
-            {saving ? 'Salvando...' : 'Salvar Configurações'}
-          </button>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Website da Empresa</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }}
+                value={configForm.websiteUrl} 
+                onChange={(e) => setConfigForm({...configForm, websiteUrl: e.target.value})} 
+                placeholder="https://..." 
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Link do Instagram</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }}
+                value={configForm.instagramUrl} 
+                onChange={(e) => setConfigForm({...configForm, instagramUrl: e.target.value})} 
+                placeholder="https://instagram.com/..." 
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Link do Facebook</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }}
+                value={configForm.facebookUrl} 
+                onChange={(e) => setConfigForm({...configForm, facebookUrl: e.target.value})} 
+                placeholder="https://facebook.com/..." 
+              />
+            </div>
+          </div>
+
+          {/* Integração Meta */}
+          <div className={styles.configSection}>
+            <h2 className={styles.cardTitle}>Integração com Redes Sociais</h2>
+            
+            {metaPages.length === 0 ? (
+              <div className={styles.alertWarning}>
+                <span>⚠️ Sua conta não possui Páginas do Facebook vinculadas ou você ainda não conectou seu Facebook na aba de Configurações globais.</span>
+                <Link href="/dashboard/configuracoes" className="btn btn-primary" style={{ width: 'fit-content' }}>
+                  Ir para Configurações Globais
+                </Link>
+              </div>
+            ) : (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Selecione a Página do Facebook desta empresa</label>
+                <select 
+                  className={styles.select}
+                  value={selectedPageId}
+                  onChange={(e) => setSelectedPageId(e.target.value)}
+                >
+                  <option value="">-- Nenhuma página vinculada --</option>
+                  {metaPages.map(page => (
+                    <option key={page.id} value={page.id}>
+                      {page.name} {page.instagram_business_account ? '(+ Instagram)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                  Dica: Para o Instagram funcionar, ele precisa ser uma conta Profissional/Criador vinculada à sua Página do Facebook.
+                </p>
+              </div>
+            )}
+
+            <div className={styles.actions} style={{ marginTop: '2rem' }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSave} 
+                disabled={saving}
+                style={{ width: '100%' }}
+              >
+                {saving ? 'Salvando...' : 'Salvar Todas as Configurações'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
       )}
     </div>
   )

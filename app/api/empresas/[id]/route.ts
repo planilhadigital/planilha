@@ -12,7 +12,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const { id } = await params
     const body = await request.json()
-    const { metaPageId, igAccountId } = body
+    const { metaPageId, igAccountId, avatarUrl, websiteUrl, instagramUrl, facebookUrl } = body
 
     // Verifica se a empresa existe e o usuário tem acesso
     const empresa = await prisma.empresa.findFirst({
@@ -32,6 +32,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data: {
         metaPageId: metaPageId !== undefined ? metaPageId : empresa.metaPageId,
         igAccountId: igAccountId !== undefined ? igAccountId : empresa.igAccountId,
+        avatarUrl: avatarUrl !== undefined ? avatarUrl : empresa.avatarUrl,
+        websiteUrl: websiteUrl !== undefined ? websiteUrl : empresa.websiteUrl,
+        instagramUrl: instagramUrl !== undefined ? instagramUrl : empresa.instagramUrl,
+        facebookUrl: facebookUrl !== undefined ? facebookUrl : empresa.facebookUrl,
         status: metaPageId ? 'Conectado' : 'Ativo',
         statusType: metaPageId ? 'success' : 'success'
       }

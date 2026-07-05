@@ -75,7 +75,11 @@ export default async function DashboardPage() {
               empresas.map((e) => (
                 <Link href={`/dashboard/empresas/${e.id}`} key={e.id} className={styles.empresaItem} id={`empresa-${e.name.replace(/\s+/g, '-').toLowerCase()}`}>
                   <div className={styles.empresaAvatar}>
-                    {e.name.charAt(0).toUpperCase()}
+                    {e.avatarUrl ? (
+                      <img src={e.avatarUrl} alt={e.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    ) : (
+                      e.name.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className={styles.empresaInfo}>
                     <span className={styles.empresaName}>{e.name}</span>

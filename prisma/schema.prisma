@@ -78,6 +78,10 @@ model Empresa {
   status      String   @default("Ativo")
   statusType  String   @default("success")
   
+  websiteUrl      String?
+  instagramUrl    String?
+  facebookUrl     String?
+  
   // Integração Meta (Graph API)
   metaPageId      String?
   igAccountId     String?
