@@ -202,14 +202,68 @@ model Coluna {
 }
 
 model Card {
-  id          String   @id @default(cuid())
-  colunaId    String
-  titulo      String
-  descricao   String?
-  ordem       Int      @default(0)
-  createdAt   DateTime @default(now())
+  id           String   @id @default(cuid())
+  colunaId     String
+  titulo       String
+  descricao    String?
+  ordem        Int      @default(0)
+  dataVencimento DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 
-  coluna      Coluna   @relation(fields: [colunaId], references: [id], onDelete: Cascade)
+  coluna       Coluna        @relation(fields: [colunaId], references: [id], onDelete: Cascade)
+  labels       CardLabel[]
+  checklists   CardChecklist[]
+  comentarios  CardComentario[]
+  anexos       CardAnexo[]
+}
+
+model CardLabel {
+  id      String @id @default(cuid())
+  cardId  String
+  nome    String
+  cor     String @default("#22c55e") // hex color
+  
+  card    Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model CardChecklist {
+  id     String @id @default(cuid())
+  cardId String
+  titulo String @default("Checklist")
+  
+  card   Card             @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  itens  ChecklistItem[]
+}
+
+model ChecklistItem {
+  id          String        @id @default(cuid())
+  checklistId String
+  texto       String
+  concluido   Boolean       @default(false)
+  ordem       Int           @default(0)
+  
+  checklist   CardChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+}
+
+model CardComentario {
+  id        String   @id @default(cuid())
+  cardId    String
+  userId    String
+  texto     String
+  createdAt DateTime @default(now())
+  
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model CardAnexo {
+  id        String   @id @default(cuid())
+  cardId    String
+  nome      String
+  url       String
+  createdAt DateTime @default(now())
+  
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
 
 // ------------------------------------------------------------------

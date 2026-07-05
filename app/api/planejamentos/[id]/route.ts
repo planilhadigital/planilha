@@ -18,7 +18,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           orderBy: { ordem: 'asc' },
           include: {
             cards: {
-              orderBy: { ordem: 'asc' }
+              orderBy: { ordem: 'asc' },
+              include: {
+                labels: true,
+                checklists: { include: { itens: true } },
+                comentarios: { select: { id: true } },
+                anexos: { select: { id: true } },
+              }
             }
           }
         }
