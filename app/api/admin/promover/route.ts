@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 import { getToken } from 'next-auth/jwt'
 import { NextRequest } from 'next/server'
 
@@ -21,7 +20,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Transação isolada (Garantia de consistência do banco de dados)
-    const resultado = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // Usamos 'any' temporariamente para evitar falhas no TS local causadas por bloqueio do 'prisma generate' no Windows
+    const resultado = await prisma.$transaction(async (tx: any) => {
       
       // 1. Vincular o usuário à empresa (M:N relacional atual)
       const empresaAtualizada = await tx.empresa.update({
