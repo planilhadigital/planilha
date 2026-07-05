@@ -41,31 +41,18 @@ export async function GET(request: Request) {
     const firstPage = pagesData.data?.[0]
     
     if (firstPage) {
-      // 4. Salvar na primeira empresa vinculada a esse usuário ou criar uma nova se não existir
-      let userEmpresas = await prisma.empresa.findMany({
+      // 4. Salvar na primeira empresa vinculada a esse usuário
+      const userEmpresas = await prisma.empresa.findMany({
         where: { usuarios: { some: { id: session.user.id } } }
       })
 
-      let empresaId = ''
-      
       if (userEmpresas.length === 0) {
-        // Cria uma empresa padrão para o usuário se for o primeiro acesso
-        const newEmpresa = await prisma.empresa.create({
-          data: {
-            nome: 'Minha Agência',
-            status: 'Ativo',
-            usuarios: {
-              connect: { id: session.user.id }
-            }
-          }
-        })
-        empresaId = newEmpresa.id
-      } else {
-        empresaId = userEmpresas[0].id
+        // Se não tiver empresa, não cria automático, só devolve um erro
+        return NextResponse.redirect(new URL('/dashboard/configuracoes?error=no_empresa', request.url))
       }
 
       await prisma.empresa.update({
-        where: { id: empresaId },
+        where: { id: userEmpresas[0].id },
         data: {
           metaPageId: firstPage.id,
           metaAccessToken: longLivedData.access_token,

@@ -50,6 +50,12 @@ export default async function ConfiguracoesPage({
         </div>
       )}
 
+      {searchParams?.error === 'no_empresa' && (
+        <div style={{ padding: '1rem', background: 'rgba(243, 156, 18, 0.1)', color: '#F39C12', border: '1px solid rgba(243, 156, 18, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
+          ⚠️ Você precisa criar uma Empresa no sistema antes de conectar o Facebook!
+        </div>
+      )}
+
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h2 className={styles.cardTitle}>Integrações</h2>
