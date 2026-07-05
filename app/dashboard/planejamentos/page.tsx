@@ -119,8 +119,8 @@ export default function PlanejamentosPage() {
             </div>
           ) : (
             <button 
-              className={styles.boardCard} 
-              style={{ borderStyle: 'dashed', cursor: 'pointer', background: 'transparent', alignItems: 'center', justifyContent: 'center' }}
+              className={`card ${styles.boardCard}`} 
+              style={{ border: '2px dashed var(--border)', cursor: 'pointer', background: 'transparent', alignItems: 'center', justifyContent: 'center', boxShadow: 'none' }}
               onClick={() => setShowForm(true)}
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>

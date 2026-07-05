@@ -400,31 +400,37 @@
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: var(--border); /* act as borders */
-  gap: 1px; /* 1px borders between cells */
+  background: rgba(255, 255, 255, 0.05); /* very subtle grid lines */
+  gap: 1px;
 }
 
 .calendarDayHeader {
-  background: var(--bg-elevated);
-  padding: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.75rem;
   text-align: center;
-  font-weight: 700;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: 0.75rem;
   text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 1px;
 }
 
 .calendarCell {
-  background: var(--bg-surface);
-  min-height: 120px;
+  background: rgba(10, 10, 10, 0.4); /* transparent to show card glow */
+  min-height: 140px;
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  transition: background 0.2s;
+}
+.calendarCell:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .calendarCell[data-other-month="true"] {
-  background: rgba(255,255,255,0.02);
-  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
 }
 
 .dayNumber {
@@ -433,21 +439,29 @@
   color: var(--text-muted);
   text-align: right;
   margin-bottom: 0.25rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border-radius: 50%;
 }
 .calendarCell[data-today="true"] .dayNumber {
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
 }
 
 .calendarPostPill {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  background: var(--bg-deep);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--r-md);
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -455,7 +469,10 @@
   text-overflow: ellipsis;
 }
 .calendarPostPill:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  color: var(--accent);
+  transform: translateY(-1px);
 }
 
 /* =========================================================

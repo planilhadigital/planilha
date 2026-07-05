@@ -28,42 +28,19 @@
 }
 
 .boardCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   min-height: 160px;
   position: relative;
   overflow: hidden;
+  padding: 1.5rem !important; /* Override large card padding */
 }
 
 .boardCard:hover {
-  transform: translateY(-4px);
-  border-color: rgba(250, 70, 22, 0.5);
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(250, 70, 22, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.boardCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--color-accent-gradient);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.boardCard:hover::before {
-  opacity: 1;
+  /* Handled by global card */
 }
 
 .boardTitle {
