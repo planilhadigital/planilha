@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { Instagram, Facebook, Globe, Image as ImageIcon, UploadCloud } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon } from 'lucide-react'
+import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -233,17 +234,17 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
           <div className={styles.headerRight}>
             {empresa.websiteUrl && (
               <a href={empresa.websiteUrl} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Website">
-                <Globe size={20} />
+                <FaGlobe size={20} />
               </a>
             )}
             {empresa.igAccountId && (
               <a href={`https://instagram.com`} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Instagram">
-                <Instagram size={20} />
+                <FaInstagram size={20} />
               </a>
             )}
             {empresa.metaPageId && (
               <a href={`https://facebook.com/${empresa.metaPageId}`} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Facebook">
-                <Facebook size={20} />
+                <FaFacebook size={20} />
               </a>
             )}
           </div>
@@ -279,14 +280,14 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                   data-active={postForm.rede === 'Instagram' || postForm.rede === 'Ambas'}
                   onClick={() => setPostForm({...postForm, rede: postForm.rede === 'Facebook' ? 'Ambas' : 'Instagram'})}
                 >
-                  <Instagram size={18} /> Instagram
+                  <FaInstagram size={18} /> Instagram
                 </button>
                 <button 
                   className={styles.channelBtn} 
                   data-active={postForm.rede === 'Facebook' || postForm.rede === 'Ambas'}
                   onClick={() => setPostForm({...postForm, rede: postForm.rede === 'Instagram' ? 'Ambas' : 'Facebook'})}
                 >
-                  <Facebook size={18} /> Facebook
+                  <FaFacebook size={18} /> Facebook
                 </button>
               </div>
             </div>
@@ -404,7 +405,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                   <div className={styles.dayNumber}>{day.getDate()}</div>
                   {dayPosts.map(post => (
                     <div key={post.id} className={styles.calendarPostPill}>
-                      {post.rede.includes('Insta') ? <Instagram size={12} color="#FA4616" /> : <Facebook size={12} color="#3B82F6" />}
+                      {post.rede.includes('Insta') ? <FaInstagram size={12} color="#FA4616" /> : <FaFacebook size={12} color="#3B82F6" />}
                       <span>{new Date(post.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   ))}
