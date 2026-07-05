@@ -18,9 +18,9 @@ const navItems = [
     group: 'Ferramentas',
     items: [
       { href: '/dashboard/planejamentos', label: 'Planejamentos', icon: <ClipboardList size={20} /> },
-      { href: '/dashboard/relatorios', label: 'Relatórios', icon: <BarChart3 size={20} /> },
       { href: '/dashboard/posts', label: 'Programar Posts', icon: <CalendarPlus size={20} /> },
       { href: '/dashboard/calendario', label: 'Calendário', icon: <CalendarDays size={20} /> },
+      { href: '/dashboard/relatorios', label: 'Relatórios', icon: <BarChart3 size={20} /> },
     ],
   },
   {
