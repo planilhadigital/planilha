@@ -107,7 +107,7 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       setPostForm({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
       setSelectedEmpresaIds([])
       setDatas([{ date: '', time: '' }])
-      setAdvancedConfig({ location: '', disableComments: false, hideLikes: false })
+      setAdvancedConfig({ location: '', disableComments: false, hideLikes: false, shareToFeed: true })
       setShowAdvanced(false)
     } finally {
       setSavingPost(false)

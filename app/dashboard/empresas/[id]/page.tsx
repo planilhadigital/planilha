@@ -190,6 +190,8 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       toast.success('Post agendado com sucesso!')
       setPostForm({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
       setDatas([{ date: '', time: '' }])
+      setAdvancedConfig({ location: '', disableComments: false, hideLikes: false, shareToFeed: true })
+      setShowAdvanced(false)
       setActiveTab('calendario')
     } catch (err: any) {
       toast.error(err.message)
