@@ -81,6 +81,7 @@ model Empresa {
   websiteUrl      String?
   instagramUrl    String?
   facebookUrl     String?
+  coverUrl        String?
   
   // Integração Meta (Graph API)
   metaPageId      String?
