@@ -205,17 +205,27 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
                 <div className={styles.profileInfo}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3>@{insightsData.profile.username}</h3>
-                    <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-elevated)', padding: '4px', borderRadius: 'var(--r-md)' }}>
-                      {[7, 14, 28].map(d => (
-                        <button 
-                          key={d} 
-                          onClick={() => setPeriod(d)}
-                          className={`btn btn-sm ${period === d ? 'btn-primary' : 'btn-ghost'}`}
-                          style={{ minWidth: '40px', padding: '4px 8px', fontSize: '0.8rem' }}
-                        >
-                          {d}D
-                        </button>
-                      ))}
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <Link 
+                        href={`/report/${params.id}?days=${period}`} 
+                        target="_blank" 
+                        className="btn btn-secondary btn-sm"
+                      >
+                        🔗 Compartilhar Relatório
+                      </Link>
+
+                      <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-elevated)', padding: '4px', borderRadius: 'var(--r-md)' }}>
+                        {[7, 14, 28].map(d => (
+                          <button 
+                            key={d} 
+                            onClick={() => setPeriod(d)}
+                            className={`btn btn-sm ${period === d ? 'btn-primary' : 'btn-ghost'}`}
+                            style={{ minWidth: '40px', padding: '4px 8px', fontSize: '0.8rem' }}
+                          >
+                            {d}D
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className={styles.profileStats}>
