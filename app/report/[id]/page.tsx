@@ -15,39 +15,84 @@ export default async function PublicReportPage({ params, searchParams }: { param
     include: { usuarios: true }
   })
 
-  if (!empresa || !empresa.igAccountId) {
+  if (!empresa) {
     return (
       <div className={styles.errorContainer}>
         <h1>Relatório Indisponível</h1>
-        <p>A empresa não foi encontrada ou não possui integração ativa com o Instagram.</p>
+        <p>A empresa não foi encontrada.</p>
       </div>
     )
   }
 
-  // Pega a conta conectada de um dos donos da empresa (como é MVP, pegamos o primeiro usuário)
-  const dono = empresa.usuarios[0]
-  const account = await prisma.account.findFirst({
-    where: { userId: dono.id, provider: 'facebook' }
-  })
+  let profile = null
+  let insights = null
+  let isDemo = false
 
-  if (!account) {
-    return (
-      <div className={styles.errorContainer}>
-        <h1>Relatório Indisponível</h1>
-        <p>Problema de credenciais da agência responsável.</p>
-      </div>
-    )
+  if (empresa.igAccountId) {
+    const dono = empresa.usuarios[0]
+    const account = await prisma.account.findFirst({
+      where: { userId: dono?.id, provider: 'facebook' }
+    })
+
+    if (account) {
+      try {
+        profile = await getInstagramProfile(empresa.igAccountId, account.access_token as string)
+        insights = await getInstagramInsights(empresa.igAccountId, account.access_token as string, days)
+      } catch (err) {
+        console.error('Erro ao buscar dados reais, ativando demo:', err)
+        isDemo = true
+      }
+    } else {
+      isDemo = true
+    }
+  } else {
+    isDemo = true
   }
 
-  const profile = await getInstagramProfile(empresa.igAccountId, account.access_token as string)
-  const insights = await getInstagramInsights(empresa.igAccountId, account.access_token as string, days)
+  // Dados Mock para Demo
+  if (isDemo || !profile || !insights) {
+    isDemo = true
+    profile = {
+      username: empresa.name.toLowerCase().replace(/\s+/g, ''),
+      avatar: empresa.avatarUrl || 'https://via.placeholder.com/150',
+      followers: 12543,
+      postsCount: 342
+    }
+    
+    const history = []
+    const baseDate = new Date()
+    baseDate.setDate(baseDate.getDate() - days)
+    
+    for (let i = 0; i < days; i++) {
+      const dt = new Date(baseDate)
+      dt.setDate(dt.getDate() + i)
+      history.push({
+        date: dt.toISOString().split('T')[0],
+        reach: Math.floor(Math.random() * 500) + 1000 + (i * 20),
+        impressions: Math.floor(Math.random() * 800) + 1500 + (i * 30),
+      })
+    }
+
+    insights = {
+      total: {
+        reach: 45230,
+        reachDelta: 12.5,
+        impressions: 78900,
+        impressionsDelta: 8.2,
+      },
+      history
+    }
+  }
 
   return (
     <div className={styles.reportPage}>
       <header className={styles.header}>
         <div className={styles.headerLogo}>planILHA Relatórios</div>
         <div className={styles.headerControls} style={{ display: 'flex', alignItems: 'center' }}>
-          <div className={styles.headerTitle}>Relatório de Desempenho</div>
+          <div className={styles.headerTitle}>
+            Relatório de Desempenho 
+            {isDemo && <span style={{fontSize: '0.8rem', background: '#3b2313', color: '#ff7b00', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem'}}>Demo</span>}
+          </div>
           <PrintButton />
         </div>
       </header>

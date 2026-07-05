@@ -4,27 +4,29 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import styles from './SidebarNav.module.css'
 
+import { LayoutDashboard, Building2, ClipboardList, BarChart3, CalendarPlus, CalendarDays, Settings } from 'lucide-react'
+
 const navItems = [
   {
     group: 'Principal',
     items: [
-      { href: '/dashboard', label: 'Dashboard', icon: '⊞' },
-      { href: '/dashboard/empresas', label: 'Empresas', icon: '🏢' },
-      { href: '/dashboard/planejamentos', label: 'Planejamentos', icon: '📋' },
+      { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+      { href: '/dashboard/empresas', label: 'Empresas', icon: <Building2 size={20} /> },
+      { href: '/dashboard/planejamentos', label: 'Planejamentos', icon: <ClipboardList size={20} /> },
     ],
   },
   {
     group: 'Ferramentas',
     items: [
-      { href: '/dashboard/relatorios', label: 'Relatórios', icon: '📊' },
-      { href: '/dashboard/posts', label: 'Programar Posts', icon: '📅' },
-      { href: '/dashboard/calendario', label: 'Calendário', icon: '🗓️' },
+      { href: '/dashboard/relatorios', label: 'Relatórios', icon: <BarChart3 size={20} /> },
+      { href: '/dashboard/posts', label: 'Programar Posts', icon: <CalendarPlus size={20} /> },
+      { href: '/dashboard/calendario', label: 'Calendário', icon: <CalendarDays size={20} /> },
     ],
   },
   {
     group: 'Configurações',
     items: [
-      { href: '/dashboard/configuracoes', label: 'Configurações', icon: '⚙️' },
+      { href: '/dashboard/configuracoes', label: 'Configurações', icon: <Settings size={20} /> },
     ],
   },
 ]
