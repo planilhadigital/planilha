@@ -9,6 +9,11 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || 'dummy-client-id',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy-client-secret',
+      authorization: {
+        params: {
+          prompt: 'select_account',
+        },
+      },
     }),
   ],
   session: {
