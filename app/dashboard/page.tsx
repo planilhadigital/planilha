@@ -1,29 +1,34 @@
 import styles from './page.module.css'
+import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
 const kpis = [
-  { label: 'Empresas Ativas',    value: '12',     delta: '+2 este mês',    positive: true,  icon: '🏢', accent: false },
-  { label: 'Posts Agendados',    value: '38',     delta: '+15 esta semana', positive: true, icon: '📅', accent: false },
-  { label: 'Relatórios Gerados', value: '94',     delta: '+7 este mês',    positive: true,  icon: '📊', accent: false },
-  { label: 'Leads Rastreados',   value: '5.2K',   delta: '+340 este mês',  positive: true,  icon: '🎯', accent: true  },
-]
-
-const empresas = [
-  { name: 'Franquia Alpha SP',   platform: 'Instagram + Facebook', posts: 12, status: 'Ativo',    statusType: 'success' },
-  { name: 'Rede Beta Nordeste',  platform: 'Instagram',            posts: 8,  status: 'Ativo',    statusType: 'success' },
-  { name: 'Grupo Gama Central',  platform: 'Facebook',             posts: 3,  status: 'Pendente', statusType: 'warning' },
-  { name: 'Delta Franquias SP',  platform: 'Instagram + Facebook', posts: 15, status: 'Ativo',    statusType: 'success' },
-  { name: 'Epsilon Marketing',   platform: 'Instagram',            posts: 0,  status: 'Erro Meta',statusType: 'error'   },
+  { label: 'Empresas Ativas',    value: '0',     delta: '+0 este mês',    positive: true,  icon: '🏢', accent: false },
+  { label: 'Posts Agendados',    value: '0',     delta: '+0 esta semana', positive: true, icon: '📅', accent: false },
+  { label: 'Relatórios Gerados', value: '0',     delta: '+0 este mês',    positive: true,  icon: '📊', accent: false },
+  { label: 'Leads Rastreados',   value: '0',     delta: '+0 este mês',  positive: true,  icon: '🎯', accent: true  },
 ]
 
 const atividades = [
-  { text: 'Relatório de junho gerado para Franquia Alpha SP', time: 'há 2h', icon: '📊' },
-  { text: 'Post agendado: "Promoção de Verão" — Rede Beta',  time: 'há 4h', icon: '📅' },
-  { text: 'Novo colaborador adicionado: maria@agencia.com',   time: 'há 6h', icon: '👤' },
-  { text: 'Link de relatório enviado para cliente Delta',     time: 'ontem', icon: '🔗' },
-  { text: 'Erro na publicação — Epsilon Marketing (token expirado)', time: 'ontem', icon: '⚠️' },
+  { text: 'Bem-vindo ao planILHA! Comece adicionando sua primeira empresa.', time: 'agora', icon: '👋' },
 ]
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions)
+  
+  let empresas = []
+  if (session?.user?.id) {
+    empresas = await prisma.empresa.findMany({
+      where: { usuarios: { some: { id: session.user.id } } },
+      orderBy: { createdAt: 'desc' }
+    })
+  }
+  
+  // Atualiza o KPI com o número real
+  kpis[0].value = empresas.length.toString()
+
   return (
     <div className={styles.page}>
       {/* Page header */}
@@ -32,9 +37,9 @@ export default function DashboardPage() {
           <h1 className={styles.pageTitle}>Dashboard</h1>
           <p className={styles.pageSubtitle}>Visão geral da sua agência — julho 2026</p>
         </div>
-        <button className="btn btn-primary" id="add-empresa-btn">
+        <Link href="/dashboard/empresas/nova" className="btn btn-primary" id="add-empresa-btn">
           + Nova Empresa
-        </button>
+        </Link>
       </div>
 
       {/* KPIs */}
@@ -62,21 +67,27 @@ export default function DashboardPage() {
             <button className="btn btn-ghost btn-sm" id="ver-todas-empresas-btn">Ver todas →</button>
           </div>
           <div className={styles.empresaList}>
-            {empresas.map((e) => (
-              <button key={e.name} className={styles.empresaItem} id={`empresa-${e.name.replace(/\s+/g, '-').toLowerCase()}`}>
-                <div className={styles.empresaAvatar}>
-                  {e.name.charAt(0)}
-                </div>
-                <div className={styles.empresaInfo}>
-                  <span className={styles.empresaName}>{e.name}</span>
-                  <span className={styles.empresaPlatform}>{e.platform}</span>
-                </div>
-                <div className={styles.empresaMeta}>
-                  <span className={`badge badge-${e.statusType}`}>{e.status}</span>
-                  <span className={styles.empresaPosts}>{e.posts} posts</span>
-                </div>
-              </button>
-            ))}
+            {empresas.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                Nenhuma empresa cadastrada ainda.
+              </div>
+            ) : (
+              empresas.map((e) => (
+                <Link href={`/dashboard/empresas/${e.id}`} key={e.id} className={styles.empresaItem} id={`empresa-${e.name.replace(/\s+/g, '-').toLowerCase()}`}>
+                  <div className={styles.empresaAvatar}>
+                    {e.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className={styles.empresaInfo}>
+                    <span className={styles.empresaName}>{e.name}</span>
+                    <span className={styles.empresaPlatform}>{e.platform}</span>
+                  </div>
+                  <div className={styles.empresaMeta}>
+                    <span className={`badge badge-${e.statusType}`}>{e.status}</span>
+                    <span className={styles.empresaPosts}>-- posts</span>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </section>
 
