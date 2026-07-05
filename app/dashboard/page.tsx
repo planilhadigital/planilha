@@ -18,7 +18,7 @@ const atividades = [
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   
-  let empresas = []
+  let empresas: any[] = []
   if (session?.user?.id) {
     empresas = await prisma.empresa.findMany({
       where: { usuarios: { some: { id: session.user.id } } },
