@@ -202,9 +202,6 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               <a href={empresa.facebookUrl} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Facebook">📘</a>
             )}
           </div>
-          <Link href="/dashboard" className="btn btn-ghost btn-sm">
-            ← Voltar ao Dashboard
-          </Link>
         </div>
       </div>
 
