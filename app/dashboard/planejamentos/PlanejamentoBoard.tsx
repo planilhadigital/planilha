@@ -337,6 +337,7 @@ export default function PlanejamentoBoard({ id, hideBackButton, onBack }: { id: 
                                     const checklistTotal = card.checklists?.reduce((a: number, cl: any) => a + (cl.itens?.length || 0), 0) || 0
                                     const checklistDone = card.checklists?.reduce((a: number, cl: any) => a + (cl.itens?.filter((i: any) => i.concluido).length || 0), 0) || 0
                                     const hasDueDate = !!card.dataVencimento
+                                    const anexoCount = card.anexos?.length || 0
 
                                     return (
                                       <Draggable key={card.id} draggableId={card.id} index={cardIndex}>
@@ -380,6 +381,11 @@ export default function PlanejamentoBoard({ id, hideBackButton, onBack }: { id: 
                                                 {commentCount > 0 && (
                                                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                                                     <MessageSquare size={11} /> {commentCount}
+                                                  </span>
+                                                )}
+                                                {anexoCount > 0 && (
+                                                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                                    <Paperclip size={11} /> {anexoCount}
                                                   </span>
                                                 )}
                                                 {checklistTotal > 0 && (

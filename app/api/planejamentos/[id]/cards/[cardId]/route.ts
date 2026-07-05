@@ -15,7 +15,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       include: {
         labels: true,
         checklists: { include: { itens: { orderBy: { ordem: 'asc' } } } },
-        comentarios: { orderBy: { createdAt: 'asc' } },
+        comentarios: { 
+          orderBy: { createdAt: 'asc' },
+          include: { user: { select: { name: true, image: true, email: true } } }
+        },
         anexos: true,
       }
     })
@@ -55,11 +58,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const { cardId } = await params
     const body = await request.json()
-    const { titulo, descricao, dataVencimento } = body
+    const { titulo, descricao, demanda, dataVencimento } = body
 
     const dataToUpdate: any = {}
     if (titulo !== undefined) dataToUpdate.titulo = titulo
     if (descricao !== undefined) dataToUpdate.descricao = descricao
+    if (demanda !== undefined) dataToUpdate.demanda = demanda
     if (dataVencimento !== undefined) dataToUpdate.dataVencimento = dataVencimento ? new Date(dataVencimento) : null
 
     const card = await prisma.card.update({

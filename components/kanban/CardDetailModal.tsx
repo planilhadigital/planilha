@@ -29,6 +29,8 @@ export default function CardDetailModal({ cardId, planejamentoId, onClose, onUpd
   const [titleValue, setTitleValue] = useState('')
   const [editingDesc, setEditingDesc] = useState(false)
   const [descValue, setDescValue] = useState('')
+  const [editingDemanda, setEditingDemanda] = useState(false)
+  const [demandaValue, setDemandaValue] = useState('')
   const [newComment, setNewComment] = useState('')
   const [showLabelPicker, setShowLabelPicker] = useState(false)
   const [newLabelNome, setNewLabelNome] = useState('')
@@ -48,6 +50,7 @@ export default function CardDetailModal({ cardId, planejamentoId, onClose, onUpd
         setCard(data.card)
         setTitleValue(data.card.titulo)
         setDescValue(data.card.descricao || '')
+        setDemandaValue(data.card.demanda || '')
       }
     } finally {
       setLoading(false)
@@ -77,6 +80,41 @@ export default function CardDetailModal({ cardId, planejamentoId, onClose, onUpd
     const res = await fetch(BASE, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ descricao: descValue }) })
     if (res.ok) setCard({ ...card, descricao: descValue })
     setEditingDesc(false)
+  }
+
+  const saveDemanda = async () => {
+    const res = await fetch(BASE, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ demanda: demandaValue }) })
+    if (res.ok) setCard({ ...card, demanda: demandaValue })
+    setEditingDemanda(false)
+  }
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const toastId = toast.loading('Fazendo upload...')
+    try {
+      const upRes = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!upRes.ok) throw new Error('Falha no upload')
+      const upData = await upRes.json()
+
+      const res = await fetch(`${BASE}/anexos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: file.name, url: upData.url }) })
+      if (res.ok) {
+        const { anexo } = await res.json()
+        setCard({ ...card, anexos: [...card.anexos, anexo] })
+        toast.success('Anexo adicionado!', { id: toastId })
+      }
+    } catch (err) {
+      toast.error('Erro no upload', { id: toastId })
+    }
+  }
+
+  const deleteAnexo = async (anexoId: string) => {
+    if (!confirm('Excluir este anexo?')) return
+    const res = await fetch(`${BASE}/anexos?anexoId=${anexoId}`, { method: 'DELETE' })
+    if (res.ok) setCard({ ...card, anexos: card.anexos.filter((a: any) => a.id !== anexoId) })
   }
 
   const saveDueDate = async (date: string) => {
@@ -259,6 +297,52 @@ export default function CardDetailModal({ cardId, planejamentoId, onClose, onUpd
               )}
             </div>
 
+            {/* Demanda */}
+            <div>
+              <div style={sectionLabelStyle}><Target size={14} /> Demanda</div>
+              {editingDemanda ? (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <textarea
+                    value={demandaValue}
+                    onChange={e => setDemandaValue(e.target.value)}
+                    style={{ width: '100%', minHeight: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', color: 'var(--text-primary)', fontFamily: 'var(--font)', fontSize: '0.9rem', padding: '0.75rem', outline: 'none', resize: 'vertical' }}
+                    placeholder="Especifique a demanda da tarefa..."
+                    autoFocus
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <button onClick={saveDemanda} className="btn btn-primary btn-sm">Salvar</button>
+                    <button onClick={() => { setEditingDemanda(false); setDemandaValue(card.demanda || '') }} className="btn btn-secondary btn-sm">Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => setEditingDemanda(true)}
+                  style={{ marginTop: '0.5rem', minHeight: '60px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: '0.75rem', cursor: 'pointer', color: card.demanda ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: '0.9rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+                >
+                  {card.demanda || 'Clique para definir a demanda...'}
+                </div>
+              )}
+            </div>
+
+            {/* Anexos */}
+            {card.anexos && card.anexos.length > 0 && (
+              <div>
+                <div style={sectionLabelStyle}><Paperclip size={14} /> Anexos</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                  {card.anexos.map((anexo: any) => (
+                    <div key={anexo.id} style={{ position: 'relative', borderRadius: 'var(--r-sm)', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-deep)', aspectRatio: '1', display: 'flex', flexDirection: 'column' }}>
+                      <img src={anexo.url} alt={anexo.nome} style={{ flex: 1, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '0.25rem', background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', display: 'flex', justifyContent: 'flex-end' }}>
+                        <button onClick={() => deleteAnexo(anexo.id)} style={{ background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} title="Excluir anexo">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Checklists */}
             {card.checklists.map((cl: any) => {
               const total = cl.itens.length
@@ -325,12 +409,21 @@ export default function CardDetailModal({ cardId, planejamentoId, onClose, onUpd
                 </div>
                 {card.comentarios.map((c: any) => (
                   <div key={c.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: '0.75rem', display: 'flex', gap: '0.6rem' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.7rem', color: 'var(--accent)', flexShrink: 0 }}>U</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-                        {new Date(c.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    {c.user?.image ? (
+                      <img src={c.user.image} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.7rem', color: 'var(--accent)', flexShrink: 0 }}>
+                        {c.user?.name ? c.user.name.charAt(0).toUpperCase() : 'U'}
                       </div>
-                      <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{c.texto}</p>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{c.user?.name || 'Usuário'}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          {new Date(c.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{c.texto}</p>
                     </div>
                     <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', alignSelf: 'flex-start', opacity: 0.5 }}>
                       <Trash2 size={13} />
@@ -370,6 +463,12 @@ export default function CardDetailModal({ cardId, planejamentoId, onClose, onUpd
                 </div>
               )}
             </div>
+
+            {/* Upload de Imagem */}
+            <label style={actionBtnStyle}>
+              <Paperclip size={14} /> Anexo
+              <input type="file" style={{ display: 'none' }} accept="image/*" onChange={handleUpload} />
+            </label>
 
             {/* Checklist */}
             {!addingChecklist ? (

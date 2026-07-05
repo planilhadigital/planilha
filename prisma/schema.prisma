@@ -59,6 +59,9 @@ model User {
 
   // Relacionamento de Visitante (Sem Empresa associada)
   visitorProfile  VisitorProfile?
+
+  // Comentários do Kanban
+  comentariosCard CardComentario[]
 }
 
 // ------------------------------------------------------------------
@@ -206,6 +209,7 @@ model Card {
   colunaId     String
   titulo       String
   descricao    String?
+  demanda      String?
   ordem        Int      @default(0)
   dataVencimento DateTime?
   createdAt    DateTime @default(now())
@@ -254,6 +258,7 @@ model CardComentario {
   createdAt DateTime @default(now())
   
   card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CardAnexo {
