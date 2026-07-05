@@ -56,6 +56,41 @@ model User {
   metaAccessToken String?
   metaName        String?
   metaPhoto       String?
+
+  // Relacionamento de Visitante (Sem Empresa associada)
+  visitorProfile  VisitorProfile?
+}
+
+// ------------------------------------------------------------------
+// Modelos de Visitantes e Onboarding (Product-Led Growth)
+// ------------------------------------------------------------------
+
+model VisitorProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  personaType         String   // "Dono de Marca" ou "Profissional de Marketing"
+  marketNiche         String   // Ex: "E-commerce", "SaaS", "Serviços locais"
+  marketingInvestment String   // Ex: "< 5k", "5k-20k", "> 20k"
+  primaryChannels     String[] // Canais prioritários de mídias pagas
+  primaryChannelUrl   String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model TenantCrmMetadata {
+  id                  String   @id @default(cuid())
+  empresaId           String   @unique
+  importedPersona     String?
+  importedNiche       String?
+  importedInvestment  String?
+  historicalOnboardingData Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -96,6 +131,9 @@ model Empresa {
   // Posts agendados e Leads
   posts       PostAgendado[]
   leads       Lead[]
+
+  // CRM Metadata do Onboarding
+  crmMetadata TenantCrmMetadata?
 }
 
 model Lead {

@@ -23,16 +23,30 @@ export const authOptions: AuthOptions = {
         // Obter role real do banco
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { role: true }
+          include: { empresas: { select: { id: true } } }
         })
         session.user.id = token.sub
         session.user.role = dbUser?.role || 'colaborador'
+        session.user.empresasCount = dbUser?.empresas?.length || 0
       }
       return session
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = user.id
+      }
+      // Se for uma atualização de sessão solicitada pelo cliente
+      if (trigger === "update" && session?.empresasCount !== undefined) {
+        token.empresasCount = session.empresasCount
+      }
+      
+      // Checagem pesada apenas se não houver a prop e tivermos o id (normalmente no primeiro login)
+      if (token.empresasCount === undefined && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          include: { empresas: { select: { id: true } } }
+        })
+        token.empresasCount = dbUser?.empresas?.length || 0
       }
       return token
     }
