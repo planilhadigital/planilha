@@ -228,11 +228,25 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
               <div className={styles.kpiGrid}>
                 <div className={styles.kpiCard}>
                   <div className={styles.kpiLabel}>Alcance ({period}d)</div>
-                  <div className={styles.kpiValue}>{insightsData.insights?.total?.reach || 0}</div>
+                  <div className={styles.kpiValue} style={{ display: 'flex', alignItems: 'center' }}>
+                    {insightsData.insights?.total?.reach || 0}
+                    {insightsData.insights?.total?.reachDelta !== undefined && (
+                      <span className={`${styles.deltaBadge} ${insightsData.insights.total.reachDelta >= 0 ? styles.deltaUp : styles.deltaDown}`}>
+                        {insightsData.insights.total.reachDelta >= 0 ? '↑' : '↓'} {Math.abs(insightsData.insights.total.reachDelta).toFixed(1)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className={styles.kpiCard}>
                   <div className={styles.kpiLabel}>Impressões ({period}d)</div>
-                  <div className={styles.kpiValue}>{insightsData.insights?.total?.impressions || 0}</div>
+                  <div className={styles.kpiValue} style={{ display: 'flex', alignItems: 'center' }}>
+                    {insightsData.insights?.total?.impressions || 0}
+                    {insightsData.insights?.total?.impressionsDelta !== undefined && (
+                      <span className={`${styles.deltaBadge} ${insightsData.insights.total.impressionsDelta >= 0 ? styles.deltaUp : styles.deltaDown}`}>
+                        {insightsData.insights.total.impressionsDelta >= 0 ? '↑' : '↓'} {Math.abs(insightsData.insights.total.impressionsDelta).toFixed(1)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

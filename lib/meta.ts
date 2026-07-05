@@ -48,6 +48,37 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     const impressionsData = data.data.find((m: any) => m.name === 'impressions')?.values || []
     const totalImpressions = impressionsData.reduce((acc: number, val: any) => acc + val.value, 0)
 
+    // PERÍODO ANTERIOR (DELTA)
+    const prevUntil = since; // O até do anterior é o desde do atual
+    const prevSince = prevUntil - (safeDays * 86400);
+    const prevUrl = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach&period=day&since=${prevSince}&until=${prevUntil}&access_token=${accessToken}`
+    
+    let prevTotalReach = 0;
+    let prevTotalImpressions = 0;
+    
+    try {
+      const prevRes = await fetch(prevUrl)
+      const prevData = await prevRes.json()
+      if (!prevData.error && prevData.data) {
+        const pReach = prevData.data.find((m: any) => m.name === 'reach')?.values || []
+        prevTotalReach = pReach.reduce((a: number, v: any) => a + v.value, 0)
+        
+        const pImp = prevData.data.find((m: any) => m.name === 'impressions')?.values || []
+        prevTotalImpressions = pImp.reduce((a: number, v: any) => a + v.value, 0)
+      }
+    } catch(e) {
+      console.error('Erro ao buscar periodo anterior', e)
+    }
+
+    // Calcula Delta %
+    const calcDelta = (current: number, prev: number) => {
+      if (prev === 0) return current > 0 ? 100 : 0;
+      return ((current - prev) / prev) * 100;
+    }
+
+    const reachDelta = calcDelta(totalReach, prevTotalReach);
+    const impressionsDelta = calcDelta(totalImpressions, prevTotalImpressions);
+
     // Formata o histórico diário para o gráfico
     const history = reachData.map((reachItem: any, index: number) => {
       const impItem = impressionsData[index]
@@ -65,12 +96,14 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     return {
       total: {
         reach: totalReach,
-        impressions: totalImpressions
+        reachDelta: reachDelta,
+        impressions: totalImpressions,
+        impressionsDelta: impressionsDelta
       },
       history
     }
   } catch (error) {
     console.error('Erro ao buscar Insights IG:', error)
-    return { total: { reach: 0, impressions: 0 }, history: [] }
+    return { total: { reach: 0, reachDelta: 0, impressions: 0, impressionsDelta: 0 }, history: [] }
   }
 }
