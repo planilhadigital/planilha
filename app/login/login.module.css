@@ -13,18 +13,17 @@
 .glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
   pointer-events: none;
 }
 .glowTop {
   width: 700px; height: 700px;
   top: -250px; right: -150px;
-  background: radial-gradient(circle, rgba(250,70,22,.18) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(250,70,22,.08) 0%, rgba(250,70,22,.02) 40%, transparent 70%);
 }
 .glowBottom {
   width: 500px; height: 500px;
   bottom: -200px; left: -100px;
-  background: radial-gradient(circle, rgba(250,70,22,.10) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(250,70,22,.05) 0%, rgba(250,70,22,.01) 40%, transparent 70%);
 }
 
 /* Grid dot pattern */
@@ -165,8 +164,7 @@
   left: 0;
   width: 100%;
   height: 60%;
-  background: linear-gradient(180deg, rgba(250, 70, 22, 0.15) 0%, rgba(250, 70, 22, 0) 100%);
-  filter: blur(100px);
+  background: linear-gradient(180deg, rgba(250, 70, 22, 0.08) 0%, rgba(250, 70, 22, 0.02) 40%, transparent 100%);
   z-index: 0;
   animation: waveMotion 15s ease-in-out infinite alternate;
   pointer-events: none;
@@ -181,11 +179,10 @@
 /* Light Pulses */
 .pulse {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(250, 70, 22, 0.3) 0%, transparent 70%);
-  filter: blur(80px);
+  background: radial-gradient(circle, rgba(250, 70, 22, 0.1) 0%, rgba(250, 70, 22, 0.02) 40%, transparent 70%);
   z-index: 0;
   pointer-events: none;
   opacity: 0;
