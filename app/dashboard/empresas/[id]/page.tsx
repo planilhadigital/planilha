@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy, Settings } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy, Settings, BarChart3, PenSquare, CalendarDays, CheckCircle2 } from 'lucide-react'
 import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -260,8 +260,8 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
             <div className={styles.companyTitleContainer}>
               <h1 className={styles.companyName}>{empresa.name}</h1>
               <div className={styles.badgesContainer}>
-                {empresa.metaPageId && <span className={styles.badgeLinked}>✅ Página Vinculada</span>}
-                {empresa.igAccountId && <span className={styles.badgeLinked}>✅ Insta Vinculado</span>}
+                {empresa.metaPageId && <span className={styles.badgeLinked} style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}><CheckCircle2 size={14} /> Página Vinculada</span>}
+                {empresa.igAccountId && <span className={styles.badgeLinked} style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}><CheckCircle2 size={14} /> Insta Vinculado</span>}
               </div>
             </div>
           </div>
@@ -286,17 +286,17 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       </div>
 
       <div className={`${styles.tabs} anim-fade-up`}>
-        <button className={`${styles.tab} ${activeTab === 'metricas' ? styles.tabActive : ''}`} onClick={() => setActiveTab('metricas')}>
-          📊 Métricas
+        <button className={`${styles.tab} ${activeTab === 'metricas' ? styles.tabActive : ''}`} onClick={() => setActiveTab('metricas')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+          <BarChart3 size={18} /> Métricas
         </button>
-        <button className={`${styles.tab} ${activeTab === 'posts' ? styles.tabActive : ''}`} onClick={() => setActiveTab('posts')}>
-          📝 Criar Post
+        <button className={`${styles.tab} ${activeTab === 'posts' ? styles.tabActive : ''}`} onClick={() => setActiveTab('posts')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+          <PenSquare size={18} /> Criar Post
         </button>
-        <button className={`${styles.tab} ${activeTab === 'calendario' ? styles.tabActive : ''}`} onClick={() => setActiveTab('calendario')}>
-          📅 Calendário
+        <button className={`${styles.tab} ${activeTab === 'calendario' ? styles.tabActive : ''}`} onClick={() => setActiveTab('calendario')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+          <CalendarDays size={18} /> Calendário
         </button>
-        <button className={`${styles.tab} ${activeTab === 'config' ? styles.tabActive : ''}`} onClick={() => setActiveTab('config')}>
-          ⚙️ Configurações
+        <button className={`${styles.tab} ${activeTab === 'config' ? styles.tabActive : ''}`} onClick={() => setActiveTab('config')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+          <Settings size={18} /> Configurações
         </button>
       </div>
 

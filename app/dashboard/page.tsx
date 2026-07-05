@@ -3,16 +3,17 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { Building2, CalendarPlus, BarChart3, Target, Sparkles, ClipboardList, Link as LinkIcon, Building } from 'lucide-react'
 
 const kpis = [
-  { label: 'Empresas Ativas',    value: '0',     delta: '+0 este mês',    positive: true,  icon: '🏢', accent: false },
-  { label: 'Posts Agendados',    value: '0',     delta: '+0 esta semana', positive: true, icon: '📅', accent: false },
-  { label: 'Relatórios Gerados', value: '0',     delta: '+0 este mês',    positive: true,  icon: '📊', accent: false },
-  { label: 'Leads Rastreados',   value: '0',     delta: '+0 este mês',  positive: true,  icon: '🎯', accent: false  },
+  { label: 'Empresas Ativas',    value: '0',     delta: '+0 este mês',    positive: true,  icon: <Building2 size={24} />, accent: false },
+  { label: 'Posts Agendados',    value: '0',     delta: '+0 esta semana', positive: true, icon: <CalendarPlus size={24} />, accent: false },
+  { label: 'Relatórios Gerados', value: '0',     delta: '+0 este mês',    positive: true,  icon: <BarChart3 size={24} />, accent: false },
+  { label: 'Leads Rastreados',   value: '0',     delta: '+0 este mês',  positive: true,  icon: <Target size={24} />, accent: false  },
 ]
 
 const atividades = [
-  { text: 'Bem-vindo ao planILHA! Comece adicionando sua primeira empresa.', time: 'agora', icon: '👋' },
+  { text: 'Bem-vindo ao planILHA! Comece adicionando sua primeira empresa.', time: 'agora', icon: <Sparkles size={20} /> },
 ]
 
 export default async function DashboardPage() {
@@ -79,7 +80,7 @@ export default async function DashboardPage() {
           <div className={styles.empresaList}>
             {empresas.length === 0 ? (
               <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.5 }}>🏢</div>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.5, display: 'flex', justifyContent: 'center' }}><Building size={48} /></div>
                 <div style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Nenhuma empresa cadastrada</div>
                 <div style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>Comece adicionando o seu primeiro cliente.</div>
               </div>
@@ -131,10 +132,10 @@ export default async function DashboardPage() {
         <h2 className={styles.sectionTitle} style={{ marginBottom: '1rem' }}>Acesso Rápido</h2>
         <div className={styles.quickGrid}>
           {[
-            { label: 'Gerar Relatório',   icon: '📊', desc: 'Selecione empresa e período', href: '/dashboard/empresas' },
-            { label: 'Programar Post',    icon: '✏️', desc: 'Criar e agendar conteúdo',   href: '/dashboard/empresas' },
-            { label: 'Novo Planejamento', icon: '📋', desc: 'Criar quadro Kanban',        href: '/dashboard/planejamentos' },
-            { label: 'Convidar Cliente',  icon: '🔗', desc: 'Gerar link de acesso',       href: '/dashboard/configuracoes' },
+            { label: 'Gerar Relatório',   icon: <BarChart3 size={24} />, desc: 'Selecione empresa e período', href: '/dashboard/empresas' },
+            { label: 'Programar Post',    icon: <CalendarPlus size={24} />, desc: 'Criar e agendar conteúdo',   href: '/dashboard/empresas' },
+            { label: 'Novo Planejamento', icon: <ClipboardList size={24} />, desc: 'Criar quadro Kanban',        href: '/dashboard/planejamentos' },
+            { label: 'Convidar Cliente',  icon: <LinkIcon size={24} />, desc: 'Gerar link de acesso',       href: '/dashboard/configuracoes' },
           ].map((q) => (
             <Link href={q.href} key={q.label} className={`card ${styles.quickCard}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
               <span className={styles.quickIcon}>{q.icon}</span>
