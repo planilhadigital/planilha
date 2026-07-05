@@ -4,14 +4,8 @@ export default function Topbar() {
   return (
     <header className={styles.topbar}>
       <div className={styles.left}>
-        {/* Empresa selecionada */}
-        <button className={styles.companySelector} id="company-selector-btn">
-          <span className={styles.companyDot} />
-          <span className={styles.companyName}>Selecione uma empresa</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
+        {/* Espaço reservado para breadcrumbs ou título da página no futuro */}
+        <div></div>
       </div>
 
       <div className={styles.right}>

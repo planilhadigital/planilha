@@ -1,8 +1,9 @@
-import styles from '../page.module.css'
+import styles from './empresas.module.css'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { ArrowRight } from 'lucide-react'
 
 export default async function EmpresasPage() {
   const session = await getServerSession(authOptions)
@@ -17,45 +18,49 @@ export default async function EmpresasPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.pageHeader}>
-        <div>
-          <h1 className={styles.pageTitle}>Todas as Empresas</h1>
-          <p className={styles.pageSubtitle}>Gerencie todas as empresas da sua agência</p>
+      <div className={styles.header}>
+        <div className="anim-fade-up">
+          <h1 className={styles.title}>Todas as Empresas</h1>
+          <p className={styles.subtitle}>Gerencie o perfil e integrações dos seus clientes.</p>
         </div>
-        <Link href="/dashboard/empresas/nova" className="btn btn-primary">
-          + Nova Empresa
-        </Link>
+        <div className="anim-fade-up">
+          <Link href="/dashboard/empresas/nova" className="btn btn-primary">
+            + Nova Empresa
+          </Link>
+        </div>
       </div>
 
-      <div className="card">
-        <div className={styles.empresaList}>
-          {empresas.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhuma empresa cadastrada ainda.
-            </div>
-          ) : (
-            empresas.map((e) => (
-              <Link href={`/dashboard/empresas/${e.id}`} key={e.id} className={styles.empresaItem}>
-                <div className={styles.empresaAvatar}>
-                  {e.avatarUrl ? (
-                    <img src={e.avatarUrl} alt={e.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                  ) : (
-                    e.name.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div className={styles.empresaInfo}>
-                  <span className={styles.empresaName}>{e.name}</span>
-                  <span className={styles.empresaPlatform}>{e.platform}</span>
-                </div>
-                <div className={styles.empresaMeta}>
-                  <span className={`badge badge-${e.statusType}`}>{e.status}</span>
-                  <span className={styles.empresaPosts}>-- posts</span>
-                </div>
-              </Link>
-            ))
-          )}
+      {empresas.length === 0 ? (
+        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 'var(--r-xl)' }} className="anim-fade-up anim-delay-1">
+          Nenhuma empresa cadastrada ainda. Clique no botão acima para adicionar seu primeiro cliente.
         </div>
-      </div>
+      ) : (
+        <div className={`${styles.grid} anim-fade-up anim-delay-1`}>
+          {empresas.map((e) => (
+            <Link href={`/dashboard/empresas/${e.id}`} key={e.id} className={styles.card}>
+              {e.avatarUrl ? (
+                <img src={e.avatarUrl} alt={e.name} className={styles.avatar} />
+              ) : (
+                <div className={styles.avatar}>
+                  {e.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              
+              <div className={styles.info}>
+                <h3 className={styles.name}>{e.name}</h3>
+                <span className={styles.platform}>
+                  {e.metaPageId ? '✅ Integração Ativa' : '⚠️ Sem Integração'}
+                </span>
+              </div>
+              
+              <div className={styles.meta}>
+                <span className={`badge badge-${e.statusType}`}>{e.status}</span>
+                <span className={styles.arrow}><ArrowRight size={18} /></span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
