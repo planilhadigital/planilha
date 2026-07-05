@@ -10,7 +10,8 @@ export default function RoleManager({ userId, currentRole }: { userId: string, c
   const [role, setRole] = useState(currentRole)
   const [loading, setLoading] = useState(false)
 
-  const currentIndex = ROLES.indexOf(role)
+  const normalizedRole = role ? role.toLowerCase() : 'visitante'
+  const currentIndex = ROLES.indexOf(normalizedRole)
   // Se o role não estiver na lista por algum motivo de banco desatualizado, assumimos visitante
   const index = currentIndex === -1 ? 0 : currentIndex
 
@@ -57,8 +58,8 @@ export default function RoleManager({ userId, currentRole }: { userId: string, c
         <Minus size={14} />
       </button>
       
-      <span className="badge badge-accent" style={{ minWidth: '85px', textAlign: 'center', justifyContent: 'center' }}>
-        {role}
+      <span className="badge badge-accent" style={{ minWidth: '85px', textAlign: 'center', justifyContent: 'center', textTransform: 'uppercase' }}>
+        {normalizedRole}
       </span>
       
       <button 
