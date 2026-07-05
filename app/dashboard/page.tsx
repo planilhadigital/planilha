@@ -64,7 +64,7 @@ export default async function DashboardPage() {
         <section className={`card ${styles.empresasCard}`}>
           <div className="card-header">
             <h2 className={styles.sectionTitle}>Empresas</h2>
-            <button className="btn btn-ghost btn-sm" id="ver-todas-empresas-btn">Ver todas →</button>
+            <Link href="/dashboard/empresas" className="btn btn-ghost btn-sm" id="ver-todas-empresas-btn">Ver todas →</Link>
           </div>
           <div className={styles.empresaList}>
             {empresas.length === 0 ? (
