@@ -5,10 +5,10 @@ export async function GET() {
   const baseUrl = process.env.NODE_ENV === 'production' ? 'https://planilha.digital' : (process.env.NEXTAUTH_URL || 'http://localhost:3000')
   const redirectUri = `${baseUrl}/api/meta/callback`
   
-  // Permissões válidas para Facebook Login for Business (Graph API v19+)
-  const scopes = 'public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts,instagram_manage_insights,instagram_content_publish,business_management'
+  // ID de Configuração do Facebook Login for Business (criado no painel da Meta)
+  const configId = '1404033698444438'
 
-  const facebookAuthUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`
+  const facebookAuthUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&config_id=${configId}&response_type=code`
 
   return NextResponse.redirect(facebookAuthUrl)
 }
