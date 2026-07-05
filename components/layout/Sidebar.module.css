@@ -13,8 +13,16 @@
 }
 
 .logoWrap {
-  padding: 1.25rem 1.25rem 1rem;
+  padding: 1.25rem;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  width: 100% !important;
+  height: auto !important;
 }
 
 .footer {

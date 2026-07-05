@@ -12,7 +12,7 @@ export default async function Sidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logoWrap}>
-        <Logo width={140} height={34} />
+        <Logo width={220} height={52} className={styles.logo} />
       </div>
       <SidebarNav />
       <div className={styles.footer}>
