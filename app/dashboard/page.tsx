@@ -67,13 +67,7 @@ export default async function DashboardPage() {
             <button className="btn btn-ghost btn-sm" id="ver-todas-empresas-btn">Ver todas →</button>
           </div>
           <div className={styles.empresaList}>
-            {loading ? (
-              <div className={styles.grid}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} className={`${styles.companyCard} skeleton`} style={{ height: '140px', border: 'none' }}></div>
-                ))}
-              </div>
-            ) : empresas.length === 0 ? (
+            {empresas.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                 Nenhuma empresa cadastrada ainda.
               </div>
