@@ -19,15 +19,25 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   
   let empresas: any[] = []
+  let totalLeads = 0
   if (session?.user?.id) {
     empresas = await prisma.empresa.findMany({
       where: { usuarios: { some: { id: session.user.id } } },
       orderBy: { createdAt: 'desc' }
     })
+    
+    // Contar total de leads das empresas que ele tem acesso
+    const empresaIds = empresas.map(e => e.id)
+    if (empresaIds.length > 0) {
+      totalLeads = await prisma.lead.count({
+        where: { empresaId: { in: empresaIds } }
+      })
+    }
   }
   
-  // Atualiza o KPI com o número real
+  // Atualiza os KPIs reais
   kpis[0].value = empresas.length.toString()
+  kpis[3].value = totalLeads.toString()
 
   return (
     <div className={styles.page}>

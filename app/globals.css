@@ -236,10 +236,22 @@ p { color: var(--text-body); line-height: 1.7; }
 }
 
 .card-accent {
-  background: linear-gradient(135deg, rgba(250,70,22,.1) 0%, var(--bg-surface) 60%);
-  border-color: var(--accent-border);
+  border-color: rgba(250, 70, 22, 0.45);
+  box-shadow: 
+    0 0 0 6px #0A0A0A, 
+    0 0 0 7px rgba(250, 70, 22, 0.2), 
+    0 10px 30px rgba(0,0,0, 0.8),
+    inset 0 0 40px rgba(250, 70, 22, 0.05);
 }
-.card-accent:hover { border-color: rgba(250,70,22,.45); }
+.card-accent:hover { 
+  border-color: rgba(250, 70, 22, 0.7); 
+  box-shadow: 
+    0 0 0 6px #0A0A0A, 
+    0 0 0 7px rgba(250, 70, 22, 0.35), 
+    0 15px 40px rgba(0,0,0, 0.9), 
+    0 0 30px rgba(250, 70, 22, 0.25),
+    inset 0 0 40px rgba(250, 70, 22, 0.1);
+}
 
 .card-header {
   display: flex;

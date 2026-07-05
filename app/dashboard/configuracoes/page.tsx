@@ -3,104 +3,96 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { Settings, Users, Link as LinkIcon, Shield } from 'lucide-react'
 
-export const metadata = {
-  title: 'Configurações — planILHA',
-}
-
-export default async function ConfiguracoesPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+export default async function ConfiguracoesPage() {
   const session = await getServerSession(authOptions)
   
-  let isMetaConnected = false
-  let metaName: string | null = null
-  let metaPhoto: string | null = null
-
-  if (session?.user?.id) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
-    
-    if (dbUser?.metaAccessToken) {
-      isMetaConnected = true
-      metaName = dbUser.metaName ?? null
-      metaPhoto = dbUser.metaPhoto ?? null
-    }
+  if (!session?.user?.email) {
+    return <div>Não autorizado</div>
   }
+
+  // Busca os usuários autorizados
+  const authorizedUsers = await prisma.usuarioAutorizado.findMany()
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Configurações</h1>
-        <p className={styles.subtitle}>Gerencie as integrações da sua conta</p>
+      <div className={styles.pageHeader}>
+        <div>
+          <h1 className={styles.pageTitle}>Configurações Globais</h1>
+          <p className={styles.pageSubtitle}>Gerencie acessos, integrações e a agência</p>
+        </div>
       </div>
 
-      {searchParams?.meta === 'success' && (
-        <div style={{ padding: '1rem', background: 'rgba(46, 204, 113, 0.1)', color: '#2ECC71', border: '1px solid rgba(46, 204, 113, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
-          ✅ Conta do Facebook/Instagram conectada com sucesso!
-        </div>
-      )}
-      
-      {searchParams?.error === 'meta_failed' && (
-        <div style={{ padding: '1rem', background: 'rgba(231, 76, 60, 0.1)', color: '#E74C3C', border: '1px solid rgba(231, 76, 60, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
-          ❌ Ocorreu um erro ao conectar a conta. Tente novamente.
-        </div>
-      )}
+      <div className={styles.mainGrid}>
+        {/* Integração Meta */}
+        <section className="card anim-fade-up anim-delay-1">
+          <div className="card-header">
+            <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <LinkIcon size={18} /> Integração Meta (Global)
+            </h2>
+          </div>
+          <p className="text-muted text-sm" style={{ marginBottom: '1.5rem' }}>
+            Renove o token global do Facebook Login for Business da agência. Todas as empresas vinculadas dependem deste acesso principal.
+          </p>
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+            Renovar Token Meta API
+          </button>
+        </section>
 
-      {searchParams?.error === 'no_empresa' && (
-        <div style={{ padding: '1rem', background: 'rgba(243, 156, 18, 0.1)', color: '#F39C12', border: '1px solid rgba(243, 156, 18, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
-          ⚠️ Você precisa criar uma Empresa no sistema antes de conectar o Facebook!
-        </div>
-      )}
+        {/* Segurança e Acesso */}
+        <section className="card anim-fade-up anim-delay-2">
+          <div className="card-header">
+            <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Shield size={18} /> Segurança
+            </h2>
+          </div>
+          <p className="text-muted text-sm" style={{ marginBottom: '1.5rem' }}>
+            Suas sessões ativas e configuração de domínio White-Label (Em breve).
+          </p>
+          <div className="input-group">
+            <label className="input-label">Domínio Personalizado (WIP)</label>
+            <input type="text" className="input" placeholder="ex: relatorios.suaagencia.com.br" disabled />
+          </div>
+        </section>
 
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2 className={styles.cardTitle}>Integrações</h2>
-        </div>
-        
-        <div className={styles.integrationItem}>
-          <div className={styles.integrationInfo}>
-            <div className={styles.integrationIcon}>
-              {/* Meta Icon placeholder */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H7v-3h3V9.5C10 6.57 11.74 5 14.38 5c1.29 0 2.62.23 2.62.23v2.88h-1.48c-1.45 0-1.9.9-1.9 1.82V12h3.25l-.52 3h-2.73v6.8c4.56-.93 8-4.96 8-9.8 0-5.52-4.48-10-10-10z"/>
-              </svg>
-            </div>
-            <div>
-              <h3 className={styles.integrationName}>Facebook & Instagram</h3>
-              <p className={styles.integrationDesc}>
-                {isMetaConnected 
-                  ? 'Conectado. A plataforma já pode ler insights e agendar posts.' 
-                  : 'Conecte sua conta para habilitar o agendamento de posts e os relatórios automáticos.'}
-              </p>
-            </div>
+        {/* Gerenciamento de Equipe */}
+        <section className="card anim-fade-up anim-delay-3" style={{ gridColumn: '1 / -1' }}>
+          <div className="card-header">
+            <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Users size={18} /> Equipe Interna
+            </h2>
+            <button className="btn btn-secondary btn-sm">+ Convidar Membro</button>
           </div>
           
-          {isMetaConnected ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              {metaPhoto && (
-                <img 
-                  src={metaPhoto} 
-                  alt={metaName ?? 'Perfil Facebook'}
-                  style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid rgba(46,204,113,0.4)' }}
-                />
-              )}
-              {metaName && (
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{metaName}</span>
-              )}
-              <button className={styles.btnSuccess} disabled>
-                Conectado
-              </button>
-            </div>
-          ) : (
-            <Link href="/api/meta/login" className={styles.btnConnect}>
-              Conectar Conta
-            </Link>
-          )}
-        </div>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>E-mail</th>
+                  <th>Papel</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {authorizedUsers.map(u => (
+                  <tr key={u.email}>
+                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.email}</td>
+                    <td><span className="badge badge-accent">{u.role}</span></td>
+                    <td><span className="badge badge-success">Ativo</span></td>
+                  </tr>
+                ))}
+                {authorizedUsers.length === 0 && (
+                  <tr>
+                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                      Nenhum membro cadastrado. Apenas você tem acesso de Admin.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </div>
   )

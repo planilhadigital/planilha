@@ -5,103 +5,74 @@
   animation: fadeIn 0.4s ease;
 }
 
-.header {
+.pageHeader {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-base);
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
-.subtitle {
+.pageSubtitle {
+  font-size: 0.9rem;
   color: var(--text-muted);
-  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
-.card {
-  background: var(--card-bg);
+.mainGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--r-md);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
 }
 
-.cardHeader {
-  padding: 1.5rem;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 1rem;
+  text-align: left;
   border-bottom: 1px solid var(--border);
 }
 
-.cardTitle {
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--text-base);
-}
-
-.integrationItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  gap: 1rem;
-}
-
-.integrationInfo {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.integrationIcon {
-  width: 48px;
-  height: 48px;
-  background: rgba(24, 119, 242, 0.1);
-  color: #1877F2;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.integrationName {
-  font-weight: 600;
-  color: var(--text-base);
-  margin-bottom: 0.25rem;
-}
-
-.integrationDesc {
+.table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--text-muted);
-  font-size: 0.875rem;
-  max-width: 400px;
+  font-weight: 600;
+  background: rgba(0,0,0, 0.2);
 }
 
-.btnConnect {
-  padding: 0.5rem 1.25rem;
-  background: #1877F2;
-  color: white;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+.table tr:last-child td {
+  border-bottom: none;
 }
 
-.btnConnect:hover {
-  background: #166FE5;
-  transform: translateY(-1px);
-}
-
-.btnSuccess {
-  padding: 0.5rem 1.25rem;
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ECC71;
-  border: 1px solid rgba(46, 204, 113, 0.2);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: default;
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
 }

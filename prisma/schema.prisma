@@ -93,8 +93,22 @@ model Empresa {
   // Relação N:N com Usuários (quais usuários tem acesso a esta empresa)
   usuarios    User[]
   
-  // Posts agendados
+  // Posts agendados e Leads
   posts       PostAgendado[]
+  leads       Lead[]
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  empresaId   String
+  nome        String
+  email       String?
+  telefone    String?
+  origem      String   @default("Manual") // Manual, Meta Ads, etc.
+  status      String   @default("Novo")   // Novo, Contatado, Fechado, Perdido
+  createdAt   DateTime @default(now())
+
+  empresa     Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
 
 model PostAgendado {

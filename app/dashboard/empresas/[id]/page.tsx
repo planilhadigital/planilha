@@ -6,8 +6,7 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { UploadCloud, Image as ImageIcon } from 'lucide-react'
-import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
+import { Instagram, Facebook, Globe, Image as ImageIcon, UploadCloud, Users } from 'lucide-react'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -16,7 +15,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   const [selectedPageId, setSelectedPageId] = useState('')
   const [loading, setLoading] = useState(true)
   
-  const [activeTab, setActiveTab] = useState<'metricas' | 'posts' | 'calendario' | 'config'>('metricas')
+  const [activeTab, setActiveTab] = useState<'metricas' | 'posts' | 'calendario' | 'leads' | 'config'>('metricas')
   const [insightsData, setInsightsData] = useState<any>(null)
   const [loadingInsights, setLoadingInsights] = useState(false)
   
@@ -25,6 +24,12 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
   const [savingPost, setSavingPost] = useState(false)
+  
+  // Leads
+  const [leads, setLeads] = useState<any[]>([])
+  const [loadingLeads, setLoadingLeads] = useState(false)
+  const [leadForm, setLeadForm] = useState({ nome: '', email: '', telefone: '', origem: 'Manual' })
+  const [addingLead, setAddingLead] = useState(false)
   
   // Config
   const [saving, setSaving] = useState(false)
@@ -62,9 +67,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
     loadData()
   }, [id])
 
-  // Carrega posts se a aba for posts ou calendário
+  // Carrega posts e leads dependendo da aba
   useEffect(() => {
-    async function loadPosts() {
+    async function loadTabData() {
       if (activeTab === 'posts' || activeTab === 'calendario') {
         setLoadingPosts(true)
         try {
@@ -79,8 +84,23 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
           setLoadingPosts(false)
         }
       }
+      
+      if (activeTab === 'leads') {
+        setLoadingLeads(true)
+        try {
+          const res = await fetch(`/api/empresas/${id}/leads`)
+          if (res.ok) {
+            const data = await res.json()
+            setLeads(data.leads || [])
+          }
+        } catch (e) {
+          console.error(e)
+        } finally {
+          setLoadingLeads(false)
+        }
+      }
     }
-    loadPosts()
+    loadTabData()
   }, [activeTab, id])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'avatar' | 'cover' | 'post') => {
@@ -174,6 +194,27 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
     }
   }
 
+  const handleAddLead = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAddingLead(true)
+    try {
+      const res = await fetch(`/api/empresas/${id}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leadForm)
+      })
+      if (!res.ok) throw new Error('Erro ao salvar Lead')
+      const newLead = await res.json()
+      setLeads([newLead, ...leads])
+      toast.success('Lead adicionado com sucesso!')
+      setLeadForm({ nome: '', email: '', telefone: '', origem: 'Manual' })
+    } catch (err: any) {
+      toast.error(err.message)
+    } finally {
+      setAddingLead(false)
+    }
+  }
+
   // --- Função do Calendário ---
   const generateCalendar = () => {
     const year = currentDate.getFullYear()
@@ -260,6 +301,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         </button>
         <button className={`${styles.tab} ${activeTab === 'calendario' ? styles.tabActive : ''}`} onClick={() => setActiveTab('calendario')}>
           📅 Calendário
+        </button>
+        <button className={`${styles.tab} ${activeTab === 'leads' ? styles.tabActive : ''}`} onClick={() => setActiveTab('leads')}>
+          🎯 CRM de Leads
         </button>
         <button className={`${styles.tab} ${activeTab === 'config' ? styles.tabActive : ''}`} onClick={() => setActiveTab('config')}>
           ⚙️ Configurações
@@ -412,6 +456,61 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'leads' && (
+        <div className="anim-fade-up">
+          <div className="grid-2">
+            <div className={styles.configSection}>
+              <h2 className={styles.stepTitle}>Novo Lead Manual</h2>
+              <form onSubmit={handleAddLead} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label className="input-label">Nome *</label>
+                  <input type="text" className="input" required value={leadForm.nome} onChange={e => setLeadForm({...leadForm, nome: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">E-mail</label>
+                  <input type="email" className="input" value={leadForm.email} onChange={e => setLeadForm({...leadForm, email: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">Telefone (WhatsApp)</label>
+                  <input type="text" className="input" value={leadForm.telefone} onChange={e => setLeadForm({...leadForm, telefone: e.target.value})} />
+                </div>
+                <button type="submit" className="btn btn-primary" disabled={addingLead}>
+                  {addingLead ? 'Salvando...' : 'Cadastrar Lead'}
+                </button>
+              </form>
+            </div>
+
+            <div className={styles.configSection}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 className={styles.stepTitle} style={{ margin: 0 }}>Base de Leads</h2>
+                <span className="badge badge-accent">{leads.length} Cadastrados</span>
+              </div>
+              
+              {loadingLeads ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Carregando leads...</div>
+              ) : leads.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Nenhum lead captado ainda.</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {leads.map(lead => (
+                    <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--bg-deep)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{lead.nome}</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{lead.email || lead.telefone || 'Sem contato'}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <span className="badge badge-neutral">{lead.origem}</span>
+                        <span className="badge badge-success">{lead.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

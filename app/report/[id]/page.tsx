@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
 import styles from './page.module.css'
-import ClientChart from './ClientChart' // Precisaremos extrair o Recharts para um Client Component
+import ClientChart from './ClientChart' 
+import PrintButton from './PrintButton'
 
 export default async function PublicReportPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ days?: string }> }) {
   const { id } = await params
@@ -45,7 +46,10 @@ export default async function PublicReportPage({ params, searchParams }: { param
     <div className={styles.reportPage}>
       <header className={styles.header}>
         <div className={styles.headerLogo}>planILHA Relatórios</div>
-        <div className={styles.headerTitle}>Relatório de Desempenho</div>
+        <div className={styles.headerControls} style={{ display: 'flex', alignItems: 'center' }}>
+          <div className={styles.headerTitle}>Relatório de Desempenho</div>
+          <PrintButton />
+        </div>
       </header>
 
       <div className={styles.content}>
