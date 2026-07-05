@@ -25,7 +25,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [postForm, setPostForm] = useState({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
   const [datas, setDatas] = useState([{ date: '', time: '' }])
-  const [advancedConfig, setAdvancedConfig] = useState({ location: '', disableComments: false, hideLikes: false })
+  const [advancedConfig, setAdvancedConfig] = useState({ location: '', disableComments: false, hideLikes: false, shareToFeed: true })
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [savingPost, setSavingPost] = useState(false)
   
@@ -455,35 +455,57 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               
               {showAdvanced && (
                 <div className="anim-fade-up" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
-                  <div className="input-group">
-                    <label className="input-label">Localização (Opcional)</label>
-                    <input 
-                      type="text" 
-                      className="input" 
-                      placeholder="Ex: São Paulo, Brasil" 
-                      style={{ background: 'var(--bg-deep)' }}
-                      value={advancedConfig.location}
-                      onChange={e => setAdvancedConfig({...advancedConfig, location: e.target.value})}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                      <input 
-                        type="checkbox" 
-                        style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
-                        checked={advancedConfig.disableComments}
-                        onChange={e => setAdvancedConfig({...advancedConfig, disableComments: e.target.checked})}
-                      /> Desativar comentários
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                      <input 
-                        type="checkbox" 
-                        style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
-                        checked={advancedConfig.hideLikes}
-                        onChange={e => setAdvancedConfig({...advancedConfig, hideLikes: e.target.checked})}
-                      /> Ocultar curtidas
-                    </label>
-                  </div>
+                  {postForm.formato === 'Stories' ? (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>
+                      Nenhuma configuração avançada disponível para Stories pela API oficial.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="input-group">
+                        <label className="input-label">Localização (Opcional)</label>
+                        <input 
+                          type="text" 
+                          className="input" 
+                          placeholder="Ex: São Paulo, Brasil" 
+                          style={{ background: 'var(--bg-deep)' }}
+                          value={advancedConfig.location}
+                          onChange={e => setAdvancedConfig({...advancedConfig, location: e.target.value})}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                          <input 
+                            type="checkbox" 
+                            style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                            checked={advancedConfig.disableComments}
+                            onChange={e => setAdvancedConfig({...advancedConfig, disableComments: e.target.checked})}
+                          /> Desativar comentários
+                        </label>
+                        
+                        {(postForm.formato === 'Feed' || postForm.formato === 'Carrossel') && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                            <input 
+                              type="checkbox" 
+                              style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                              checked={advancedConfig.hideLikes}
+                              onChange={e => setAdvancedConfig({...advancedConfig, hideLikes: e.target.checked})}
+                            /> Ocultar curtidas
+                          </label>
+                        )}
+
+                        {postForm.formato === 'Reels' && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                            <input 
+                              type="checkbox" 
+                              style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                              checked={advancedConfig.shareToFeed}
+                              onChange={e => setAdvancedConfig({...advancedConfig, shareToFeed: e.target.checked})}
+                            /> Compartilhar também no Feed
+                          </label>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
