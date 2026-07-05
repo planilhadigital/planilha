@@ -44,7 +44,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          String    @default("colaborador") // admin, colaborador, cliente
+  role          String    @default("visitante") // admin, colaborador, visitante
   
   accounts      Account[]
   sessions      Session[]

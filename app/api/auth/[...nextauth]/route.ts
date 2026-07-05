@@ -31,7 +31,7 @@ export const authOptions: AuthOptions = {
           include: { empresas: { select: { id: true } } }
         })
         session.user.id = token.sub
-        session.user.role = dbUser?.role || 'colaborador'
+        session.user.role = dbUser?.role || 'visitante'
         session.user.empresasCount = dbUser?.empresas?.length || 0
       }
       return session
