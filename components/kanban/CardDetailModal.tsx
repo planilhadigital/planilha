@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Tag, CheckSquare, Calendar, Paperclip, MessageSquare, Trash2, Plus, Check, Edit3, Clock } from 'lucide-react'
+import { X, Tag, CheckSquare, Calendar, Paperclip, MessageSquare, Trash2, Plus, Check, Edit3, Clock, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const LABEL_COLORS = [
