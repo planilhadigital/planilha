@@ -6,9 +6,10 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy, Settings, BarChart3, PenSquare, CalendarDays, CheckCircle2 } from 'lucide-react'
+import { CalendarDays, Settings, BarChart3, PenSquare, CheckCircle2, ChevronLeft, ChevronRight, Download, Eye, UploadCloud, ClipboardList, Plus, ArrowRight } from 'lucide-react'
 import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
 import GlobalPostCreator from '../../posts/GlobalPostCreator'
+import PlanejamentoBoard from '../../planejamentos/PlanejamentoBoard'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -17,7 +18,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   const [selectedPageId, setSelectedPageId] = useState('')
   const [loading, setLoading] = useState(true)
   
-  const [activeTab, setActiveTab] = useState<'metricas' | 'posts' | 'calendario' | 'leads' | 'config'>('metricas')
+  const [activeTab, setActiveTab] = useState<'metricas' | 'posts' | 'calendario' | 'leads' | 'config' | 'planejamentos'>('metricas')
+  const [empresaPlans, setEmpresaPlans] = useState<any[]>([])
+  const [activePlanId, setActivePlanId] = useState<string | null>(null)
   const [insightsData, setInsightsData] = useState<any>(null)
   const [loadingInsights, setLoadingInsights] = useState(false)
   
@@ -85,9 +88,26 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
           setLoadingPosts(false)
         }
       }
+      if (activeTab === 'planejamentos') {
+        loadEmpresaPlans()
+      }
     }
     loadTabData()
   }, [activeTab, id])
+
+  async function loadEmpresaPlans() {
+    try {
+      const res = await fetch(`/api/planejamentos?empresaId=${id}`)
+      const data = await res.json()
+      const plans = data.planejamentos || []
+      setEmpresaPlans(plans)
+      if (plans.length === 1 && !activePlanId) {
+        setActivePlanId(plans[0].id)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'avatar' | 'cover' | 'post') => {
     const file = e.target.files?.[0]
@@ -301,6 +321,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         <button className={`${styles.tab} ${activeTab === 'calendario' ? styles.tabActive : ''}`} onClick={() => setActiveTab('calendario')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
           <CalendarDays size={18} /> Calendário
         </button>
+        <button className={`${styles.tab} ${activeTab === 'planejamentos' ? styles.tabActive : ''}`} onClick={() => setActiveTab('planejamentos')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+          <ClipboardList size={18} /> Planejamentos
+        </button>
         <button className={`${styles.tab} ${activeTab === 'config' ? styles.tabActive : ''}`} onClick={() => setActiveTab('config')} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
           <Settings size={18} /> Configurações
         </button>
@@ -309,6 +332,45 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       {activeTab === 'posts' && (
         <div style={{ marginTop: '2rem' }}>
           <GlobalPostCreator empresas={[empresa]} />
+        </div>
+      )}
+
+      {activeTab === 'planejamentos' && (
+        <div className="anim-fade-up">
+          {activePlanId ? (
+            <PlanejamentoBoard 
+              id={activePlanId} 
+              hideBackButton={empresaPlans.length <= 1} 
+              onBack={() => setActivePlanId(null)} 
+            />
+          ) : (
+            <div className={styles.grid}>
+              {empresaPlans.map(q => (
+                <div key={q.id} onClick={() => setActivePlanId(q.id)} className={`card ${styles.boardCard}`} style={{ cursor: 'pointer', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 0.5rem 0' }}>{q.titulo}</h3>
+                    {q.descricao && <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>{q.descricao}</p>}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.8rem' }}>
+                      Criado em: {new Date(q.createdAt).toLocaleDateString()}
+                    </span>
+                    <span style={{ color: 'var(--accent)' }}><ArrowRight size={18} /></span>
+                  </div>
+                </div>
+              ))}
+              {empresaPlans.length === 0 && (
+                <div className="card" style={{ padding: '2rem', textAlign: 'center', gridColumn: '1 / -1' }}>
+                  <ClipboardList size={48} style={{ margin: '0 auto 1rem', color: 'var(--text-muted)' }} />
+                  <h3>Nenhum planejamento encontrado</h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>Esta empresa ainda não possui um quadro de planejamento.</p>
+                  <Link href="/dashboard/planejamentos" className="btn btn-primary">
+                    <Plus size={18} /> Criar Quadro
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

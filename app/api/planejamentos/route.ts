@@ -3,14 +3,25 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const empresaId = searchParams.get('empresaId')
+    
+    const whereClause = empresaId ? { empresaId } : {}
+
     const planejamentos = await prisma.planejamento.findMany({
+      where: whereClause,
+      include: {
+        empresa: {
+          select: { id: true, name: true, avatarUrl: true }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     })
 
@@ -28,7 +39,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { titulo, descricao } = await request.json()
+    const { titulo, descricao, empresaId } = await request.json()
 
     if (!titulo) {
       return NextResponse.json({ error: 'Título é obrigatório' }, { status: 400 })
@@ -38,6 +49,7 @@ export async function POST(request: Request) {
       data: {
         titulo,
         descricao,
+        empresaId,
         criadoPor: session.user.name || session.user.email
       }
     })

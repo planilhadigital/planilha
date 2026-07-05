@@ -12,12 +12,12 @@ const navItems = [
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
       { href: '/dashboard/empresas', label: 'Empresas', icon: <Building2 size={20} /> },
-      { href: '/dashboard/planejamentos', label: 'Planejamentos', icon: <ClipboardList size={20} /> },
     ],
   },
   {
     group: 'Ferramentas',
     items: [
+      { href: '/dashboard/planejamentos', label: 'Planejamentos', icon: <ClipboardList size={20} /> },
       { href: '/dashboard/relatorios', label: 'Relatórios', icon: <BarChart3 size={20} /> },
       { href: '/dashboard/posts', label: 'Programar Posts', icon: <CalendarPlus size={20} /> },
       { href: '/dashboard/calendario', label: 'Calendário', icon: <CalendarDays size={20} /> },

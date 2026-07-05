@@ -8,14 +8,25 @@ import { ArrowRight, Plus } from 'lucide-react'
 
 export default function PlanejamentosPage() {
   const [quadros, setQuadros] = useState<any[]>([])
+  const [empresas, setEmpresas] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ titulo: '', descricao: '' })
+  const [form, setForm] = useState({ titulo: '', descricao: '', empresaId: '' })
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
-    loadQuadros()
+    Promise.all([loadQuadros(), loadEmpresas()]).finally(() => setLoading(false))
   }, [])
+
+  async function loadEmpresas() {
+    try {
+      const res = await fetch('/api/empresas')
+      const data = await res.json()
+      setEmpresas(data.empresas || [])
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   async function loadQuadros() {
     try {
@@ -24,8 +35,6 @@ export default function PlanejamentosPage() {
       setQuadros(data.planejamentos || [])
     } catch (err) {
       console.error(err)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -40,8 +49,12 @@ export default function PlanejamentosPage() {
       })
       if (!res.ok) throw new Error('Erro ao criar quadro')
       const novo = await res.json()
-      setQuadros([novo, ...quadros])
-      setForm({ titulo: '', descricao: '' })
+      // Como a API não devolve o objeto `empresa` aninhado na criação, vamos anexá-lo manualmente pro state
+      const emp = empresas.find(e => e.id === form.empresaId)
+      const novoQuadro = { ...novo, empresa: emp || null }
+      
+      setQuadros([novoQuadro, ...quadros])
+      setForm({ titulo: '', descricao: '', empresaId: '' })
       setShowForm(false)
       toast.success('Quadro criado com sucesso!')
     } catch (err: any) {
@@ -79,6 +92,16 @@ export default function PlanejamentosPage() {
                   value={form.titulo}
                   onChange={e => setForm({...form, titulo: e.target.value})}
                 />
+                <select 
+                  className={styles.input}
+                  value={form.empresaId}
+                  onChange={e => setForm({...form, empresaId: e.target.value})}
+                >
+                  <option value="">Sem vínculo (Global)</option>
+                  {empresas.map(emp => (
+                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                  ))}
+                </select>
                 <textarea 
                   className={styles.input} 
                   rows={2}
@@ -106,24 +129,40 @@ export default function PlanejamentosPage() {
               </div>
             </button>
           )}
-
-          {/* Lista de Quadros Existentes */}
-          {quadros.map(q => (
-            <Link key={q.id} href={`/dashboard/planejamentos/${q.id}`} className={styles.boardCard}>
-              <div>
-                <h3 className={styles.boardTitle}>{q.titulo}</h3>
-                {q.descricao && <p className={styles.boardDesc}>{q.descricao}</p>}
-              </div>
-              <div className={styles.boardFooter}>
-                <span className={styles.boardDate}>
-                  Criado em: {new Date(q.createdAt).toLocaleDateString()}
-                </span>
-                <span className={styles.boardArrow}><ArrowRight size={18} /></span>
-              </div>
-            </Link>
-          ))}
         </div>
       )}
+
+      {/* Lista de Quadros Existentes Agrupados */}
+      {!loading && Object.entries(
+        quadros.reduce((acc, q) => {
+          const emp = q.empresa?.name || 'Gerais'
+          if (!acc[emp]) acc[emp] = []
+          acc[emp].push(q)
+          return acc
+        }, {} as Record<string, any[]>)
+      ).map(([empresaName, boards]) => (
+        <div key={empresaName} className="anim-fade-up anim-delay-2" style={{ marginTop: '2rem' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+            {empresaName}
+          </h2>
+          <div className={styles.grid}>
+            {(boards as any[]).map(q => (
+              <Link key={q.id} href={`/dashboard/planejamentos/${q.id}`} className={`card ${styles.boardCard}`}>
+                <div>
+                  <h3 className={styles.boardTitle}>{q.titulo}</h3>
+                  {q.descricao && <p className={styles.boardDesc}>{q.descricao}</p>}
+                </div>
+                <div className={styles.boardFooter}>
+                  <span className={styles.boardDate}>
+                    Criado em: {new Date(q.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className={styles.boardArrow}><ArrowRight size={18} /></span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
