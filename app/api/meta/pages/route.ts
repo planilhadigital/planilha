@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     let nextUrl = `https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account{id,username,profile_picture_url}&limit=100&access_token=${user.metaAccessToken}`
 
     while (nextUrl) {
-      const pagesRes = await fetch(nextUrl)
+      const pagesRes = await fetch(nextUrl, { cache: 'no-store' })
       const pagesData = await pagesRes.json()
 
       if (pagesData.error) {
