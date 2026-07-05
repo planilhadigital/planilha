@@ -18,15 +18,27 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Conta da Meta não conectada' }, { status: 400 })
     }
 
-    // Busca as páginas gerenciadas pelo usuário e informações aninhadas do Instagram
-    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account{id,username,profile_picture_url}&limit=100&access_token=${user.metaAccessToken}`)
-    const pagesData = await pagesRes.json()
+    // Busca as páginas gerenciadas pelo usuário com paginação para garantir que todas venham
+    let allPages: any[] = []
+    let nextUrl = `https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account{id,username,profile_picture_url}&limit=100&access_token=${user.metaAccessToken}`
 
-    if (pagesData.error) {
-      throw new Error(pagesData.error.message)
+    while (nextUrl) {
+      const pagesRes = await fetch(nextUrl)
+      const pagesData = await pagesRes.json()
+
+      if (pagesData.error) {
+        throw new Error(pagesData.error.message)
+      }
+
+      if (pagesData.data && pagesData.data.length > 0) {
+        allPages = [...allPages, ...pagesData.data]
+      }
+
+      // Verifica se tem próxima página
+      nextUrl = pagesData.paging?.next || null
     }
 
-    return NextResponse.json({ pages: pagesData.data })
+    return NextResponse.json({ pages: allPages })
   } catch (error: any) {
     console.error('Erro ao listar páginas da Meta:', error)
     return NextResponse.json({ error: error.message || 'Erro interno' }, { status: 500 })
