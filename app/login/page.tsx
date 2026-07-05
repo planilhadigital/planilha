@@ -10,6 +10,9 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <div className={styles.page}>
+      {/* Background Icon (Zero Gravity) */}
+      <img src="/icon.svg" alt="Background Icon" className={styles.bgIcon} />
+
       {/* Background glows */}
       <div className={`${styles.glow} ${styles.glowTop}`} />
       <div className={`${styles.glow} ${styles.glowBottom}`} />
@@ -20,15 +23,7 @@ export default function LoginPage() {
       <div className={styles.card}>
         {/* Logo */}
         <div className={styles.logoWrap}>
-          <Logo width={200} height={48} />
-        </div>
-
-        {/* Header text */}
-        <div className={styles.header}>
-          <h1 className={styles.title}>Bem-vindo de volta</h1>
-          <p className={styles.subtitle}>
-            Acesse sua plataforma de gestão de marketing e relatórios
-          </p>
+          <Logo width={340} height={81} />
         </div>
 
         {/* Google login button */}
@@ -60,8 +55,8 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
           </div>
-          <button type="submit" className="btn btn-primary w-full" id="email-login-submit-btn">
-            Entrar na plataforma
+          <button type="submit" className="btn btn-primary w-full" style={{ justifyContent: 'center' }} id="email-login-submit-btn">
+            Entrar
           </button>
         </form>
 

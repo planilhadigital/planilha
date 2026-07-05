@@ -116,248 +116,213 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
 
   return (
     <div className={`${styles.postCreatorLayout} anim-fade-up`}>
-      {/* COLUNA 1: Cliente e Legenda */}
-      <div className={styles.editorPanel}>
-        <div>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>1</span> Selecione as contas
-          </div>
-          <select 
-            className="input" 
-            value=""
-            onChange={e => {
-              const val = e.target.value
-              if (val && !selectedEmpresaIds.includes(val)) {
-                setSelectedEmpresaIds([...selectedEmpresaIds, val])
-              }
-            }}
-            style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
-          >
-            <option value="">-- Adicionar empresa --</option>
-            {empresas.map(e => (
-              <option key={e.id} value={e.id}>{e.name}</option>
-            ))}
-          </select>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {selectedEmpresaIds.map(id => {
-              const emp = empresas.find(e => e.id === id)
-              if(!emp) return null
-              return (
-                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-full)', border: '1px solid var(--border)' }}>
-                  {emp.avatarUrl ? <img src={emp.avatarUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} /> : <div style={{width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold'}}>{emp.name.charAt(0).toUpperCase()}</div>}
-                  <span style={{ fontSize: '0.85rem' }}>{emp.name}</span>
-                  <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>2</span> Texto do post
-          </div>
-          <textarea 
-            className={styles.postTextarea}
-            placeholder="Digite o seu texto aqui..."
-            style={{ flex: 1, minHeight: '300px' }}
-            value={postForm.legenda}
-            onChange={e => setPostForm({...postForm, legenda: e.target.value})}
-          />
-        </div>
-      </div>
-
-      {/* COLUNA 2: Canais, Formato, Mídias e Agendamento */}
-      <div className={styles.editorPanel}>
-        <div>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>3</span> Selecione canais
-          </div>
-          <div className={styles.channelSelector}>
-            <button 
-              className={styles.channelBtn} 
-              data-active={postForm.canais.instagram}
-              onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
-              style={{ padding: '0.8rem', borderRadius: '50%' }}
-              title="Instagram"
-            >
-              <FaInstagram size={24} />
-            </button>
-            <button 
-              className={styles.channelBtn} 
-              data-active={postForm.canais.facebook}
-              onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
-              style={{ padding: '0.8rem', borderRadius: '50%' }}
-              title="Facebook"
-            >
-              <FaFacebook size={24} />
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>4</span> Formato do Post
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {['Feed', 'Reels', 'Stories', 'Carrossel'].map(fmt => (
-              <button 
-                key={fmt}
-                onClick={() => setPostForm({...postForm, formato: fmt})}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.5rem 1rem', borderRadius: 'var(--r-full)',
-                  border: `1px solid ${postForm.formato === fmt ? 'var(--accent)' : 'var(--border)'}`,
-                  background: postForm.formato === fmt ? 'var(--accent-dim)' : 'var(--bg-deep)',
-                  color: postForm.formato === fmt ? 'var(--accent)' : 'var(--text-muted)',
-                  cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.85rem'
+      {/* EDITOR PANEL (COMPACTADO) */}
+      <div className={styles.editorPanel} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', gridColumn: 'span 2' }}>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+          {/* Lado Esquerdo do Editor */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>1</span> Selecione as contas
+              </div>
+              <select 
+                className="input" 
+                value=""
+                onChange={e => {
+                  const val = e.target.value
+                  if (val && !selectedEmpresaIds.includes(val)) {
+                    setSelectedEmpresaIds([...selectedEmpresaIds, val])
+                  }
                 }}
+                style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
               >
-                {fmt === 'Feed' && <Layout size={14} />}
-                {fmt === 'Reels' && <Film size={14} />}
-                {fmt === 'Stories' && <Copy size={14} />}
-                {fmt === 'Carrossel' && <ImageIcon size={14} />}
-                {fmt}
-              </button>
-            ))}
-          </div>
-        </div>
+                <option value="">-- Adicionar empresa --</option>
+                {empresas.map(e => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
+              </select>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {selectedEmpresaIds.map(id => {
+                  const emp = empresas.find(e => e.id === id)
+                  if(!emp) return null
+                  return (
+                    <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-full)', border: '1px solid var(--border)' }}>
+                      {emp.avatarUrl ? <img src={emp.avatarUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} /> : <div style={{width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold'}}>{emp.name.charAt(0).toUpperCase()}</div>}
+                      <span style={{ fontSize: '0.85rem' }}>{emp.name}</span>
+                      <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
 
-        <div>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>5</span> Mídias
-          </div>
-          <input type="file" hidden ref={postMediaInputRef} onChange={handleUpload} accept="image/*,video/*" />
-          <div className={styles.uploadZone} onClick={() => postMediaInputRef.current?.click()}>
-            {postForm.midiaUrl ? (
-              <img src={postForm.midiaUrl} alt="Preview" style={{ height: '120px', borderRadius: '8px', objectFit: 'contain' }} />
-            ) : (
-              <>
-                <UploadCloud size={40} color="var(--text-muted)" />
-                <p><strong>Imagens ou vídeos</strong><br/>Clique aqui para enviar arquivos.</p>
-              </>
-            )}
-          </div>
-        </div>
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>2</span> Selecione canais
+              </div>
+              <div className={styles.channelSelector}>
+                <button 
+                  className={styles.channelBtn} 
+                  data-active={postForm.canais.instagram}
+                  onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
+                  style={{ padding: '0.8rem', borderRadius: '50%' }}
+                  title="Instagram"
+                >
+                  <FaInstagram size={24} />
+                </button>
+                <button 
+                  className={styles.channelBtn} 
+                  data-active={postForm.canais.facebook}
+                  onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
+                  style={{ padding: '0.8rem', borderRadius: '50%' }}
+                  title="Facebook"
+                >
+                  <FaFacebook size={24} />
+                </button>
+              </div>
+            </div>
 
-        <div>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>6</span> Data e horário
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {datas.map((dt, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <input 
-                  type="date" 
-                  className="input"
-                  style={{ flex: 2, padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
-                  value={dt.date}
-                  onChange={e => {
-                    const newDatas = [...datas]
-                    newDatas[idx].date = e.target.value
-                    setDatas(newDatas)
-                  }}
-                />
-                <input 
-                  type="time" 
-                  className="input"
-                  style={{ flex: 1, padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
-                  value={dt.time}
-                  onChange={e => {
-                    const newDatas = [...datas]
-                    newDatas[idx].time = e.target.value
-                    setDatas(newDatas)
-                  }}
-                />
-                {datas.length > 1 && (
-                  <button className="btn-icon" style={{ padding: '0.5rem', background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: 'var(--r-sm)' }} onClick={() => setDatas(datas.filter((_, i) => i !== idx))}>✕</button>
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>3</span> Formato do Post
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {['Feed', 'Reels', 'Stories', 'Carrossel'].map(fmt => (
+                  <button 
+                    key={fmt}
+                    onClick={() => setPostForm({...postForm, formato: fmt})}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.5rem',
+                      padding: '0.5rem 1rem', borderRadius: 'var(--r-full)',
+                      border: `1px solid ${postForm.formato === fmt ? 'var(--accent)' : 'var(--border)'}`,
+                      background: postForm.formato === fmt ? 'var(--accent-dim)' : 'var(--bg-deep)',
+                      color: postForm.formato === fmt ? 'var(--accent)' : 'var(--text-muted)',
+                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.85rem'
+                    }}
+                  >
+                    {fmt === 'Feed' && <Layout size={14} />}
+                    {fmt === 'Reels' && <Film size={14} />}
+                    {fmt === 'Stories' && <Copy size={14} />}
+                    {fmt === 'Carrossel' && <ImageIcon size={14} />}
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>4</span> Mídias
+              </div>
+              <input type="file" hidden ref={postMediaInputRef} onChange={handleUpload} accept="image/*,video/*" />
+              <div className={styles.uploadZone} onClick={() => postMediaInputRef.current?.click()} style={{ padding: '1rem', minHeight: '120px' }}>
+                {postForm.midiaUrl ? (
+                  <img src={postForm.midiaUrl} alt="Preview" style={{ height: '100px', borderRadius: '8px', objectFit: 'contain' }} />
+                ) : (
+                  <>
+                    <UploadCloud size={32} color="var(--text-muted)" />
+                    <p style={{ fontSize: '0.85rem' }}><strong>Imagens ou vídeos</strong><br/>Clique aqui para enviar arquivos.</p>
+                  </>
                 )}
               </div>
-            ))}
-            <button 
-              className="btn btn-secondary btn-sm" 
-              style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}
-              onClick={() => setDatas([...datas, { date: '', time: '' }])}
-            >
-              + Incluir mais dias e horários
-            </button>
+            </div>
+          </div>
+
+          {/* Lado Direito do Editor */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div>
+              <div className={styles.stepTitle} style={{ cursor: 'pointer' }} onClick={() => setShowAdvanced(!showAdvanced)}>
+                <span className={styles.stepNumber}>5</span> Configurações Adicionais {showAdvanced ? '▲' : '▼'}
+              </div>
+              {showAdvanced && (
+                <div className="anim-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+                  {postForm.formato === 'Stories' ? (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>
+                      Nenhuma configuração disponível.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="input-group">
+                        <label className="input-label" style={{ fontSize: '0.8rem' }}>Localização (Opcional)</label>
+                        <input 
+                          type="text" 
+                          className="input" 
+                          placeholder="Ex: São Paulo" 
+                          style={{ background: 'var(--bg-deep)', padding: '0.6rem' }}
+                          value={advancedConfig.location}
+                          onChange={e => setAdvancedConfig({...advancedConfig, location: e.target.value})}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                          <input type="checkbox" style={{ width: 16, height: 16, accentColor: 'var(--primary)' }} checked={advancedConfig.disableComments} onChange={e => setAdvancedConfig({...advancedConfig, disableComments: e.target.checked})} /> 
+                          Sem comentários
+                        </label>
+                        
+                        {(postForm.formato === 'Feed' || postForm.formato === 'Carrossel') && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <input type="checkbox" style={{ width: 16, height: 16, accentColor: 'var(--primary)' }} checked={advancedConfig.hideLikes} onChange={e => setAdvancedConfig({...advancedConfig, hideLikes: e.target.checked})} /> 
+                            Sem curtidas
+                          </label>
+                        )}
+
+                        {postForm.formato === 'Reels' && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <input type="checkbox" style={{ width: 16, height: 16, accentColor: 'var(--primary)' }} checked={advancedConfig.shareToFeed} onChange={e => setAdvancedConfig({...advancedConfig, shareToFeed: e.target.checked})} /> 
+                            No Feed
+                          </label>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>6</span> Texto do post
+              </div>
+              <textarea 
+                className={styles.postTextarea}
+                placeholder="Digite o seu texto aqui..."
+                style={{ flex: 1, minHeight: '120px' }}
+                value={postForm.legenda}
+                onChange={e => setPostForm({...postForm, legenda: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>7</span> Data e horário
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {datas.map((dt, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input type="date" className="input" style={{ flex: 2, padding: '0.7rem', background: 'var(--bg-deep)', color: '#fff' }} value={dt.date} onChange={e => { const newDatas = [...datas]; newDatas[idx].date = e.target.value; setDatas(newDatas) }} />
+                    <input type="time" className="input" style={{ flex: 1, padding: '0.7rem', background: 'var(--bg-deep)', color: '#fff' }} value={dt.time} onChange={e => { const newDatas = [...datas]; newDatas[idx].time = e.target.value; setDatas(newDatas) }} />
+                    {datas.length > 1 && (
+                      <button className="btn-icon" style={{ padding: '0.4rem', background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: 'var(--r-sm)' }} onClick={() => setDatas(datas.filter((_, i) => i !== idx))}>✕</button>
+                    )}
+                  </div>
+                ))}
+                <button className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start', marginTop: '0.25rem' }} onClick={() => setDatas([...datas, { date: '', time: '' }])}>
+                  + Incluir mais dias e horários
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-          <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--primary)', color: 'var(--primary)', fontWeight: 'bold' }}
-            onClick={(e) => { e.preventDefault(); setShowAdvanced(!showAdvanced) }}
-          >
-            <Settings size={18} /> {showAdvanced ? 'Ocultar' : 'Exibir'} Configurações Avançadas
-          </button>
-          
-          {showAdvanced && (
-            <div className="anim-fade-up" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
-              {postForm.formato === 'Stories' ? (
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>
-                  Nenhuma configuração avançada disponível para Stories pela API oficial.
-                </div>
-              ) : (
-                <>
-                  <div className="input-group">
-                    <label className="input-label">Localização (Opcional)</label>
-                    <input 
-                      type="text" 
-                      className="input" 
-                      placeholder="Ex: São Paulo, Brasil" 
-                      style={{ background: 'var(--bg-deep)' }}
-                      value={advancedConfig.location}
-                      onChange={e => setAdvancedConfig({...advancedConfig, location: e.target.value})}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                      <input 
-                        type="checkbox" 
-                        style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
-                        checked={advancedConfig.disableComments}
-                        onChange={e => setAdvancedConfig({...advancedConfig, disableComments: e.target.checked})}
-                      /> Desativar comentários
-                    </label>
-                    
-                    {(postForm.formato === 'Feed' || postForm.formato === 'Carrossel') && (
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                        <input 
-                          type="checkbox" 
-                          style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
-                          checked={advancedConfig.hideLikes}
-                          onChange={e => setAdvancedConfig({...advancedConfig, hideLikes: e.target.checked})}
-                        /> Ocultar curtidas
-                      </label>
-                    )}
-
-                    {postForm.formato === 'Reels' && (
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                        <input 
-                          type="checkbox" 
-                          style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
-                          checked={advancedConfig.shareToFeed}
-                          onChange={e => setAdvancedConfig({...advancedConfig, shareToFeed: e.target.checked})}
-                        /> Compartilhar também no Feed
-                      </label>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
           <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handleSchedulePost} disabled={savingPost}>
             {savingPost ? 'Agendando Lote...' : 'Agendar Publicações'}
           </button>
         </div>
       </div>
 
-      {/* COLUNA 3: Preview */}
+      {/* PREVIEW PANEL */}
       <div className={styles.previewPanel}>
         <div className={styles.stepTitle} style={{ justifyContent: 'center' }}>
           Preview: {postForm.formato}

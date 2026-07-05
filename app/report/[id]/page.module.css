@@ -171,20 +171,26 @@
 }
 
 @media print {
+  html, body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: var(--bg-deep) !important;
+  }
   .reportPage {
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--bg-deep) !important;
+    color: var(--text-primary) !important;
+    max-width: 100% !important;
+    padding: 0 !important;
   }
   .profileCard, .kpiCard, .chartSection {
-    background: #fff !important;
-    border-color: #eee !important;
-    box-shadow: none !important;
+    background: var(--bg-surface) !important;
+    border-color: var(--border) !important;
   }
   .kpiLabel, .headerTitle, .profileInfo p, .stats div {
-    color: #555 !important;
+    color: var(--text-muted) !important;
   }
   .kpiValue, .profileInfo h2, .stats strong, .chartSection h3 {
-    color: #000 !important;
+    color: var(--text-primary) !important;
   }
   .footer {
     display: none;

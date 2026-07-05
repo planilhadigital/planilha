@@ -37,14 +37,11 @@
   pointer-events: none;
 }
 
-/* Card */
 .card {
   width: 100%;
   max-width: 420px;
-  background: rgba(19, 27, 46, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,.09);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: var(--r-xl);
   padding: 2.5rem;
   display: flex;
@@ -52,7 +49,6 @@
   gap: 1.5rem;
   position: relative;
   z-index: 1;
-  box-shadow: 0 24px 64px rgba(0,0,0,.5), 0 0 0 1px rgba(250,70,22,.06);
   animation: fadeInUp 0.55s ease forwards;
 }
 
@@ -134,3 +130,24 @@
   transition: var(--t-fast);
 }
 .link:hover { color: var(--accent-light); }
+
+.bgIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150vw;
+  height: 150vw;
+  max-width: 1200px;
+  max-height: 1200px;
+  z-index: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  animation: zeroGravity 150s linear infinite;
+}
+
+@keyframes zeroGravity {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  33% { transform: translate(-48%, -52%) rotate(120deg) scale(1.05); }
+  66% { transform: translate(-52%, -48%) rotate(240deg) scale(0.95); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+}
