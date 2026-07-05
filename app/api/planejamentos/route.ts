@@ -38,15 +38,7 @@ export async function POST(request: Request) {
       data: {
         titulo,
         descricao,
-        criadoPor: session.user.name || session.user.email,
-        colunas: {
-          create: [
-            { titulo: 'Ideias', ordem: 0 },
-            { titulo: 'Em Produção', ordem: 1 },
-            { titulo: 'Aprovação', ordem: 2 },
-            { titulo: 'Concluído', ordem: 3 }
-          ]
-        }
+        criadoPor: session.user.name || session.user.email
       }
     })
 

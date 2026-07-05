@@ -130,6 +130,7 @@ model Coluna {
   id              String   @id @default(cuid())
   planejamentoId  String
   titulo          String
+  icone           String?
   ordem           Int      @default(0)
   createdAt       DateTime @default(now())
 

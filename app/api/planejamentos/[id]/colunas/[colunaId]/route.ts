@@ -32,11 +32,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const { colunaId } = await params
     const body = await request.json()
-    const { titulo } = body
+    const { titulo, icone } = body
+
+    const dataToUpdate: any = {}
+    if (titulo !== undefined) dataToUpdate.titulo = titulo
+    if (icone !== undefined) dataToUpdate.icone = icone
 
     const coluna = await prisma.coluna.update({
       where: { id: colunaId },
-      data: { titulo }
+      data: dataToUpdate
     })
 
     return NextResponse.json({ coluna })

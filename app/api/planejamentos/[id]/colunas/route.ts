@@ -12,7 +12,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { id } = await params
     const body = await request.json()
-    const { titulo } = body
+    const { titulo, icone } = body
 
     if (!titulo) {
       return NextResponse.json({ error: 'Título é obrigatório' }, { status: 400 })
@@ -29,6 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const coluna = await prisma.coluna.create({
       data: {
         titulo,
+        icone,
         ordem: novaOrdem,
         planejamentoId: id
       },
