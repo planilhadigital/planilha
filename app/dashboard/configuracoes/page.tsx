@@ -8,7 +8,11 @@ export const metadata = {
   title: 'Configurações — planILHA',
 }
 
-export default async function ConfiguracoesPage() {
+export default async function ConfiguracoesPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
   const session = await getServerSession(authOptions)
   
   let isMetaConnected = false
@@ -33,6 +37,18 @@ export default async function ConfiguracoesPage() {
         <h1 className={styles.title}>Configurações</h1>
         <p className={styles.subtitle}>Gerencie as integrações da sua conta</p>
       </div>
+
+      {searchParams?.meta === 'success' && (
+        <div style={{ padding: '1rem', background: 'rgba(46, 204, 113, 0.1)', color: '#2ECC71', border: '1px solid rgba(46, 204, 113, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
+          ✅ Conta do Facebook/Instagram conectada com sucesso!
+        </div>
+      )}
+      
+      {searchParams?.error === 'meta_failed' && (
+        <div style={{ padding: '1rem', background: 'rgba(231, 76, 60, 0.1)', color: '#E74C3C', border: '1px solid rgba(231, 76, 60, 0.2)', borderRadius: '8px', marginBottom: '1rem' }}>
+          ❌ Ocorreu um erro ao conectar a conta. Tente novamente.
+        </div>
+      )}
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>

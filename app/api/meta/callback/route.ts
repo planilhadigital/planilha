@@ -41,25 +41,41 @@ export async function GET(request: Request) {
     const firstPage = pagesData.data?.[0]
     
     if (firstPage) {
-      // 4. Salvar na primeira empresa vinculada a esse usuário
-      const userEmpresas = await prisma.empresa.findMany({
+      // 4. Salvar na primeira empresa vinculada a esse usuário ou criar uma nova se não existir
+      let userEmpresas = await prisma.empresa.findMany({
         where: { usuarios: { some: { id: session.user.id } } }
       })
 
-      if (userEmpresas.length > 0) {
-        await prisma.empresa.update({
-          where: { id: userEmpresas[0].id },
+      let empresaId = ''
+      
+      if (userEmpresas.length === 0) {
+        // Cria uma empresa padrão para o usuário se for o primeiro acesso
+        const newEmpresa = await prisma.empresa.create({
           data: {
-            metaPageId: firstPage.id,
-            metaAccessToken: longLivedData.access_token,
-            status: 'Conectado',
-            statusType: 'success'
+            nome: 'Minha Agência',
+            status: 'Ativo',
+            usuarios: {
+              connect: { id: session.user.id }
+            }
           }
         })
+        empresaId = newEmpresa.id
+      } else {
+        empresaId = userEmpresas[0].id
       }
+
+      await prisma.empresa.update({
+        where: { id: empresaId },
+        data: {
+          metaPageId: firstPage.id,
+          metaAccessToken: longLivedData.access_token,
+          status: 'Conectado',
+          statusType: 'success'
+        }
+      })
     }
 
-    return NextResponse.redirect(new URL('/dashboard?meta=success', request.url))
+    return NextResponse.redirect(new URL('/dashboard/configuracoes?meta=success', request.url))
   } catch (error) {
     console.error('Meta OAuth Error:', error)
     return NextResponse.redirect(new URL('/dashboard/configuracoes?error=meta_failed', request.url))
