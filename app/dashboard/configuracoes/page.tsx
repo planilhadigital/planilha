@@ -16,6 +16,8 @@ export default async function ConfiguracoesPage({
   const session = await getServerSession(authOptions)
   
   let isMetaConnected = false
+  let metaName: string | null = null
+  let metaPhoto: string | null = null
 
   if (session?.user?.id) {
     const dbUser = await prisma.user.findUnique({
@@ -24,6 +26,8 @@ export default async function ConfiguracoesPage({
     
     if (dbUser?.metaAccessToken) {
       isMetaConnected = true
+      metaName = dbUser.metaName ?? null
+      metaPhoto = dbUser.metaPhoto ?? null
     }
   }
 
@@ -76,9 +80,21 @@ export default async function ConfiguracoesPage({
           </div>
           
           {isMetaConnected ? (
-            <button className={styles.btnSuccess} disabled>
-              Conectado
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {metaPhoto && (
+                <img 
+                  src={metaPhoto} 
+                  alt={metaName ?? 'Perfil Facebook'}
+                  style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid rgba(46,204,113,0.4)' }}
+                />
+              )}
+              {metaName && (
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{metaName}</span>
+              )}
+              <button className={styles.btnSuccess} disabled>
+                Conectado
+              </button>
+            </div>
           ) : (
             <Link href="/api/meta/login" className={styles.btnConnect}>
               Conectar Conta

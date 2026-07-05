@@ -33,11 +33,17 @@ export async function GET(request: Request) {
 
     if (longLivedData.error) throw new Error(longLivedData.error.message)
 
-    // 3. Salvar o Passaporte (Token) diretamente no Usuário logado
+    // 3. Buscar nome e foto do perfil do Facebook
+    const profileRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,picture.width(200)&access_token=${longLivedData.access_token}`)
+    const profileData = await profileRes.json()
+
+    // 4. Salvar o Token + Nome + Foto diretamente no Usuário logado
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
         metaAccessToken: longLivedData.access_token,
+        metaName: profileData.name ?? null,
+        metaPhoto: profileData.picture?.data?.url ?? null,
       }
     })
 

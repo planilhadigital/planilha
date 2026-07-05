@@ -54,6 +54,8 @@ model User {
 
   // Integração Meta (Acesso global do usuário)
   metaAccessToken String?
+  metaName        String?
+  metaPhoto       String?
 }
 
 model VerificationToken {
