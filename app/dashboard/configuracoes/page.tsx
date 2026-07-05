@@ -75,7 +75,7 @@ export default async function ConfiguracoesPage() {
                 </tr>
               </thead>
               <tbody>
-                {authorizedUsers.map(u => (
+                {authorizedUsers.map((u: any) => (
                   <tr key={u.email}>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.email}</td>
                     <td><span className="badge badge-accent">{u.role}</span></td>

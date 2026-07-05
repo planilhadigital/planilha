@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { Instagram, Facebook, Globe, Image as ImageIcon, UploadCloud, Users } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Users } from 'lucide-react'
+import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
