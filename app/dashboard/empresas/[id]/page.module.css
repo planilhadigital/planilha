@@ -199,3 +199,38 @@
   font-weight: 700;
   color: var(--accent);
 }
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.postItem {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-deep);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+}
+
+.postTime {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  width: 70px;
+  flex-shrink: 0;
+  padding-right: 1rem;
+  border-right: 1px dashed var(--border);
+}
+
+.postContent {
+  flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}

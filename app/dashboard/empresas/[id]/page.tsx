@@ -11,9 +11,15 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
   const [metaPages, setMetaPages] = useState<any[]>([])
   const [selectedPageId, setSelectedPageId] = useState('')
   
-  const [activeTab, setActiveTab] = useState<'metricas' | 'config'>('metricas')
+  const [activeTab, setActiveTab] = useState<'metricas' | 'config' | 'posts'>('metricas')
   const [insightsData, setInsightsData] = useState<any>(null)
   const [loadingInsights, setLoadingInsights] = useState(false)
+  
+  // States para posts
+  const [posts, setPosts] = useState<any[]>([])
+  const [loadingPosts, setLoadingPosts] = useState(false)
+  const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
+  const [savingPost, setSavingPost] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -71,6 +77,27 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
     loadInsights()
   }, [activeTab, empresa?.igAccountId, params.id])
 
+  // Carrega posts se a aba for posts
+  useEffect(() => {
+    async function loadPosts() {
+      if (activeTab === 'posts') {
+        setLoadingPosts(true)
+        try {
+          const res = await fetch(`/api/empresas/${params.id}/posts`)
+          if (res.ok) {
+            const data = await res.json()
+            setPosts(data.posts || [])
+          }
+        } catch (e) {
+          console.error(e)
+        } finally {
+          setLoadingPosts(false)
+        }
+      }
+    }
+    loadPosts()
+  }, [activeTab, params.id])
+
   const handleSave = async () => {
     setSaving(true)
     setError('')
@@ -101,6 +128,32 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
     }
   }
 
+  const handleSchedulePost = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSavingPost(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const res = await fetch(`/api/empresas/${params.id}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postForm)
+      })
+
+      if (!res.ok) throw new Error('Erro ao agendar o post')
+      
+      const newPost = await res.json()
+      setPosts([...posts, newPost])
+      setSuccess('Post agendado com sucesso!')
+      setPostForm({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSavingPost(false)
+    }
+  }
+
   if (loading) return <div className={styles.page}><div className={styles.loading}>Carregando...</div></div>
   if (!empresa) return <div className={styles.page}><div className={styles.error}>Empresa não encontrada</div></div>
 
@@ -125,6 +178,12 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
           onClick={() => setActiveTab('metricas')}
         >
           📊 Métricas
+        </button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'posts' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('posts')}
+        >
+          📅 Posts
         </button>
         <button 
           className={`${styles.tab} ${activeTab === 'config' ? styles.tabActive : ''}`}
@@ -217,6 +276,97 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
           ) : (
             <div className={styles.error}>Não foi possível carregar os insights. Talvez o token tenha expirado.</div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'posts' && (
+        <div className={styles.grid2}>
+          {/* Formulário de Agendamento */}
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Agendar Novo Post</h2>
+            <form onSubmit={handleSchedulePost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label className={styles.label}>Rede Social</label>
+                <select 
+                  className={styles.select}
+                  value={postForm.rede}
+                  onChange={(e) => setPostForm({...postForm, rede: e.target.value})}
+                >
+                  <option value="Instagram">Instagram</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="Ambas">Ambas (Insta + Face)</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className={styles.label}>URL da Imagem / Vídeo (Temporário)</label>
+                <input 
+                  type="text" 
+                  className={styles.input} 
+                  placeholder="https://..."
+                  value={postForm.midiaUrl}
+                  onChange={(e) => setPostForm({...postForm, midiaUrl: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className={styles.label}>Legenda do Post</label>
+                <textarea 
+                  className={styles.input} 
+                  rows={4}
+                  placeholder="Escreva a legenda..."
+                  value={postForm.legenda}
+                  onChange={(e) => setPostForm({...postForm, legenda: e.target.value})}
+                ></textarea>
+              </div>
+
+              <div>
+                <label className={styles.label}>Data e Hora da Publicação</label>
+                <input 
+                  type="datetime-local" 
+                  className={styles.input}
+                  required
+                  value={postForm.dataHora}
+                  onChange={(e) => setPostForm({...postForm, dataHora: e.target.value})}
+                />
+              </div>
+
+              <div className={styles.actions}>
+                <button type="submit" className="btn btn-primary" disabled={savingPost}>
+                  {savingPost ? 'Agendando...' : 'Agendar Post'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Timeline de Posts */}
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Timeline de Posts</h2>
+            {loadingPosts ? (
+              <div className={styles.loading}>Carregando posts...</div>
+            ) : posts.length === 0 ? (
+              <p className={styles.subtitle}>Nenhum post agendado ainda.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {posts.map(post => (
+                  <div key={post.id} className={styles.postItem}>
+                    <div className={styles.postTime}>
+                      {new Date(post.dataHora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                    </div>
+                    <div className={styles.postContent}>
+                      <span className={`badge badge-accent`}>{post.rede}</span>
+                      <span className={`badge ${post.status === 'Agendado' ? 'badge-warning' : 'badge-success'}`}>
+                        {post.status}
+                      </span>
+                      <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                        {post.legenda ? (post.legenda.length > 50 ? post.legenda.substring(0, 50) + '...' : post.legenda) : '[Sem legenda]'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

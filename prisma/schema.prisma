@@ -87,4 +87,22 @@ model Empresa {
   
   // Relação N:N com Usuários (quais usuários tem acesso a esta empresa)
   usuarios    User[]
+  
+  // Posts agendados
+  posts       PostAgendado[]
+}
+
+model PostAgendado {
+  id          String   @id @default(cuid())
+  empresaId   String
+  midiaUrl    String?
+  legenda     String?
+  rede        String   @default("Instagram")
+  dataHora    DateTime
+  status      String   @default("Agendado") // Agendado, Publicado, Erro
+  
+  criadoPor   String?
+  createdAt   DateTime @default(now())
+
+  empresa     Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
