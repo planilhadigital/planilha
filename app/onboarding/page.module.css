@@ -5,275 +5,86 @@
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
-.header {
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--border);
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
+.card {
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 .logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
+  margin-bottom: 2rem;
 }
 
 .logoIcon {
-  height: 32px;
-  width: 32px;
+  height: 48px;
+  width: 48px;
   background-color: var(--primary);
   border-radius: var(--r-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: 1.5rem;
   color: #000;
-}
-
-.logoText {
-  font-size: 1.125rem;
-  font-weight: bold;
-  background: linear-gradient(to right, var(--primary), #4ade80);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.card {
-  width: 100%;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 2.5rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-}
-
-.progressBarContainer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: var(--border);
-}
-
-.progressBar {
-  height: 100%;
-  background: linear-gradient(to right, var(--primary), #4ade80);
-  transition: width 0.3s ease;
-}
-
-.stepIndicator {
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.stepIndicator span:last-child {
-  color: var(--primary);
-  font-weight: bold;
 }
 
 .title {
   font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .subtitle {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
-  margin-bottom: 2rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.grid4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
-}
-
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-}
-
-.flexWrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.optionButton {
-  padding: 1.5rem;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
-  background-color: var(--bg-deep);
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--text-primary);
-}
-
-.optionButton:hover {
-  border-color: rgba(255,255,255,0.2);
-}
-
-.optionButton.selected {
-  border-color: var(--primary);
-  background-color: rgba(var(--primary-rgb, 16, 185, 129), 0.1);
-  box-shadow: 0 0 0 1px var(--primary);
-}
-
-.optionIcon {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.optionTitle {
-  font-weight: bold;
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}
-
-.optionDesc {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.smallButton {
-  padding: 0.75rem 1rem;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
-  background-color: var(--bg-deep);
-  color: var(--text-primary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.smallButton.selected {
-  border-color: var(--primary);
-  background-color: rgba(var(--primary-rgb, 16, 185, 129), 0.1);
-  color: var(--primary);
-}
-
-.inputLabel {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.input {
-  width: 100%;
-  background-color: var(--bg-deep);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 0.75rem 1rem;
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  outline: none;
-}
-
-.input:focus {
-  border-color: var(--primary);
-}
-
-.footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.btnBack {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.btnBack:hover {
-  color: var(--text-primary);
-}
-
-.btnNext {
+.btnPrimary {
+  display: inline-block;
   background-color: var(--primary);
   color: #000;
   border: none;
   border-radius: var(--r-md);
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   font-weight: bold;
-  font-size: 0.875rem;
+  font-size: 1rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
-.btnNext:disabled {
-  background-color: var(--border);
-  color: var(--text-muted);
-  cursor: not-allowed;
+.btnPrimary:hover {
+  opacity: 0.9;
 }
 
-.btnDemo {
-  background-color: var(--border);
-  color: var(--text-primary);
+.btnLogout {
+  background: none;
   border: none;
-  border-radius: var(--r-md);
-  padding: 0.75rem 1.5rem;
-  font-weight: bold;
+  color: var(--text-muted);
   font-size: 0.875rem;
   cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
 }
 
-.calContainer {
-  background-color: var(--bg-deep);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 1.5rem;
-  margin-top: 1.5rem;
-  text-align: left;
+.btnLogout:hover {
+  color: var(--text-primary);
 }
