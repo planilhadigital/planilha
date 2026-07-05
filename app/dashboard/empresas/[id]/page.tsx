@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy, Settings } from 'lucide-react'
 import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,7 +23,10 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   // States para posts
   const [posts, setPosts] = useState<any[]>([])
   const [loadingPosts, setLoadingPosts] = useState(false)
-  const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
+  const [postForm, setPostForm] = useState({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
+  const [datas, setDatas] = useState([{ date: '', time: '' }])
+  const [advancedConfig, setAdvancedConfig] = useState({ location: '', disableComments: false, hideLikes: false })
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [savingPost, setSavingPost] = useState(false)
   
   // Config
@@ -114,7 +117,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         })
         if (!patchRes.ok) throw new Error('Erro ao salvar empresa')
         const updated = await patchRes.json()
-        setEmpresa(updated.empresa)
+        setEmpresa(updated)
         toast.success(`${target === 'avatar' ? 'Avatar' : 'Capa'} atualizada!`, { id: loadingToast })
       }
     } catch (err: any) {
@@ -140,7 +143,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       if (!res.ok) throw new Error('Erro ao salvar as configurações')
       
       const updated = await res.json()
-      setEmpresa(updated.empresa)
+      setEmpresa(updated)
       toast.success('Configurações salvas com sucesso!')
       router.refresh()
     } catch (err: any) {
@@ -164,18 +167,29 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
 
     setSavingPost(true)
     try {
-      const res = await fetch(`/api/empresas/${id}/posts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
+      let createdPosts = 0
+      for (const dt of datas) {
+        if (!dt.date || !dt.time) continue
+        const isoDate = new Date(`${dt.date}T${dt.time}:00`).toISOString()
+        
+        const res = await fetch(`/api/empresas/${id}/posts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, dataHora: isoDate, advancedConfig })
+        })
 
-      if (!res.ok) throw new Error('Erro ao agendar o post')
+        if (res.ok) {
+          const newPost = await res.json()
+          setPosts(prev => [...prev, newPost])
+          createdPosts++
+        }
+      }
+
+      if (createdPosts === 0) throw new Error('Selecione pelo menos uma data e hora válidas')
       
-      const newPost = await res.json()
-      setPosts([...posts, newPost])
       toast.success('Post agendado com sucesso!')
-      setPostForm({ legenda: '', dataHora: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
+      setPostForm({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
+      setDatas([{ date: '', time: '' }])
       setActiveTab('calendario')
     } catch (err: any) {
       toast.error(err.message)
@@ -390,13 +404,88 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               <div className={styles.stepTitle}>
                 <span className={styles.stepNumber}>6</span> Data e horário da publicação
               </div>
-              <input 
-                type="datetime-local" 
-                className={styles.postTextarea}
-                style={{ minHeight: 'auto' }}
-                value={postForm.dataHora}
-                onChange={e => setPostForm({...postForm, dataHora: e.target.value})}
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {datas.map((dt, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input 
+                      type="date" 
+                      className="input"
+                      style={{ flex: 2, padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
+                      value={dt.date}
+                      onChange={e => {
+                        const newDatas = [...datas]
+                        newDatas[idx].date = e.target.value
+                        setDatas(newDatas)
+                      }}
+                    />
+                    <input 
+                      type="time" 
+                      className="input"
+                      style={{ flex: 1, padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
+                      value={dt.time}
+                      onChange={e => {
+                        const newDatas = [...datas]
+                        newDatas[idx].time = e.target.value
+                        setDatas(newDatas)
+                      }}
+                    />
+                    {datas.length > 1 && (
+                      <button className="btn-icon" style={{ padding: '0.5rem', background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: 'var(--r-sm)' }} onClick={() => setDatas(datas.filter((_, i) => i !== idx))}>✕</button>
+                    )}
+                  </div>
+                ))}
+                <button 
+                  className="btn btn-secondary btn-sm" 
+                  style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}
+                  onClick={() => setDatas([...datas, { date: '', time: '' }])}
+                >
+                  + Incluir mais dias e horários
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+              <button 
+                className="btn btn-secondary" 
+                style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--primary)', color: 'var(--primary)', fontWeight: 'bold' }}
+                onClick={(e) => { e.preventDefault(); setShowAdvanced(!showAdvanced) }}
+              >
+                <Settings size={18} /> {showAdvanced ? 'Ocultar' : 'Exibir'} Configurações Avançadas
+              </button>
+              
+              {showAdvanced && (
+                <div className="anim-fade-up" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+                  <div className="input-group">
+                    <label className="input-label">Localização (Opcional)</label>
+                    <input 
+                      type="text" 
+                      className="input" 
+                      placeholder="Ex: São Paulo, Brasil" 
+                      style={{ background: 'var(--bg-deep)' }}
+                      value={advancedConfig.location}
+                      onChange={e => setAdvancedConfig({...advancedConfig, location: e.target.value})}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                      <input 
+                        type="checkbox" 
+                        style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                        checked={advancedConfig.disableComments}
+                        onChange={e => setAdvancedConfig({...advancedConfig, disableComments: e.target.checked})}
+                      /> Desativar comentários
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                      <input 
+                        type="checkbox" 
+                        style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                        checked={advancedConfig.hideLikes}
+                        onChange={e => setAdvancedConfig({...advancedConfig, hideLikes: e.target.checked})}
+                      /> Ocultar curtidas
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
