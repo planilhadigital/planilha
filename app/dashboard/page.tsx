@@ -78,8 +78,10 @@ export default async function DashboardPage() {
           </div>
           <div className={styles.empresaList}>
             {empresas.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                Nenhuma empresa cadastrada ainda.
+              <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.5 }}>🏢</div>
+                <div style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Nenhuma empresa cadastrada</div>
+                <div style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>Comece adicionando o seu primeiro cliente.</div>
               </div>
             ) : (
               empresas.map((e) => (
@@ -129,16 +131,16 @@ export default async function DashboardPage() {
         <h2 className={styles.sectionTitle} style={{ marginBottom: '1rem' }}>Acesso Rápido</h2>
         <div className={styles.quickGrid}>
           {[
-            { label: 'Gerar Relatório',   icon: '📊', desc: 'Selecione empresa e período', id: 'quick-report-btn' },
-            { label: 'Programar Post',    icon: '✏️', desc: 'Criar e agendar conteúdo',   id: 'quick-post-btn' },
-            { label: 'Novo Planejamento', icon: '📋', desc: 'Criar quadro Kanban',        id: 'quick-plan-btn' },
-            { label: 'Convidar Cliente',  icon: '🔗', desc: 'Gerar link de acesso',       id: 'quick-invite-btn' },
+            { label: 'Gerar Relatório',   icon: '📊', desc: 'Selecione empresa e período', href: '/dashboard/empresas' },
+            { label: 'Programar Post',    icon: '✏️', desc: 'Criar e agendar conteúdo',   href: '/dashboard/empresas' },
+            { label: 'Novo Planejamento', icon: '📋', desc: 'Criar quadro Kanban',        href: '/dashboard/planejamentos' },
+            { label: 'Convidar Cliente',  icon: '🔗', desc: 'Gerar link de acesso',       href: '/dashboard/configuracoes' },
           ].map((q) => (
-            <button key={q.label} className={`card ${styles.quickCard}`} id={q.id}>
+            <Link href={q.href} key={q.label} className={`card ${styles.quickCard}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
               <span className={styles.quickIcon}>{q.icon}</span>
               <span className={styles.quickLabel}>{q.label}</span>
               <span className={styles.quickDesc}>{q.desc}</span>
-            </button>
+            </Link>
           ))}
         </div>
       </section>

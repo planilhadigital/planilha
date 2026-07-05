@@ -489,3 +489,25 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* =========================================================
+   LEADS CRM
+   ========================================================= */
+.leadCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+
+.leadCard:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(250, 70, 22, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}

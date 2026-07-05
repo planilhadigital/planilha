@@ -498,10 +498,15 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {leads.map(lead => (
-                    <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--bg-deep)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{lead.nome}</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{lead.email || lead.telefone || 'Sem contato'}</div>
+                    <div key={lead.id} className={styles.leadCard}>
+                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '50%' }}>
+                           <Users size={20} color="var(--accent)" />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{lead.nome}</div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{lead.email || lead.telefone || 'Sem contato'}</div>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <span className="badge badge-neutral">{lead.origem}</span>
