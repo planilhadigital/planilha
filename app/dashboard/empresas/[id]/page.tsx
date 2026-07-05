@@ -31,6 +31,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   
   // Config
   const [saving, setSaving] = useState(false)
+  const [websiteUrl, setWebsiteUrl] = useState('')
   
   // Calendário
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -50,6 +51,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         const empData = await empRes.json()
         setEmpresa(empData)
         setSelectedPageId(empData.metaPageId || '')
+        setWebsiteUrl(empData.websiteUrl || '')
 
         const pagesRes = await fetch('/api/meta/pages')
         if (pagesRes.ok) {
@@ -137,6 +139,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         body: JSON.stringify({
           metaPageId: selectedPageId,
           igAccountId: igAccountId,
+          websiteUrl: websiteUrl,
         })
       })
 
@@ -268,8 +271,8 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
           <div className={styles.headerRight}>
-            {empresa.websiteUrl && (
-              <a href={empresa.websiteUrl} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Website">
+            {empresa.websiteUrl && empresa.websiteUrl.trim() !== '' && (
+              <a href={empresa.websiteUrl.startsWith('http') ? empresa.websiteUrl : `https://${empresa.websiteUrl}`} target="_blank" rel="noreferrer" className={styles.socialBtn} title="Website">
                 <FaGlobe size={20} />
               </a>
             )}
@@ -660,6 +663,18 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                 </select>
               </div>
             )}
+
+            <div className="input-group" style={{ marginTop: '1.5rem' }}>
+              <label className="input-label">Website da Empresa</label>
+              <input 
+                type="text" 
+                className="input" 
+                placeholder="Ex: www.planilha.digital" 
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-deep)', color: '#fff', borderRadius: 'var(--r-sm)' }}
+                value={websiteUrl}
+                onChange={e => setWebsiteUrl(e.target.value)}
+              />
+            </div>
 
             <div style={{ marginTop: '2rem' }}>
               <button className="btn btn-primary w-full" onClick={handleSaveConfig} disabled={saving}>
