@@ -13,7 +13,7 @@ export default async function ConfiguracoesPage() {
   }
 
   // Busca os usuários autorizados
-  const authorizedUsers = await prisma.usuarioAutorizado.findMany()
+  const authorizedUsers = await prisma.user.findMany()
 
   return (
     <div className={styles.page}>
