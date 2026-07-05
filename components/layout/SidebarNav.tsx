@@ -39,7 +39,9 @@ export default function SidebarNav() {
           <span className={styles.groupLabel}>{group.group}</span>
           <ul>
             {group.items.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              const isActive = item.href === '/dashboard' 
+                ? pathname === '/dashboard'
+                : pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <li key={item.href}>
                   <Link

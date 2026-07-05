@@ -128,7 +128,8 @@ export default function NovaEmpresaPage() {
         )}
 
         <div style={{ marginBottom: '1rem' }}>
-          <label className={styles.label} style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>URL da Foto de Perfil (Avatar)</label>
+          <label className={styles.label} style={{ display: 'block', marginBottom: '0.2rem', fontWeight: 500 }}>Upload da foto de perfil (Opcional)</label>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>*Obs: a foto de perfil será importada automaticamente da sua página do facebook caso não coloque nenhuma</p>
           <input type="text" className={styles.input} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." style={{ width: '100%', padding: '0.75rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }} />
         </div>
 

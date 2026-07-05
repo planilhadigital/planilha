@@ -14,7 +14,7 @@
 .content {
   flex: 1;
   padding: var(--page-pad);
-  max-width: var(--content-max);
+  max-width: 100%;
   width: 100%;
 }
 
