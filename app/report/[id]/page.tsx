@@ -3,7 +3,7 @@ import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
 import styles from './page.module.css'
 import ClientChart from './ClientChart' 
 import PrintButton from './PrintButton'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai'
 
 // Iniciar SDK do Gemini (Usa variável de ambiente obrigatoriamente agora)
 const apiKey = process.env.GEMINI_API_KEY || ''
@@ -91,31 +91,46 @@ export default async function PublicReportPage({ params, searchParams }: { param
   // Análise IA via Gemini 1.5 Pro
   let aiAnalysis = null
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+    const reportSchema: Schema = {
+      type: SchemaType.OBJECT,
+      properties: {
+        punchline: { type: SchemaType.STRING, description: "Uma frase de alto impacto e chamativa resumindo o principal feito ou desafio do período." },
+        narrative: { type: SchemaType.STRING, description: "Um parágrafo conciso (3-4 linhas) estilo 'Storytelling' analisando a situação e o significado desses números para a marca." },
+        mainHighlight: {
+          type: SchemaType.OBJECT,
+          properties: {
+            label: { type: SchemaType.STRING, description: "O que mais chamou atenção" },
+            value: { type: SchemaType.STRING, description: "O número com um formato bonito (ex: +45K Alcance)" }
+          },
+          required: ["label", "value"]
+        },
+        actionPlan: {
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
+          description: "Lista de próximos passos estratégicos"
+        }
+      },
+      required: ["punchline", "narrative", "mainHighlight", "actionPlan"]
+    }
+
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: reportSchema
+      }
+    })
+
     const prompt = `
 Você é um estrategista de marketing brilhante e criativo, montando uma apresentação executiva sobre o desempenho do Instagram da empresa "${empresa.name}".
-Analise os seguintes dados e retorne ESTRITAMENTE um JSON válido com a estrutura solicitada. Sem markdown (\`\`\`json), apenas o JSON puro.
+Analise os seguintes dados e preencha a estrutura JSON correspondente perfeitamente.
 
 DADOS:
 - Seguidores: ${profile.followers}
 - Publicações: ${profile.postsCount}
 - Alcance Total (${days} dias): ${insights.total.reach} (Crescimento/Queda de ${insights.total.reachDelta}%)
 - Impressões Totais (${days} dias): ${insights.total.impressions} (Crescimento/Queda de ${insights.total.impressionsDelta}%)
-
-ESTRUTURA ESPERADA NO JSON:
-{
-  "punchline": "Uma frase de alto impacto e chamativa resumindo o principal feito ou desafio do período. Seja enérgico.",
-  "narrative": "Um parágrafo conciso (3-4 linhas) estilo 'Storytelling' analisando a situação e o significado desses números para a marca.",
-  "mainHighlight": {
-    "label": "O que mais chamou atenção",
-    "value": "O número com um formato bonito (ex: +45K Alcance)"
-  },
-  "actionPlan": [
-    "Próximo passo estratégico 1",
-    "Próximo passo estratégico 2",
-    "Próximo passo estratégico 3"
-  ]
-}`
+`
     
     const result = await model.generateContent(prompt)
     const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
