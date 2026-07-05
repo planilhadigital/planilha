@@ -5,6 +5,7 @@ declare module 'next-auth' {
     user: {
       id: string
       role: string
+      empresasCount?: number
     } & DefaultSession['user']
   }
 
