@@ -33,34 +33,13 @@ export async function GET(request: Request) {
 
     if (longLivedData.error) throw new Error(longLivedData.error.message)
 
-    // 3. Obter ID da conta principal vinculada (ex: pegar a primeira página que o usuário gerencia)
-    const pagesResponse = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${longLivedData.access_token}`)
-    const pagesData = await pagesResponse.json()
-    
-    // Simplificação: pegando a primeira página do usuário
-    const firstPage = pagesData.data?.[0]
-    
-    if (firstPage) {
-      // 4. Salvar na primeira empresa vinculada a esse usuário
-      const userEmpresas = await prisma.empresa.findMany({
-        where: { usuarios: { some: { id: session.user.id } } }
-      })
-
-      if (userEmpresas.length === 0) {
-        // Se não tiver empresa, não cria automático, só devolve um erro
-        return NextResponse.redirect(new URL('/dashboard/configuracoes?error=no_empresa', request.url))
+    // 3. Salvar o Passaporte (Token) diretamente no Usuário logado
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        metaAccessToken: longLivedData.access_token,
       }
-
-      await prisma.empresa.update({
-        where: { id: userEmpresas[0].id },
-        data: {
-          metaPageId: firstPage.id,
-          metaAccessToken: longLivedData.access_token,
-          status: 'Conectado',
-          statusType: 'success'
-        }
-      })
-    }
+    })
 
     return NextResponse.redirect(new URL('/dashboard/configuracoes?meta=success', request.url))
   } catch (error) {

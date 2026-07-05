@@ -51,6 +51,9 @@ model User {
   
   // Relações customizadas planILHA
   empresas      Empresa[]
+
+  // Integração Meta (Acesso global do usuário)
+  metaAccessToken String?
 }
 
 model VerificationToken {
@@ -76,7 +79,6 @@ model Empresa {
   // Integração Meta (Graph API)
   metaPageId      String?
   igAccountId     String?
-  metaAccessToken String?
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

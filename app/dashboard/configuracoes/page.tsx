@@ -16,18 +16,14 @@ export default async function ConfiguracoesPage({
   const session = await getServerSession(authOptions)
   
   let isMetaConnected = false
-  let empresa = null
 
   if (session?.user?.id) {
-    const userEmpresas = await prisma.empresa.findMany({
-      where: { usuarios: { some: { id: session.user.id } } }
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id }
     })
     
-    if (userEmpresas.length > 0) {
-      empresa = userEmpresas[0]
-      if (empresa.metaAccessToken && empresa.metaPageId) {
-        isMetaConnected = true
-      }
+    if (dbUser?.metaAccessToken) {
+      isMetaConnected = true
     }
   }
 
