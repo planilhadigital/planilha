@@ -7,7 +7,9 @@ import toast from 'react-hot-toast'
 import styles from '../empresas/[id]/page.module.css'
 
 export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
-  const [selectedEmpresaIds, setSelectedEmpresaIds] = useState<string[]>([])
+  const [selectedEmpresaIds, setSelectedEmpresaIds] = useState<string[]>(
+    empresas.length === 1 ? [empresas[0].id] : []
+  )
   const [postForm, setPostForm] = useState<{legenda: string, canais: {instagram: boolean, facebook: boolean}, formatos: string[], midiaUrls: string[]}>({ 
     legenda: '', 
     canais: { instagram: true, facebook: false }, 
@@ -163,24 +165,26 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
               <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>1</span> Selecione as contas
+                <span className={styles.stepNumber}>1</span> {empresas.length === 1 ? 'Conta Selecionada' : 'Selecione as contas'}
               </div>
-              <select 
-                className="input" 
-                value=""
-                onChange={e => {
-                  const val = e.target.value
-                  if (val && !selectedEmpresaIds.includes(val)) {
-                    setSelectedEmpresaIds([...selectedEmpresaIds, val])
-                  }
-                }}
-                style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
-              >
-                <option value="">-- Adicionar empresa --</option>
-                {empresas.map(e => (
-                  <option key={e.id} value={e.id}>{e.name}</option>
-                ))}
-              </select>
+              {empresas.length > 1 && (
+                <select 
+                  className="input" 
+                  value=""
+                  onChange={e => {
+                    const val = e.target.value
+                    if (val && !selectedEmpresaIds.includes(val)) {
+                      setSelectedEmpresaIds([...selectedEmpresaIds, val])
+                    }
+                  }}
+                  style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
+                >
+                  <option value="">-- Adicionar empresa --</option>
+                  {empresas.map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              )}
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {selectedEmpresaIds.map(id => {
                   const emp = empresas.find(e => e.id === id)
@@ -189,7 +193,9 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
                     <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-full)', border: '1px solid var(--border)' }}>
                       {emp.avatarUrl ? <img src={emp.avatarUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} /> : <div style={{width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold'}}>{emp.name.charAt(0).toUpperCase()}</div>}
                       <span style={{ fontSize: '0.85rem' }}>{emp.name}</span>
-                      <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
+                      {empresas.length > 1 && (
+                        <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
+                      )}
                     </div>
                   )
                 })}
