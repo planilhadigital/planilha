@@ -247,7 +247,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
     <div className={styles.page}>
       
       {/* HEADER TIPO FACEBOOK */}
-      <div className={`${styles.premiumHeader} anim-fade-up`}>
+      <div className={`card ${styles.premiumHeader} anim-fade-up`}>
         {empresa.coverUrl ? (
           <div className={styles.coverImage} style={{ backgroundImage: `url(${empresa.coverUrl})` }} />
         ) : (
@@ -313,7 +313,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       )}
 
       {activeTab === 'calendario' && (
-        <div className={`${styles.calendarWrapper} anim-fade-up`}>
+        <div className={`card ${styles.calendarWrapper} anim-fade-up`}>
           <div className={styles.calendarHeader}>
             <button className="btn btn-icon" onClick={() => {
               const d = new Date(currentDate)
@@ -359,7 +359,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
 
       {activeTab === 'config' && (
         <div className={`${styles.configLayout} anim-fade-up`}>
-          <div className={styles.configSection}>
+          <div className={`card ${styles.configSection}`}>
             <h2 className={styles.stepTitle}>Imagens da Empresa</h2>
             
             <input type="file" hidden ref={coverInputRef} onChange={e => handleUpload(e, 'cover')} accept="image/*" />
@@ -386,7 +386,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          <div className={styles.configSection}>
+          <div className={`card ${styles.configSection}`}>
             <h2 className={styles.stepTitle}>Integração com Meta (Automação de Links)</h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
               Vincule a página do Facebook para puxarmos os links e acessos automaticamente. Não é mais necessário colar URLs manualmente!
@@ -471,7 +471,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       
       {/* Fallback silencioso para métricas (Mantivemos a lógica, mas simplifiquei a renderização pra caber no arquivo se o user pedir) */}
       {activeTab === 'metricas' && (
-        <div className="anim-fade-up" style={{ background: 'var(--bg-surface)', padding: '2rem', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
+        <div className="anim-fade-up card">
           <h2 style={{ marginBottom: '1rem' }}>Métricas Resumidas</h2>
           <p style={{ color: 'var(--text-muted)' }}>Módulo de relatórios mantido operante no back-end. Vincule o Facebook na aba Configurações para gerar insights.</p>
         </div>

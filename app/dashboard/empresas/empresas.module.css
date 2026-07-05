@@ -28,41 +28,20 @@
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  padding: 1.5rem;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(250, 70, 22, 0.5);
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(250, 70, 22, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  /* Effects handled by global .card class */
 }
 
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--color-accent-gradient);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.card:hover::before {
-  opacity: 1;
-}
+/* Removed custom hover before effect */
 
 .avatar {
   width: 72px;

@@ -37,7 +37,7 @@ export default async function EmpresasPage() {
       ) : (
         <div className={`${styles.grid} anim-fade-up anim-delay-1`}>
           {empresas.map((e) => (
-            <Link href={`/dashboard/empresas/${e.id}`} key={e.id} className={styles.card}>
+            <Link href={`/dashboard/empresas/${e.id}`} key={e.id} className={`card ${styles.card}`}>
               {e.avatarUrl ? (
                 <img src={e.avatarUrl} alt={e.name} className={styles.avatar} />
               ) : (

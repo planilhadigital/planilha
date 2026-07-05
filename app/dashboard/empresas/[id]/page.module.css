@@ -9,11 +9,9 @@
    ========================================================= */
 .premiumHeader {
   position: relative;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
   overflow: hidden;
   margin-bottom: 2rem;
+  padding: 0 !important; /* Override card padding for the header */
 }
 
 .coverImage {
@@ -185,10 +183,7 @@
 }
 
 .configSection {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 2rem;
+  /* Box styling handled by global .card */
 }
 
 .uploadZone {
@@ -390,10 +385,8 @@
    CALENDAR
    ========================================================= */
 .calendarWrapper {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
   overflow: hidden;
+  padding: 0 !important; /* Override card padding */
 }
 
 .calendarHeader {
