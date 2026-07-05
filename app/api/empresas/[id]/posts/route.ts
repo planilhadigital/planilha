@@ -53,7 +53,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const body = await request.json()
-    const { legenda, rede, dataHora, midiaUrl, formato } = body
+    const { legenda, rede, dataHora, midiaUrl, formato, advancedConfig } = body
 
     if (!dataHora || !rede) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
@@ -67,6 +67,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         formato: formato || 'Feed',
         dataHora: new Date(dataHora),
         midiaUrl,
+        advancedConfig,
         criadoPor: session.user.name || session.user.email
       }
     })

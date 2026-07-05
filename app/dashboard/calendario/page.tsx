@@ -26,10 +26,10 @@ export default async function GlobalCalendarPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <header>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-          Calendário da Agência
+          Calendário Global
         </h1>
         <p style={{ color: 'var(--text-muted)' }}>
-          Visão unificada de todos os posts agendados para os seus clientes.
+          Visualize e gerencie os posts agendados de todos os seus clientes em um único lugar.
         </p>
       </header>
 

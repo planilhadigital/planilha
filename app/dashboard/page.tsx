@@ -8,7 +8,7 @@ const kpis = [
   { label: 'Empresas Ativas',    value: '0',     delta: '+0 este mês',    positive: true,  icon: '🏢', accent: false },
   { label: 'Posts Agendados',    value: '0',     delta: '+0 esta semana', positive: true, icon: '📅', accent: false },
   { label: 'Relatórios Gerados', value: '0',     delta: '+0 este mês',    positive: true,  icon: '📊', accent: false },
-  { label: 'Leads Rastreados',   value: '0',     delta: '+0 este mês',  positive: true,  icon: '🎯', accent: true  },
+  { label: 'Leads Rastreados',   value: '0',     delta: '+0 este mês',  positive: true,  icon: '🎯', accent: false  },
 ]
 
 const atividades = [
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Dashboard</h1>
-          <p className={styles.pageSubtitle}>Visão geral da sua agência — julho 2026</p>
+          <p className={styles.pageSubtitle}>Visão geral do seu espaço — julho 2026</p>
         </div>
         <Link href="/dashboard/empresas/nova" className="btn btn-primary" id="add-empresa-btn">
           + Nova Empresa

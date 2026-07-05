@@ -120,6 +120,7 @@ model PostAgendado {
   formato     String   @default("Feed") // Feed, Reels, Stories, Carrossel
   dataHora    DateTime
   status      String   @default("Agendado") // Agendado, Publicado, Erro
+  advancedConfig Json?
   
   criadoPor   String?
   createdAt   DateTime @default(now())

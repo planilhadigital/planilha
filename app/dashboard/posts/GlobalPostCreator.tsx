@@ -1,24 +1,34 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { UploadCloud, Image as ImageIcon, Film, Layout, Copy } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Film, Layout, Copy, Settings } from 'lucide-react'
 import { FaInstagram, FaFacebook } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import styles from '../empresas/[id]/page.module.css'
 
 export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
-  const [selectedEmpresaId, setSelectedEmpresaId] = useState('')
+  const [selectedEmpresaIds, setSelectedEmpresaIds] = useState<string[]>([])
   const [postForm, setPostForm] = useState({ 
     legenda: '', 
-    dataHora: '', 
     canais: { instagram: true, facebook: false }, 
     formato: 'Feed', // Feed, Reels, Stories, Carrossel
     midiaUrl: '' 
   })
+  
+  const [datas, setDatas] = useState([{ date: '', time: '' }])
+  
+  const [advancedConfig, setAdvancedConfig] = useState({
+    location: '',
+    disableComments: false,
+    hideLikes: false
+  })
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  
   const [savingPost, setSavingPost] = useState(false)
   const postMediaInputRef = useRef<HTMLInputElement>(null)
 
-  const selectedEmpresa = empresas.find(e => e.id === selectedEmpresaId)
+  // O preview usará a primeira empresa selecionada
+  const selectedEmpresa = empresas.find(e => e.id === selectedEmpresaIds[0])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -45,31 +55,59 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
 
   const handleSchedulePost = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedEmpresaId) return toast.error('Selecione uma empresa primeiro!')
+    if (selectedEmpresaIds.length === 0) return toast.error('Selecione pelo menos uma empresa!')
     if (!postForm.midiaUrl && postForm.formato !== 'Text') return toast.error('Anexe uma mídia!')
     if (!postForm.canais.instagram && !postForm.canais.facebook) return toast.error('Selecione pelo menos um canal!')
     
-    // Converter estado para compatibilidade com API atual
+    // Check if at least one valid date/time exists
+    const validDatas = datas.filter(d => d.date && d.time)
+    if (validDatas.length === 0) return toast.error('Adicione pelo menos uma data e horário válido!')
+
     let redeFinal = 'Instagram'
     if (postForm.canais.instagram && postForm.canais.facebook) redeFinal = 'Ambas'
     else if (postForm.canais.facebook) redeFinal = 'Facebook'
 
-    const payload = { ...postForm, rede: redeFinal }
-
     setSavingPost(true)
-    try {
-      const res = await fetch(`/api/empresas/${selectedEmpresaId}/posts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
+    let errors = 0
+    let success = 0
 
-      if (!res.ok) throw new Error('Erro ao agendar o post')
+    try {
+      const promises = []
       
-      toast.success('Post agendado com sucesso!')
-      setPostForm({ legenda: '', dataHora: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
-    } catch (err: any) {
-      toast.error(err.message)
+      for (const empId of selectedEmpresaIds) {
+        for (const dt of validDatas) {
+          const payload = { 
+            ...postForm, 
+            rede: redeFinal,
+            dataHora: `${dt.date}T${dt.time}:00`,
+            advancedConfig 
+          }
+          
+          promises.push(
+            fetch(`/api/empresas/${empId}/posts`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }).then(res => {
+              if (!res.ok) throw new Error()
+              success++
+            }).catch(() => {
+              errors++
+            })
+          )
+        }
+      }
+      
+      await Promise.all(promises)
+
+      if (success > 0) toast.success(`${success} post(s) agendado(s) com sucesso!`)
+      if (errors > 0) toast.error(`${errors} erro(s) ao agendar.`)
+      
+      setPostForm({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
+      setSelectedEmpresaIds([])
+      setDatas([{ date: '', time: '' }])
+      setAdvancedConfig({ location: '', disableComments: false, hideLikes: false })
+      setShowAdvanced(false)
     } finally {
       setSavingPost(false)
     }
@@ -81,29 +119,47 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       <div className={styles.editorPanel}>
         <div>
           <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>1</span> Cliente / Conta
+            <span className={styles.stepNumber}>1</span> Selecione as contas
           </div>
           <select 
             className="input" 
-            value={selectedEmpresaId} 
-            onChange={e => setSelectedEmpresaId(e.target.value)}
-            style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
+            value=""
+            onChange={e => {
+              const val = e.target.value
+              if (val && !selectedEmpresaIds.includes(val)) {
+                setSelectedEmpresaIds([...selectedEmpresaIds, val])
+              }
+            }}
+            style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
           >
-            <option value="">-- Selecione a empresa --</option>
+            <option value="">-- Adicionar empresa --</option>
             {empresas.map(e => (
               <option key={e.id} value={e.id}>{e.name}</option>
             ))}
           </select>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {selectedEmpresaIds.map(id => {
+              const emp = empresas.find(e => e.id === id)
+              if(!emp) return null
+              return (
+                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-full)', border: '1px solid var(--border)' }}>
+                  {emp.avatarUrl ? <img src={emp.avatarUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} /> : <div style={{width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold'}}>{emp.name.charAt(0).toUpperCase()}</div>}
+                  <span style={{ fontSize: '0.85rem' }}>{emp.name}</span>
+                  <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
-        <div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div className={styles.stepTitle}>
             <span className={styles.stepNumber}>2</span> Texto do post
           </div>
           <textarea 
             className={styles.postTextarea}
             placeholder="Digite o seu texto aqui..."
-            style={{ minHeight: '300px' }}
+            style={{ flex: 1, minHeight: '300px' }}
             value={postForm.legenda}
             onChange={e => setPostForm({...postForm, legenda: e.target.value})}
           />
@@ -185,20 +241,95 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
 
         <div>
           <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>6</span> Data e horário da publicação
+            <span className={styles.stepNumber}>6</span> Data e horário
           </div>
-          <input 
-            type="datetime-local" 
-            className={styles.postTextarea}
-            style={{ minHeight: 'auto' }}
-            value={postForm.dataHora}
-            onChange={e => setPostForm({...postForm, dataHora: e.target.value})}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {datas.map((dt, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <input 
+                  type="date" 
+                  className="input"
+                  style={{ flex: 2, padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
+                  value={dt.date}
+                  onChange={e => {
+                    const newDatas = [...datas]
+                    newDatas[idx].date = e.target.value
+                    setDatas(newDatas)
+                  }}
+                />
+                <input 
+                  type="time" 
+                  className="input"
+                  style={{ flex: 1, padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff' }}
+                  value={dt.time}
+                  onChange={e => {
+                    const newDatas = [...datas]
+                    newDatas[idx].time = e.target.value
+                    setDatas(newDatas)
+                  }}
+                />
+                {datas.length > 1 && (
+                  <button className="btn-icon" style={{ padding: '0.5rem', background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: 'var(--r-sm)' }} onClick={() => setDatas(datas.filter((_, i) => i !== idx))}>✕</button>
+                )}
+              </div>
+            ))}
+            <button 
+              className="btn btn-secondary btn-sm" 
+              style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}
+              onClick={() => setDatas([...datas, { date: '', time: '' }])}
+            >
+              + Incluir mais dias e horários
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+          <button 
+            className="btn btn-secondary" 
+            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--primary)', color: 'var(--primary)', fontWeight: 'bold' }}
+            onClick={(e) => { e.preventDefault(); setShowAdvanced(!showAdvanced) }}
+          >
+            <Settings size={18} /> {showAdvanced ? 'Ocultar' : 'Exibir'} Configurações Avançadas
+          </button>
+          
+          {showAdvanced && (
+            <div className="anim-fade-up" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+              <div className="input-group">
+                <label className="input-label">Localização (Opcional)</label>
+                <input 
+                  type="text" 
+                  className="input" 
+                  placeholder="Ex: São Paulo, Brasil" 
+                  style={{ background: 'var(--bg-deep)' }}
+                  value={advancedConfig.location}
+                  onChange={e => setAdvancedConfig({...advancedConfig, location: e.target.value})}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                  <input 
+                    type="checkbox" 
+                    style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                    checked={advancedConfig.disableComments}
+                    onChange={e => setAdvancedConfig({...advancedConfig, disableComments: e.target.checked})}
+                  /> Desativar comentários
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                  <input 
+                    type="checkbox" 
+                    style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+                    checked={advancedConfig.hideLikes}
+                    onChange={e => setAdvancedConfig({...advancedConfig, hideLikes: e.target.checked})}
+                  /> Ocultar curtidas
+                </label>
+              </div>
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
           <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handleSchedulePost} disabled={savingPost}>
-            {savingPost ? 'Agendando...' : 'Agendar Publicações'}
+            {savingPost ? 'Agendando Lote...' : 'Agendar Publicações'}
           </button>
         </div>
       </div>
@@ -221,7 +352,7 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
             {selectedEmpresa?.avatarUrl ? (
               <img src={selectedEmpresa.avatarUrl} alt="avatar" className={styles.previewAvatar} />
             ) : (
-              <div className={styles.previewAvatar} />
+              <div className={styles.previewAvatar}>{selectedEmpresa ? selectedEmpresa.name.charAt(0).toUpperCase() : ''}</div>
             )}
             <span className={styles.previewName}>{selectedEmpresa?.name || 'Selecione uma conta'}</span>
           </div>
@@ -242,3 +373,4 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
     </div>
   )
 }
+
