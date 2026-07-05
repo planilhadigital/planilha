@@ -240,7 +240,17 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
     return days
   }
 
-  if (loading) return <div className={styles.page}><div className={styles.loading}>Carregando...</div></div>
+  if (loading) return (
+    <div className={styles.page}>
+      <div className="skeleton" style={{ width: '100%', height: '250px', borderRadius: 'var(--r-xl)', marginBottom: '2rem' }}></div>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="skeleton" style={{ width: '120px', height: '40px', borderRadius: 'var(--r-md)' }}></div>
+        <div className="skeleton" style={{ width: '120px', height: '40px', borderRadius: 'var(--r-md)' }}></div>
+        <div className="skeleton" style={{ width: '120px', height: '40px', borderRadius: 'var(--r-md)' }}></div>
+      </div>
+      <div className="skeleton" style={{ width: '100%', height: '400px', borderRadius: 'var(--r-lg)' }}></div>
+    </div>
+  )
   if (!empresa) return <div className={styles.page}><div className={styles.error}>Empresa não encontrada</div></div>
 
   const calendarDays = generateCalendar()
