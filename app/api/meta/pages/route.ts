@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     }
 
     // Busca as páginas gerenciadas pelo usuário e informações aninhadas do Instagram
-    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account{id,username,profile_picture_url}&access_token=${user.metaAccessToken}`)
+    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=id,name,picture,instagram_business_account{id,username,profile_picture_url}&limit=100&access_token=${user.metaAccessToken}`)
     const pagesData = await pagesRes.json()
 
     if (pagesData.error) {
