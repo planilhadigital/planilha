@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import styles from './page.module.css'
 import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy, Settings, BarChart3, PenSquare, CalendarDays, CheckCircle2 } from 'lucide-react'
 import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
-import GlobalPostCreator from '../posts/GlobalPostCreator'
+import GlobalPostCreator from '../../posts/GlobalPostCreator'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
