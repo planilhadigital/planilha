@@ -40,13 +40,37 @@ export default async function DashboardPage() {
   kpis[0].value = empresas.length.toString()
   kpis[3].value = totalLeads.toString()
 
+  const user = session?.user
+  const fallbackInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U'
+  
+  // Como é componente de servidor, vamos pegar a data local aproximada usando o Vercel locale ou deixar genérico.
+  // Em Server Components no Vercel (Edge/Serverless), o new Date() vai usar UTC, então pode dar diferença.
+  // Vamos usar o client-side hydration ou simplesmente fuso fixo BR.
+  const hour = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"})).getHours()
+  const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
+  const firstName = user?.name?.split(' ')[0] || 'Usuário'
+
   return (
     <div className={styles.page}>
       {/* Page header */}
       <div className={styles.pageHeader}>
-        <div>
-          <h1 className={styles.pageTitle}>Dashboard</h1>
-          <p className={styles.pageSubtitle}>Visão geral do seu espaço — julho 2026</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className={styles.headerAvatar}>
+            {user?.image ? (
+              <img src={user.image} alt={firstName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <span>{fallbackInitial}</span>
+            )}
+          </div>
+          <div>
+            <h1 className={styles.pageTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {greeting}, {firstName}! 👋
+            </h1>
+            <p className={styles.pageSubtitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className={`badge badge-success`} style={{ zoom: 0.8 }}>Admin</span>
+              <span>Bem-vindo(a) de volta ao seu espaço.</span>
+            </p>
+          </div>
         </div>
         <Link href="/dashboard/empresas/nova" className="btn btn-primary" id="add-empresa-btn">
           + Nova Empresa
