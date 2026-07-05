@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name } = body
+    const { name, metaPageId, igAccountId, avatarUrl, websiteUrl, instagramUrl, facebookUrl } = body
 
     if (!name || name.trim() === '') {
       return NextResponse.json({ error: 'O nome da empresa é obrigatório' }, { status: 400 })
@@ -20,6 +20,14 @@ export async function POST(request: Request) {
     const novaEmpresa = await prisma.empresa.create({
       data: {
         name,
+        metaPageId,
+        igAccountId,
+        avatarUrl,
+        websiteUrl,
+        instagramUrl,
+        facebookUrl,
+        status: metaPageId ? 'Conectado' : 'Ativo',
+        statusType: metaPageId ? 'success' : 'success',
         usuarios: {
           connect: { id: session.user.id }
         }
