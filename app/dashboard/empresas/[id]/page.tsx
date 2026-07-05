@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
+import GenerateReportButton from '@/components/reports/GenerateReportButton'
 import styles from './page.module.css'
 import { CalendarDays, Settings, BarChart3, PenSquare, CheckCircle2, ChevronLeft, ChevronRight, Download, Eye, UploadCloud, ClipboardList, Plus, ArrowRight } from 'lucide-react'
 import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
@@ -534,8 +535,27 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       {/* Fallback silencioso para métricas (Mantivemos a lógica, mas simplifiquei a renderização pra caber no arquivo se o user pedir) */}
       {activeTab === 'metricas' && (
         <div className="anim-fade-up card">
-          <h2 style={{ marginBottom: '1rem' }}>Métricas Resumidas</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Módulo de relatórios mantido operante no back-end. Vincule o Facebook na aba Configurações para gerar insights.</p>
+          <h2 style={{ marginBottom: '1rem' }}>Métricas e Relatórios</h2>
+          {!empresa?.metaPageId ? (
+            <div style={{ color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)' }}>
+              <p>Módulo de relatórios mantido operante no back-end.</p>
+              <p style={{ marginTop: '0.5rem', color: 'var(--accent)' }}>Vincule uma página do Facebook e Instagram na aba <strong>Configurações</strong> para desbloquear a geração de insights.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <p style={{ color: 'var(--text-muted)' }}>
+                Sua conta do Facebook está vinculada! Agora você pode gerar relatórios de desempenho e inteligência artificial atualizados com dados em tempo real.
+              </p>
+              <div>
+                <GenerateReportButton empresaId={empresa.id} />
+              </div>
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                <a href="/dashboard/relatorios" className="btn btn-secondary btn-sm">
+                  Ver Histórico de Relatórios Salvos
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
