@@ -19,7 +19,8 @@ export async function GET(request: Request) {
   try {
     const appId = process.env.META_APP_ID
     const appSecret = process.env.META_APP_SECRET
-    const redirectUri = `${process.env.NEXTAUTH_URL}/api/meta/callback`
+    const baseUrl = process.env.NODE_ENV === 'production' ? 'https://planilha.digital' : (process.env.NEXTAUTH_URL || 'http://localhost:3000')
+    const redirectUri = `${baseUrl}/api/meta/callback`
 
     // 1. Trocar o código por um Token de Acesso de Curta Duração
     const tokenResponse = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${appSecret}&code=${code}`)
