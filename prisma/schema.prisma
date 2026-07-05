@@ -106,3 +106,40 @@ model PostAgendado {
 
   empresa     Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
+
+// ------------------------------------------------------------------
+// Modelos de Planejamento (Kanban)
+// ------------------------------------------------------------------
+
+model Planejamento {
+  id          String   @id @default(cuid())
+  titulo      String
+  descricao   String?
+  criadoPor   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  colunas     Coluna[]
+}
+
+model Coluna {
+  id              String   @id @default(cuid())
+  planejamentoId  String
+  titulo          String
+  ordem           Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  planejamento    Planejamento @relation(fields: [planejamentoId], references: [id], onDelete: Cascade)
+  cards           Card[]
+}
+
+model Card {
+  id          String   @id @default(cuid())
+  colunaId    String
+  titulo      String
+  descricao   String?
+  ordem       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  coluna      Coluna   @relation(fields: [colunaId], references: [id], onDelete: Cascade)
+}
