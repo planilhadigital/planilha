@@ -137,6 +137,9 @@ model Empresa {
   
   // Planejamentos Estratégicos (Kanban)
   planejamentos Planejamento[]
+  
+  // Relatórios Gerados
+  relatoriosGerados RelatorioGerado[]
 }
 
 model Lead {
@@ -207,4 +210,19 @@ model Card {
   createdAt   DateTime @default(now())
 
   coluna      Coluna   @relation(fields: [colunaId], references: [id], onDelete: Cascade)
+}
+
+// ------------------------------------------------------------------
+// Modelos de Relatórios
+// ------------------------------------------------------------------
+
+model RelatorioGerado {
+  id            String   @id @default(cuid())
+  empresaId     String
+  dias          Int
+  dadosCongelados Json
+  criadoPor     String?
+  createdAt     DateTime @default(now())
+
+  empresa       Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }

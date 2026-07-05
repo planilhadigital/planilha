@@ -1,150 +1,33 @@
 import { prisma } from '@/lib/prisma'
-import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
 import styles from './page.module.css'
 import ClientChart from '@/app/report/[id]/ClientChart'
 import PrintButton from './PrintButton'
-import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai'
-
-// Iniciar SDK do Gemini (Usa variável de ambiente obrigatoriamente agora)
-const apiKey = process.env.GEMINI_API_KEY || ''
-const genAI = new GoogleGenerativeAI(apiKey)
+import CopyLinkButton from '@/components/reports/CopyLinkButton'
 
 export default async function PublicReportPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ days?: string }> }) {
   const { id } = await params
-  const searchParamsObj = await searchParams
-  const days = searchParamsObj.days ? parseInt(searchParamsObj.days, 10) : 28
-
-  const empresa = await prisma.empresa.findUnique({
+  const relatorio = await prisma.relatorioGerado.findUnique({
     where: { id },
-    include: { usuarios: true }
+    include: { empresa: true }
   })
 
-  if (!empresa) {
+  if (!relatorio) {
     return (
       <div className={styles.errorContainer}>
         <h1>Relatório Indisponível</h1>
-        <p>A empresa não foi encontrada.</p>
+        <p>O relatório não foi encontrado ou foi excluído.</p>
       </div>
     )
   }
 
-  let profile: any = null
-  let insights: any = null
-  let isDemo = false
-
-  if (empresa.igAccountId) {
-    const dono = empresa.usuarios[0]
-    const account = await prisma.account.findFirst({
-      where: { userId: dono?.id, provider: 'facebook' }
-    })
-
-    if (account) {
-      try {
-        profile = await getInstagramProfile(empresa.igAccountId, account.access_token as string)
-        insights = await getInstagramInsights(empresa.igAccountId, account.access_token as string, days)
-      } catch (err) {
-        console.error('Erro ao buscar dados reais:', err)
-        isDemo = true
-      }
-    } else {
-      isDemo = true
-    }
-  } else {
-    isDemo = true
-  }
-
-  // Dados Mock para Demo
-  if (isDemo || !profile || !insights) {
-    isDemo = true
-    profile = {
-      username: empresa.name.toLowerCase().replace(/\s+/g, ''),
-      avatar: empresa.avatarUrl || 'https://via.placeholder.com/150',
-      followers: 12543,
-      postsCount: 342
-    }
-    
-    const history = []
-    const baseDate = new Date()
-    baseDate.setDate(baseDate.getDate() - days)
-    
-    for (let i = 0; i < days; i++) {
-      const dt = new Date(baseDate)
-      dt.setDate(dt.getDate() + i)
-      history.push({
-        date: dt.toISOString().split('T')[0],
-        reach: Math.floor(Math.random() * 500) + 1000 + (i * 20),
-        impressions: Math.floor(Math.random() * 800) + 1500 + (i * 30),
-      })
-    }
-
-    insights = {
-      total: {
-        reach: 45230,
-        reachDelta: 12.5,
-        impressions: 78900,
-        impressionsDelta: 8.2,
-      },
-      history
-    }
-  }
-
-  // Análise IA via Gemini 1.5 Pro
-  let aiAnalysis = null
-  try {
-    const reportSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        punchline: { type: SchemaType.STRING, description: "Uma frase de alto impacto e chamativa resumindo o principal feito ou desafio do período." },
-        narrative: { type: SchemaType.STRING, description: "Um parágrafo conciso (3-4 linhas) estilo 'Storytelling' analisando a situação e o significado desses números para a marca." },
-        mainHighlight: {
-          type: SchemaType.OBJECT,
-          properties: {
-            label: { type: SchemaType.STRING, description: "O que mais chamou atenção" },
-            value: { type: SchemaType.STRING, description: "O número com um formato bonito (ex: +45K Alcance)" }
-          },
-          required: ["label", "value"]
-        },
-        actionPlan: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-          description: "Lista de próximos passos estratégicos"
-        }
-      },
-      required: ["punchline", "narrative", "mainHighlight", "actionPlan"]
-    }
-
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: reportSchema
-      }
-    })
-
-    const prompt = `
-Você é um estrategista de marketing brilhante e criativo, montando uma apresentação executiva sobre o desempenho do Instagram da empresa "${empresa.name}".
-Analise os seguintes dados e preencha a estrutura JSON correspondente perfeitamente.
-
-DADOS:
-- Seguidores: ${profile.followers}
-- Publicações: ${profile.postsCount}
-- Alcance Total (${days} dias): ${insights.total.reach} (Crescimento/Queda de ${insights.total.reachDelta}%)
-- Impressões Totais (${days} dias): ${insights.total.impressions} (Crescimento/Queda de ${insights.total.impressionsDelta}%)
-`
-    
-    const result = await model.generateContent(prompt)
-    const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
-    aiAnalysis = JSON.parse(responseText)
-  } catch (error) {
-    console.error('Erro na análise da IA:', error)
-    // Fallback AI
-    aiAnalysis = {
-      punchline: "Consistência de Resultados no Período",
-      narrative: "A estratégia atual mantém um fluxo constante de alcance e engajamento. Notamos uma base sólida de impressões, indicando que a audiência continua interagindo com os conteúdos principais da marca.",
-      mainHighlight: { label: "Alcance Mantido", value: String(insights.total.reach) },
-      actionPlan: ["Manter a cadência de postagens", "Investir em Reels para mais alcance", "Criar chamadas para ação nos Stories"]
-    }
-  }
+  const empresa = relatorio.empresa
+  const days = relatorio.dias
+  const dados = relatorio.dadosCongelados as any
+  
+  const isDemo = dados.isDemo
+  const profile = dados.profile
+  const insights = dados.insights
+  const aiAnalysis = dados.aiAnalysis
 
   return (
     <div className={styles.presentationPage}>
@@ -158,6 +41,7 @@ DADOS:
         </div>
         <div className={styles.headerControls}>
           {isDemo && <span className={styles.demoBadge}>Demo</span>}
+          <CopyLinkButton />
           <PrintButton />
         </div>
       </header>
