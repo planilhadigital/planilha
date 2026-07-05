@@ -41,15 +41,15 @@ export async function POST(req: Request) {
     let isDemo = false
 
     if (empresa.igAccountId) {
-      const dono = empresa.usuarios[0]
-      const account = await prisma.account.findFirst({
-        where: { userId: dono?.id, provider: 'facebook' }
+      const dono = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { metaAccessToken: true }
       })
 
-      if (account) {
+      if (dono && dono.metaAccessToken) {
         try {
-          profile = await getInstagramProfile(empresa.igAccountId, account.access_token as string)
-          insights = await getInstagramInsights(empresa.igAccountId, account.access_token as string, days)
+          profile = await getInstagramProfile(empresa.igAccountId, dono.metaAccessToken)
+          insights = await getInstagramInsights(empresa.igAccountId, dono.metaAccessToken, days)
         } catch (err) {
           console.error('Erro ao buscar dados reais:', err)
           isDemo = true
