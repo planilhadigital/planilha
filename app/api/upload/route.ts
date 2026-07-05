@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 export async function POST(request: Request) {
   try {
@@ -14,29 +13,50 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Sanitizar nome do arquivo e criar timestamp para evitar colisão
     const originalName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')
     const fileName = `${Date.now()}-${originalName}`
+
+    // Pega as credenciais do ambiente
+    const endpoint = process.env.S3_ENDPOINT || ''
+    const region = process.env.S3_REGION || 'auto'
+    const accessKeyId = process.env.S3_ACCESS_KEY || ''
+    const secretAccessKey = process.env.S3_SECRET_KEY || ''
+    const bucketName = process.env.S3_BUCKET_NAME || ''
     
-    // Caminho físico
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-    
-    // Garante que o diretório existe
-    try {
-      await mkdir(uploadDir, { recursive: true })
-    } catch (e) {
-      // Ignorar se já existe
+    if (!bucketName || !accessKeyId || !secretAccessKey) {
+       console.error("Variáveis de ambiente S3 ausentes. Configure S3_BUCKET_NAME, S3_ACCESS_KEY e S3_SECRET_KEY.")
+       return NextResponse.json({ error: 'Servidor de arquivos (Cloud) não configurado no .env' }, { status: 500 })
     }
+
+    const s3Client = new S3Client({
+      region,
+      endpoint: endpoint || undefined,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      }
+    })
+
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+      Body: buffer,
+      ContentType: file.type,
+      // ACL: 'public-read' // Maioria dos novos buckets recomendam usar Bucket Policies ao invés de ACL
+    })
+
+    await s3Client.send(command)
     
-    const filePath = path.join(uploadDir, fileName)
+    // A URL final. Se estiver usando R2, pode ser que precise setar S3_PUBLIC_URL.
+    // O fallback usa o padrão da AWS se não houver endpoint customizado.
+    const publicBaseUrl = process.env.S3_PUBLIC_URL || 
+                          (endpoint ? `${endpoint}/${bucketName}` : `https://${bucketName}.s3.${region}.amazonaws.com`)
     
-    // Salvar arquivo
-    await writeFile(filePath, buffer)
-    
-    // Retornar a URL pública
-    return NextResponse.json({ url: `/uploads/${fileName}` })
+    const fileUrl = `${publicBaseUrl}/${fileName}`
+
+    return NextResponse.json({ url: fileUrl })
   } catch (error: any) {
-    console.error('Erro no upload:', error)
-    return NextResponse.json({ error: 'Erro ao fazer upload do arquivo' }, { status: 500 })
+    console.error('Erro no upload para nuvem:', error)
+    return NextResponse.json({ error: 'Erro ao fazer upload do arquivo para a nuvem' }, { status: 500 })
   }
 }
