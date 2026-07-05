@@ -149,9 +149,9 @@ export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProp
                   <input type="text" className="input" value={lastName} onChange={e => setLastName(e.target.value)} required style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-deep)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }} />
                 </div>
               </div>
-              <div>
                 <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>E-mail</label>
-                <input type="email" className="input" value={email} onChange={e => setEmail(e.target.value)} required style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-deep)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text)' }} />
+                <input type="email" className="input" value={email} disabled style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-deep)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', color: 'var(--text-muted)', cursor: 'not-allowed' }} />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Vinculado à sua conta Google</span>
               </div>
             </div>
 
@@ -185,10 +185,10 @@ export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProp
         }}>
           <button type="button" onClick={() => signOut({ callbackUrl: '/login' })} style={{ 
             background: 'transparent', border: '1px solid #ff4444', color: '#ff4444', 
-            padding: '0.5rem 1rem', borderRadius: 'var(--r-sm)', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600
+            padding: '0.5rem 1.5rem', borderRadius: 'var(--r-sm)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', fontWeight: 600
           }}>
-            <LogOut size={16} /> Sair / Logout
+            Sair
           </button>
           
           <div style={{ display: 'flex', gap: '0.75rem' }}>
