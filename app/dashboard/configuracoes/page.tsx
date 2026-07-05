@@ -3,19 +3,41 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Settings, Users, Link as LinkIcon, Shield } from 'lucide-react'
+import { Settings, Users, Link as LinkIcon, Shield, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { revalidatePath } from 'next/cache'
 
 export default async function ConfiguracoesPage() {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.email) {
     return <div>Não autorizado</div>
+  if (!session?.user?.email) {
+    return <div>Não autorizado</div>
   }
+
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  const isMetaConnected = !!user?.metaAccessToken
 
   // Busca os usuários autorizados
   const authorizedUsers = await prisma.user.findMany()
 
   const isAdmin = session.user.role?.toLowerCase() === 'admin'
+
+  async function disconnectMeta() {
+    'use server'
+    const s = await getServerSession(authOptions)
+    if (!s?.user?.id) return
+    const u = await prisma.user.findUnique({ where: { id: s.user.id } })
+    if (u?.metaAccessToken) {
+      // Deleta as permissões direto na Meta para garantir que no próximo login o usuário veja a tela de seleção
+      await fetch(`https://graph.facebook.com/v19.0/me/permissions?access_token=${u.metaAccessToken}`, { method: 'DELETE' })
+      await prisma.user.update({
+        where: { id: u.id },
+        data: { metaAccessToken: null, metaName: null, metaPhoto: null }
+      })
+    }
+    revalidatePath('/dashboard/configuracoes')
+  }
 
   return (
     <div className={styles.page}>
@@ -47,12 +69,50 @@ export default async function ConfiguracoesPage() {
                   <LinkIcon size={18} /> Integração Meta (Global)
                 </h2>
               </div>
-              <p className="text-muted text-sm" style={{ marginBottom: '1.5rem' }}>
-                Renove o token global do Facebook Login for Business. Todas as empresas vinculadas dependem deste acesso principal.
-              </p>
-              <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Renovar Token Meta API
-              </button>
+              
+              {isMetaConnected ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--r-sm)', border: '1px solid var(--border)' }}>
+                    {user?.metaPhoto ? (
+                      <img src={user.metaPhoto} alt={user.metaName || ''} style={{ width: '48px', height: '48px', borderRadius: '50%' }} />
+                    ) : (
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-deep)' }} />
+                    )}
+                    <div>
+                      <h4 style={{ margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {user.metaName} <CheckCircle2 size={16} color="var(--success)" />
+                      </h4>
+                      <span className="text-muted text-sm">Status: Conectado</span>
+                    </div>
+                  </div>
+                  <p className="text-muted text-sm" style={{ marginBottom: '1.5rem' }}>
+                    Para que novas páginas apareçam, é necessário desconectar e conectar novamente selecionando todas as páginas no popup do Facebook.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <form action={disconnectMeta} style={{ flex: 1 }}>
+                      <button className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', color: '#ff4444', borderColor: '#ff4444' }}>
+                        Desconectar e Resetar
+                      </button>
+                    </form>
+                    <a href="/api/meta/login" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', textDecoration: 'none' }}>
+                      Reconectar Meta
+                    </a>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--warning)', padding: '0.75rem', background: 'rgba(250, 173, 20, 0.1)', borderRadius: 'var(--r-sm)' }}>
+                    <AlertTriangle size={16} />
+                    <span className="text-sm">Conta não conectada.</span>
+                  </div>
+                  <p className="text-muted text-sm" style={{ marginBottom: '1.5rem' }}>
+                    Conecte a conta do Facebook que tem nível de permissão Administrador sobre as páginas e contas do Instagram dos clientes.
+                  </p>
+                  <a href="/api/meta/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', textDecoration: 'none' }}>
+                    Conectar com Facebook
+                  </a>
+                </>
+              )}
             </section>
 
             {/* Segurança e Acesso */}
