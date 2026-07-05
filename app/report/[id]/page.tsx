@@ -25,7 +25,7 @@ export default async function PublicReportPage({ params, searchParams }: { param
 
   // Pega a conta conectada de um dos donos da empresa (como é MVP, pegamos o primeiro usuário)
   const dono = empresa.usuarios[0]
-  const account = await prisma.contaConectada.findFirst({
+  const account = await prisma.account.findFirst({
     where: { userId: dono.id, provider: 'facebook' }
   })
 
@@ -38,8 +38,8 @@ export default async function PublicReportPage({ params, searchParams }: { param
     )
   }
 
-  const profile = await getInstagramProfile(empresa.igAccountId, account.access_token)
-  const insights = await getInstagramInsights(empresa.igAccountId, account.access_token, days)
+  const profile = await getInstagramProfile(empresa.igAccountId, account.access_token as string)
+  const insights = await getInstagramInsights(empresa.igAccountId, account.access_token as string, days)
 
   return (
     <div className={styles.reportPage}>

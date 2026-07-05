@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // Pega o token global do usuário
-    const account = await prisma.contaConectada.findFirst({
+    const account = await prisma.account.findFirst({
       where: { userId: session.user.id, provider: 'facebook' }
     })
 
@@ -44,8 +44,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const days = daysParam ? parseInt(daysParam, 10) : 28
 
     // Busca dados reais
-    const profile = await getInstagramProfile(empresa.igAccountId, account.access_token)
-    const insights = await getInstagramInsights(empresa.igAccountId, account.access_token, days)
+    const profile = await getInstagramProfile(empresa.igAccountId, account.access_token as string)
+    const insights = await getInstagramInsights(empresa.igAccountId, account.access_token as string, days)
 
     return NextResponse.json({
       profile,
