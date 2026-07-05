@@ -120,11 +120,9 @@ export default async function DashboardPage() {
                   </div>
                   <div className={styles.empresaInfo}>
                     <span className={styles.empresaName}>{e.name}</span>
-                    <span className={styles.empresaPlatform}>{e.platform}</span>
                   </div>
                   <div className={styles.empresaMeta}>
                     <span className={`badge badge-${e.statusType}`}>{e.status}</span>
-                    <span className={styles.empresaPosts}>-- posts</span>
                   </div>
                 </Link>
               ))
