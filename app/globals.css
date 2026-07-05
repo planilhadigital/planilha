@@ -221,8 +221,8 @@ p { color: var(--text-body); line-height: 1.7; }
     /* 2. Fade que apaga o grid na parte inferior direita */
     linear-gradient(to bottom right, transparent 30%, #151414 90%),
     /* 3. Grid sutil interno */
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
   background-position: center top;
   
