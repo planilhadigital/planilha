@@ -112,12 +112,25 @@ export async function POST(req: Request) {
             },
             required: ["label", "value"]
           },
+          dynamicKpis: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                title: { type: SchemaType.STRING, description: "O nome da métrica" },
+                value: { type: SchemaType.STRING, description: "O valor formatado" },
+                trend: { type: SchemaType.STRING, description: "Pode ser 'positivo', 'negativo' ou 'neutro'" },
+                deltaText: { type: SchemaType.STRING, description: "Opcional. Exemplo: '+12%'" }
+              },
+              required: ["title", "value", "trend"]
+            }
+          },
           actionPlan: {
             type: SchemaType.ARRAY,
             items: { type: SchemaType.STRING }
           }
         },
-        required: ["punchline", "narrative", "mainHighlight", "actionPlan"]
+        required: ["punchline", "narrative", "mainHighlight", "dynamicKpis", "actionPlan"]
       }
 
       const model = genAI.getGenerativeModel({ 
@@ -131,6 +144,9 @@ export async function POST(req: Request) {
       const prompt = `
 Você é um estrategista de marketing brilhante e criativo, montando uma apresentação executiva sobre o desempenho do Instagram da empresa "${empresa.name}".
 Analise os seguintes dados e preencha a estrutura JSON correspondente perfeitamente.
+
+ATENÇÃO: Se alguma métrica for 0, inválida ou ausente, IGNORE-A completamente. 
+Escolha até 4 métricas de maior destaque que mostrem a real situação da conta e adicione no array "dynamicKpis".
 
 DADOS:
 - Seguidores: ${profile.followers}
@@ -147,6 +163,10 @@ DADOS:
         punchline: "Consistência de Resultados no Período",
         narrative: "A estratégia atual mantém um fluxo constante de alcance e engajamento. Notamos uma base sólida de impressões, indicando que a audiência continua interagindo com os conteúdos principais da marca.",
         mainHighlight: { label: "Alcance Mantido", value: String(insights.total.reach) },
+        dynamicKpis: [
+          { title: "Alcance Total", value: String(insights.total.reach), trend: "positivo", deltaText: "Estável" },
+          { title: "Seguidores", value: String(profile.followers), trend: "neutro" }
+        ],
         actionPlan: ["Manter a cadência de postagens", "Investir em Reels para mais alcance", "Criar chamadas para ação nos Stories"]
       }
     }

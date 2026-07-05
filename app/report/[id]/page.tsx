@@ -62,45 +62,35 @@ export default async function PublicReportPage({ params, searchParams }: { param
 
         {/* Slide 2: Números Reais (Grid de KPIs) */}
         <section className={`${styles.slide} ${styles.slideMetrics}`}>
-          <div className={styles.kpiBox}>
-            <span className={styles.kpiTitle}>Alcance Total</span>
-            <div className={styles.kpiNumber}>
-              {insights.total.reach.toLocaleString()}
-              {insights.total.reachDelta !== undefined && (
-                <span className={`${styles.delta} ${insights.total.reachDelta >= 0 ? styles.deltaUp : styles.deltaDown}`}>
-                  {insights.total.reachDelta >= 0 ? '↑' : '↓'}{Math.abs(insights.total.reachDelta).toFixed(1)}%
-                </span>
-              )}
+          {aiAnalysis.dynamicKpis && aiAnalysis.dynamicKpis.map((kpi: any, idx: number) => (
+            <div key={idx} className={styles.kpiBox}>
+              <span className={styles.kpiTitle}>{kpi.title}</span>
+              <div className={styles.kpiNumber}>
+                {kpi.value}
+                {kpi.deltaText && (
+                  <span className={`${styles.delta} ${kpi.trend === 'positivo' ? styles.deltaUp : kpi.trend === 'negativo' ? styles.deltaDown : ''}`}>
+                    {kpi.deltaText}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-          <div className={styles.kpiBox}>
-            <span className={styles.kpiTitle}>Impressões</span>
-            <div className={styles.kpiNumber}>
-              {insights.total.impressions.toLocaleString()}
-              {insights.total.impressionsDelta !== undefined && (
-                <span className={`${styles.delta} ${insights.total.impressionsDelta >= 0 ? styles.deltaUp : styles.deltaDown}`}>
-                  {insights.total.impressionsDelta >= 0 ? '↑' : '↓'}{Math.abs(insights.total.impressionsDelta).toFixed(1)}%
-                </span>
-              )}
+          ))}
+          {(!aiAnalysis.dynamicKpis || aiAnalysis.dynamicKpis.length === 0) && (
+            <div className={styles.kpiBox} style={{ gridColumn: '1 / -1', textAlign: 'center', opacity: 0.5 }}>
+              Sem dados numéricos relevantes neste período.
             </div>
-          </div>
-          <div className={styles.kpiBox}>
-            <span className={styles.kpiTitle}>Seguidores</span>
-            <div className={styles.kpiNumber}>{profile.followers.toLocaleString()}</div>
-          </div>
-          <div className={styles.kpiBox}>
-            <span className={styles.kpiTitle}>Publicações</span>
-            <div className={styles.kpiNumber}>{profile.postsCount.toLocaleString()}</div>
-          </div>
+          )}
         </section>
 
         {/* Slide 3: Gráfico Visual */}
-        <section className={`${styles.slide} ${styles.slideChart}`}>
-          <h3 className={styles.slideTitle}>Evolução Diária</h3>
-          <div className={styles.chartContainer}>
-            <ClientChart data={insights.history} />
-          </div>
-        </section>
+        {insights.history && insights.history.length > 0 && (
+          <section className={`${styles.slide} ${styles.slideChart}`}>
+            <h3 className={styles.slideTitle}>Evolução Diária</h3>
+            <div className={styles.chartContainer}>
+              <ClientChart data={insights.history} />
+            </div>
+          </section>
+        )}
 
         {/* Slide 4: Plano de Ação IA */}
         <section className={`${styles.slide} ${styles.slideAction}`}>
