@@ -30,7 +30,7 @@ export default function LoginPage() {
       <div className={styles.card}>
         {/* Logo */}
         <div className={styles.logoWrap}>
-          <Logo width={340} height={81} />
+          <Logo width={272} height={65} />
         </div>
 
         {/* Google login button */}
