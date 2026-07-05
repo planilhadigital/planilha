@@ -9,9 +9,7 @@ import { revalidatePath } from 'next/cache'
 export default async function ConfiguracoesPage() {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.email) {
-    return <div>Não autorizado</div>
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return <div>Não autorizado</div>
   }
 
