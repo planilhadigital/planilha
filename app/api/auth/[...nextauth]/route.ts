@@ -36,8 +36,17 @@ export const authOptions: AuthOptions = {
         token.sub = user.id
       }
       // Se for uma atualização de sessão solicitada pelo cliente
-      if (trigger === "update" && session?.empresasCount !== undefined) {
-        token.empresasCount = session.empresasCount
+      if (trigger === "update" && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          include: { empresas: { select: { id: true } } }
+        })
+        if (dbUser) {
+          token.name = dbUser.name
+          token.email = dbUser.email
+          token.picture = dbUser.image
+          token.empresasCount = dbUser.empresas.length
+        }
       }
       
       // Checagem pesada apenas se não houver a prop e tivermos o id (normalmente no primeiro login)

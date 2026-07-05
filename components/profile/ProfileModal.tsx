@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { X, UploadCloud, LogOut, Lock, User as UserIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -12,6 +13,8 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProps) {
+  const { update } = useSession()
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
@@ -69,8 +72,10 @@ export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProp
         throw new Error(error.message || 'Erro ao atualizar perfil')
       }
       
-      toast.success('Perfil atualizado! Recarregando...')
-      setTimeout(() => window.location.reload(), 1500)
+      toast.success('Perfil atualizado!')
+      await update()
+      router.refresh()
+      onClose()
     } catch (err: any) {
       toast.error(err.message)
     } finally {
