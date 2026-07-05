@@ -1,18 +1,18 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { UploadCloud, Image as ImageIcon, Film, Layout, Copy, Settings } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Film, Layout, Copy, Settings, Calendar } from 'lucide-react'
 import { FaInstagram, FaFacebook } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import styles from '../empresas/[id]/page.module.css'
 
 export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
   const [selectedEmpresaIds, setSelectedEmpresaIds] = useState<string[]>([])
-  const [postForm, setPostForm] = useState({ 
+  const [postForm, setPostForm] = useState<{legenda: string, canais: {instagram: boolean, facebook: boolean}, formatos: string[], midiaUrls: string[]}>({ 
     legenda: '', 
     canais: { instagram: true, facebook: false }, 
-    formato: 'Feed', // Feed, Reels, Stories, Carrossel
-    midiaUrl: '' 
+    formatos: ['Feed'], // Pode conter múltiplos: Feed, Reels, Stories, Carrossel
+    midiaUrls: [] 
   })
   
   const [datas, setDatas] = useState([{ date: '', time: '' }])
@@ -32,32 +32,48 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
   const selectedEmpresa = empresas.find(e => e.id === selectedEmpresaIds[0])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = e.target.files
+    if (!files || files.length === 0) return
     
-    const formData = new FormData()
-    formData.append('file', file)
-
     const loadingToast = toast.loading('Fazendo upload...')
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-      if (!res.ok) throw new Error('Erro ao fazer upload')
+      const newUrls = []
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData()
+        formData.append('file', files[i])
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+        if (!res.ok) throw new Error('Erro ao fazer upload')
+        const { url } = await res.json()
+        newUrls.push(url)
+      }
       
-      const { url } = await res.json()
-      setPostForm({ ...postForm, midiaUrl: url })
+      if (postForm.formatos.includes('Carrossel')) {
+        setPostForm({ ...postForm, midiaUrls: [...postForm.midiaUrls, ...newUrls] })
+      } else {
+        setPostForm({ ...postForm, midiaUrls: [newUrls[0]] }) // Substitui se não for carrossel
+      }
       toast.success('Mídia carregada!', { id: loadingToast })
     } catch (err: any) {
       toast.error(err.message, { id: loadingToast })
     }
   }
 
+  const handlePublishNow = () => {
+    const now = new Date()
+    const date = now.toISOString().split('T')[0]
+    const time = now.toTimeString().substring(0, 5)
+    setDatas([{ date, time }])
+    toast.success('Horário definido para Agora')
+  }
+
   const handleSchedulePost = async (e: React.FormEvent) => {
     e.preventDefault()
     if (selectedEmpresaIds.length === 0) return toast.error('Selecione pelo menos uma empresa!')
-    if (!postForm.midiaUrl && postForm.formato !== 'Text') return toast.error('Anexe uma mídia!')
+    if (postForm.midiaUrls.length === 0 && !postForm.formatos.includes('Text')) return toast.error('Anexe pelo menos uma mídia!')
+    if (postForm.formatos.length === 0) return toast.error('Selecione pelo menos um formato!')
     if (!postForm.canais.instagram && !postForm.canais.facebook) return toast.error('Selecione pelo menos um canal!')
     
     // Check if at least one valid date/time exists
@@ -77,25 +93,31 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       
       for (const empId of selectedEmpresaIds) {
         for (const dt of validDatas) {
-          const payload = { 
-            ...postForm, 
-            rede: redeFinal,
-            dataHora: `${dt.date}T${dt.time}:00`,
-            advancedConfig 
+          for (const fmt of postForm.formatos) {
+            const payload = { 
+              legenda: postForm.legenda,
+              canais: postForm.canais,
+              formato: fmt,
+              midiaUrl: postForm.midiaUrls[0] || '',
+              midiaUrls: postForm.midiaUrls,
+              rede: redeFinal,
+              dataHora: `${dt.date}T${dt.time}:00`,
+              advancedConfig 
+            }
+            
+            promises.push(
+              fetch(`/api/empresas/${empId}/posts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              }).then(res => {
+                if (!res.ok) throw new Error()
+                success++
+              }).catch(() => {
+                errors++
+              })
+            )
           }
-          
-          promises.push(
-            fetch(`/api/empresas/${empId}/posts`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            }).then(res => {
-              if (!res.ok) throw new Error()
-              success++
-            }).catch(() => {
-              errors++
-            })
-          )
         }
       }
       
@@ -104,7 +126,7 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       if (success > 0) toast.success(`${success} post(s) agendado(s) com sucesso!`)
       if (errors > 0) toast.error(`${errors} erro(s) ao agendar.`)
       
-      setPostForm({ legenda: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
+      setPostForm({ legenda: '', canais: { instagram: true, facebook: false }, formatos: ['Feed'], midiaUrls: [] })
       setSelectedEmpresaIds([])
       setDatas([{ date: '', time: '' }])
       setAdvancedConfig({ location: '', disableComments: false, hideLikes: false, shareToFeed: true })
@@ -116,6 +138,12 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
 
   return (
     <div className={`${styles.postCreatorLayout} anim-fade-up`}>
+      {/* Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', gridColumn: 'span 3', marginBottom: '1rem' }}>
+        <Calendar size={28} color="var(--primary)" />
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Programar Posts</h1>
+      </div>
+
       {/* EDITOR PANEL (COMPACTADO) */}
       <div className={styles.editorPanel} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', gridColumn: 'span 2' }}>
         
@@ -188,26 +216,35 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
                 <span className={styles.stepNumber}>3</span> Formato do Post
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {['Feed', 'Reels', 'Stories', 'Carrossel'].map(fmt => (
-                  <button 
-                    key={fmt}
-                    onClick={() => setPostForm({...postForm, formato: fmt})}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.5rem',
-                      padding: '0.5rem 1rem', borderRadius: 'var(--r-full)',
-                      border: `1px solid ${postForm.formato === fmt ? 'var(--accent)' : 'var(--border)'}`,
-                      background: postForm.formato === fmt ? 'var(--accent-dim)' : 'var(--bg-deep)',
-                      color: postForm.formato === fmt ? 'var(--accent)' : 'var(--text-muted)',
-                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.85rem'
-                    }}
-                  >
-                    {fmt === 'Feed' && <Layout size={14} />}
-                    {fmt === 'Reels' && <Film size={14} />}
-                    {fmt === 'Stories' && <Copy size={14} />}
-                    {fmt === 'Carrossel' && <ImageIcon size={14} />}
-                    {fmt}
-                  </button>
-                ))}
+                {['Feed', 'Reels', 'Stories', 'Carrossel'].map(fmt => {
+                  const isActive = postForm.formatos.includes(fmt)
+                  return (
+                    <button 
+                      key={fmt}
+                      onClick={() => {
+                        if (isActive) {
+                          setPostForm({...postForm, formatos: postForm.formatos.filter(f => f !== fmt)})
+                        } else {
+                          setPostForm({...postForm, formatos: [...postForm.formatos, fmt]})
+                        }
+                      }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        padding: '0.5rem 1rem', borderRadius: 'var(--r-full)',
+                        border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                        background: isActive ? 'var(--accent-dim)' : 'var(--bg-deep)',
+                        color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                        cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.85rem'
+                      }}
+                    >
+                      {fmt === 'Feed' && <Layout size={14} />}
+                      {fmt === 'Reels' && <Film size={14} />}
+                      {fmt === 'Stories' && <Copy size={14} />}
+                      {fmt === 'Carrossel' && <ImageIcon size={14} />}
+                      {fmt}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -215,10 +252,14 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
               <div className={styles.stepTitle}>
                 <span className={styles.stepNumber}>4</span> Mídias
               </div>
-              <input type="file" hidden ref={postMediaInputRef} onChange={handleUpload} accept="image/*,video/*" />
+              <input type="file" hidden multiple={postForm.formatos.includes('Carrossel')} ref={postMediaInputRef} onChange={handleUpload} accept="image/*,video/*" />
               <div className={styles.uploadZone} onClick={() => postMediaInputRef.current?.click()} style={{ padding: '1rem', minHeight: '120px' }}>
-                {postForm.midiaUrl ? (
-                  <img src={postForm.midiaUrl} alt="Preview" style={{ height: '100px', borderRadius: '8px', objectFit: 'contain' }} />
+                {postForm.midiaUrls.length > 0 ? (
+                  <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                    {postForm.midiaUrls.map((url, i) => (
+                      <img key={i} src={url} alt="Preview" style={{ height: '80px', borderRadius: '8px', objectFit: 'contain' }} />
+                    ))}
+                  </div>
                 ) : (
                   <>
                     <UploadCloud size={32} color="var(--text-muted)" />
@@ -294,8 +335,9 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
             </div>
 
             <div>
-              <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>7</span> Data e horário
+              <div className={styles.stepTitle} style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <span><span className={styles.stepNumber}>7</span> Data e horário</span>
+                <button className="btn btn-secondary btn-sm" onClick={handlePublishNow}>Publicar agora</button>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {datas.map((dt, idx) => (
@@ -325,13 +367,13 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       {/* PREVIEW PANEL */}
       <div className={styles.previewPanel}>
         <div className={styles.stepTitle} style={{ justifyContent: 'center' }}>
-          Preview: {postForm.formato}
+          Preview: {postForm.formatos.join(', ') || 'Nenhum'}
         </div>
         
         <div 
           className={styles.previewMobile} 
           style={
-            (postForm.formato === 'Reels' || postForm.formato === 'Stories') 
+            (postForm.formatos.includes('Reels') || postForm.formatos.includes('Stories')) 
             ? { aspectRatio: '9/16', maxWidth: '300px', margin: '0 auto' } 
             : {}
           }
@@ -344,15 +386,22 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
             )}
             <span className={styles.previewName}>{selectedEmpresa?.name || 'Selecione uma conta'}</span>
           </div>
-          <div className={styles.previewImage} style={(postForm.formato === 'Reels' || postForm.formato === 'Stories') ? { height: '100%', flex: 1 } : {}}>
-            {postForm.midiaUrl ? (
-              <img src={postForm.midiaUrl} alt="media" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+          <div className={styles.previewImage} style={(postForm.formatos.includes('Reels') || postForm.formatos.includes('Stories')) ? { height: '100%', flex: 1, position: 'relative' } : { position: 'relative' }}>
+            {postForm.midiaUrls.length > 0 ? (
+              <>
+                <img src={postForm.midiaUrls[0]} alt="media" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                {postForm.midiaUrls.length > 1 && (
+                  <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '10px' }}>
+                    1/{postForm.midiaUrls.length}
+                  </div>
+                )}
+              </>
             ) : (
               <ImageIcon size={48} opacity={0.5} />
             )}
           </div>
-          {postForm.formato !== 'Stories' && (
-            <div className={styles.previewBody} style={(postForm.formato === 'Reels' || postForm.formato === 'Stories') ? { position: 'absolute', bottom: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' } : {}}>
+          {!postForm.formatos.includes('Stories') && (
+            <div className={styles.previewBody} style={(postForm.formatos.includes('Reels') || postForm.formatos.includes('Stories')) ? { position: 'absolute', bottom: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' } : {}}>
               <span style={{ fontWeight: 600 }}>{selectedEmpresa?.name || 'Conta'}</span> {postForm.legenda || 'O texto do seu post aparecerá aqui...'}
             </div>
           )}
