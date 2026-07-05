@@ -41,6 +41,7 @@
   font-weight: bold;
   background: linear-gradient(to right, var(--primary), #4ade80);
   -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
 }
 
