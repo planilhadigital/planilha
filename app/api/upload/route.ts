@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
+// Para rotas do App Router no Next.js (Server Actions ou Route Handlers), o Next.js suporta envios maiores que 4MB por padrão para formData, mas pode ser configurado no next.config.mjs se necessário.
 export async function POST(request: Request) {
   try {
     const data = await request.formData()

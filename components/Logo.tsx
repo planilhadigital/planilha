@@ -9,8 +9,8 @@ interface LogoProps {
 export default function Logo({ width = 180, height = 43, className = '' }: LogoProps) {
   return (
     <Image
-      src="/planilha.svg"
-      alt="planILHA"
+      src="/logo.svg"
+      alt="Ilha"
       width={width}
       height={height}
       className={className}

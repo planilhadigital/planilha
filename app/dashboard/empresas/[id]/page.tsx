@@ -26,12 +26,6 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
   const [savingPost, setSavingPost] = useState(false)
   
-  // Leads
-  const [leads, setLeads] = useState<any[]>([])
-  const [loadingLeads, setLoadingLeads] = useState(false)
-  const [leadForm, setLeadForm] = useState({ nome: '', email: '', telefone: '', origem: 'Manual' })
-  const [addingLead, setAddingLead] = useState(false)
-  
   // Config
   const [saving, setSaving] = useState(false)
   
@@ -83,21 +77,6 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
           console.error(e)
         } finally {
           setLoadingPosts(false)
-        }
-      }
-      
-      if (activeTab === 'leads') {
-        setLoadingLeads(true)
-        try {
-          const res = await fetch(`/api/empresas/${id}/leads`)
-          if (res.ok) {
-            const data = await res.json()
-            setLeads(data.leads || [])
-          }
-        } catch (e) {
-          console.error(e)
-        } finally {
-          setLoadingLeads(false)
         }
       }
     }
@@ -192,27 +171,6 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       toast.error(err.message)
     } finally {
       setSavingPost(false)
-    }
-  }
-
-  const handleAddLead = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAddingLead(true)
-    try {
-      const res = await fetch(`/api/empresas/${id}/leads`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadForm)
-      })
-      if (!res.ok) throw new Error('Erro ao salvar Lead')
-      const newLead = await res.json()
-      setLeads([newLead, ...leads])
-      toast.success('Lead adicionado com sucesso!')
-      setLeadForm({ nome: '', email: '', telefone: '', origem: 'Manual' })
-    } catch (err: any) {
-      toast.error(err.message)
-    } finally {
-      setAddingLead(false)
     }
   }
 
@@ -312,9 +270,6 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         </button>
         <button className={`${styles.tab} ${activeTab === 'calendario' ? styles.tabActive : ''}`} onClick={() => setActiveTab('calendario')}>
           📅 Calendário
-        </button>
-        <button className={`${styles.tab} ${activeTab === 'leads' ? styles.tabActive : ''}`} onClick={() => setActiveTab('leads')}>
-          🎯 CRM de Leads
         </button>
         <button className={`${styles.tab} ${activeTab === 'config' ? styles.tabActive : ''}`} onClick={() => setActiveTab('config')}>
           ⚙️ Configurações
@@ -467,66 +422,6 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                 </div>
               )
             })}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'leads' && (
-        <div className="anim-fade-up">
-          <div className="grid-2">
-            <div className={styles.configSection}>
-              <h2 className={styles.stepTitle}>Novo Lead Manual</h2>
-              <form onSubmit={handleAddLead} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                  <label className="input-label">Nome *</label>
-                  <input type="text" className="input" required value={leadForm.nome} onChange={e => setLeadForm({...leadForm, nome: e.target.value})} />
-                </div>
-                <div>
-                  <label className="input-label">E-mail</label>
-                  <input type="email" className="input" value={leadForm.email} onChange={e => setLeadForm({...leadForm, email: e.target.value})} />
-                </div>
-                <div>
-                  <label className="input-label">Telefone (WhatsApp)</label>
-                  <input type="text" className="input" value={leadForm.telefone} onChange={e => setLeadForm({...leadForm, telefone: e.target.value})} />
-                </div>
-                <button type="submit" className="btn btn-primary" disabled={addingLead}>
-                  {addingLead ? 'Salvando...' : 'Cadastrar Lead'}
-                </button>
-              </form>
-            </div>
-
-            <div className={styles.configSection}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 className={styles.stepTitle} style={{ margin: 0 }}>Base de Leads</h2>
-                <span className="badge badge-accent">{leads.length} Cadastrados</span>
-              </div>
-              
-              {loadingLeads ? (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Carregando leads...</div>
-              ) : leads.length === 0 ? (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Nenhum lead captado ainda.</div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {leads.map(lead => (
-                    <div key={lead.id} className={styles.leadCard}>
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '50%' }}>
-                           <Users size={20} color="var(--accent)" />
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{lead.nome}</div>
-                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{lead.email || lead.telefone || 'Sem contato'}</div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <span className="badge badge-neutral">{lead.origem}</span>
-                        <span className="badge badge-success">{lead.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       )}

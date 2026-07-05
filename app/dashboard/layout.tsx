@@ -1,5 +1,4 @@
 import Sidebar from '@/components/layout/Sidebar'
-import Topbar from '@/components/layout/Topbar'
 import styles from './dashboard.module.css'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -7,7 +6,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className={styles.shell}>
       <Sidebar />
       <div className={styles.main}>
-        <Topbar />
         <main className={styles.content}>
           {children}
         </main>
