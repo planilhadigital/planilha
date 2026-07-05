@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import styles from './page.module.css'
-import { UploadCloud, Image as ImageIcon, Users } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Users, Layout, Film, Copy } from 'lucide-react'
 import { FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa'
 
 export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,7 +23,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
   // States para posts
   const [posts, setPosts] = useState<any[]>([])
   const [loadingPosts, setLoadingPosts] = useState(false)
-  const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
+  const [postForm, setPostForm] = useState({ legenda: '', dataHora: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
   const [savingPost, setSavingPost] = useState(false)
   
   // Config
@@ -152,12 +152,22 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
 
   const handleSchedulePost = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!postForm.midiaUrl && postForm.formato !== 'Text') return toast.error('Anexe uma mídia!')
+    if (!postForm.canais.instagram && !postForm.canais.facebook) return toast.error('Selecione pelo menos um canal!')
+    
+    // Converter estado para compatibilidade com API atual
+    let redeFinal = 'Instagram'
+    if (postForm.canais.instagram && postForm.canais.facebook) redeFinal = 'Ambas'
+    else if (postForm.canais.facebook) redeFinal = 'Facebook'
+
+    const payload = { ...postForm, rede: redeFinal }
+
     setSavingPost(true)
     try {
       const res = await fetch(`/api/empresas/${id}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(postForm)
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) throw new Error('Erro ao agendar o post')
@@ -165,7 +175,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       const newPost = await res.json()
       setPosts([...posts, newPost])
       toast.success('Post agendado com sucesso!')
-      setPostForm({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
+      setPostForm({ legenda: '', dataHora: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
       setActiveTab('calendario')
     } catch (err: any) {
       toast.error(err.message)
@@ -278,27 +288,14 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
 
       {activeTab === 'posts' && (
         <div className={`${styles.postCreatorLayout} anim-fade-up`}>
-          {/* EDITOR PANEL (Esquerda) */}
+          {/* COLUNA 1: Cliente e Legenda */}
           <div className={styles.editorPanel}>
             <div>
               <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>1</span> Selecione canais
+                <span className={styles.stepNumber}>1</span> Conta Selecionada
               </div>
-              <div className={styles.channelSelector}>
-                <button 
-                  className={styles.channelBtn} 
-                  data-active={postForm.rede === 'Instagram' || postForm.rede === 'Ambas'}
-                  onClick={() => setPostForm({...postForm, rede: postForm.rede === 'Facebook' ? 'Ambas' : 'Instagram'})}
-                >
-                  <FaInstagram size={18} /> Instagram
-                </button>
-                <button 
-                  className={styles.channelBtn} 
-                  data-active={postForm.rede === 'Facebook' || postForm.rede === 'Ambas'}
-                  onClick={() => setPostForm({...postForm, rede: postForm.rede === 'Instagram' ? 'Ambas' : 'Facebook'})}
-                >
-                  <FaFacebook size={18} /> Facebook
-                </button>
+              <div style={{ padding: '0.8rem', background: 'var(--bg-deep)', borderRadius: 'var(--r-md)', color: 'var(--text-muted)' }}>
+                {empresa.name} (Atual)
               </div>
             </div>
 
@@ -309,23 +306,81 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               <textarea 
                 className={styles.postTextarea}
                 placeholder="Digite o seu texto aqui..."
+                style={{ minHeight: '300px' }}
                 value={postForm.legenda}
                 onChange={e => setPostForm({...postForm, legenda: e.target.value})}
               />
             </div>
+          </div>
+
+          {/* COLUNA 2: Canais, Formato, Mídias e Agendamento */}
+          <div className={styles.editorPanel}>
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>3</span> Selecione canais
+              </div>
+              <div className={styles.channelSelector}>
+                <button 
+                  className={styles.channelBtn} 
+                  data-active={postForm.canais.instagram}
+                  onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
+                  style={{ padding: '0.8rem', borderRadius: '50%' }}
+                  title="Instagram"
+                >
+                  <FaInstagram size={24} />
+                </button>
+                <button 
+                  className={styles.channelBtn} 
+                  data-active={postForm.canais.facebook}
+                  onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
+                  style={{ padding: '0.8rem', borderRadius: '50%' }}
+                  title="Facebook"
+                >
+                  <FaFacebook size={24} />
+                </button>
+              </div>
+            </div>
 
             <div>
               <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>3</span> Mídias
+                <span className={styles.stepNumber}>4</span> Formato do Post
               </div>
-              <input type="file" hidden ref={postMediaInputRef} onChange={e => handleUpload(e, 'post')} accept="image/*" />
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {['Feed', 'Reels', 'Stories', 'Carrossel'].map(fmt => (
+                  <button 
+                    key={fmt}
+                    onClick={() => setPostForm({...postForm, formato: fmt})}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.5rem',
+                      padding: '0.5rem 1rem', borderRadius: 'var(--r-full)',
+                      border: `1px solid ${postForm.formato === fmt ? 'var(--accent)' : 'var(--border)'}`,
+                      background: postForm.formato === fmt ? 'var(--accent-dim)' : 'var(--bg-deep)',
+                      color: postForm.formato === fmt ? 'var(--accent)' : 'var(--text-muted)',
+                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600, fontSize: '0.85rem'
+                    }}
+                  >
+                    {fmt === 'Feed' && <Layout size={14} />}
+                    {fmt === 'Reels' && <Film size={14} />}
+                    {fmt === 'Stories' && <Copy size={14} />}
+                    {fmt === 'Carrossel' && <ImageIcon size={14} />}
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className={styles.stepTitle}>
+                <span className={styles.stepNumber}>5</span> Mídias
+              </div>
+              <input type="file" hidden ref={postMediaInputRef} onChange={e => handleUpload(e, 'post')} accept="image/*,video/*" />
               <div className={styles.uploadZone} onClick={() => postMediaInputRef.current?.click()}>
                 {postForm.midiaUrl ? (
                   <img src={postForm.midiaUrl} alt="Preview" style={{ height: '120px', borderRadius: '8px', objectFit: 'contain' }} />
                 ) : (
                   <>
                     <UploadCloud size={40} color="var(--text-muted)" />
-                    <p><strong>Imagens, vídeos ou documentos</strong><br/>Clique aqui para enviar arquivos locais.</p>
+                    <p><strong>Imagens, vídeos ou documentos</strong><br/>Clique aqui para enviar arquivos.</p>
                   </>
                 )}
               </div>
@@ -333,7 +388,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
 
             <div>
               <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>4</span> Data e horário da publicação
+                <span className={styles.stepNumber}>6</span> Data e horário da publicação
               </div>
               <input 
                 type="datetime-local" 
@@ -345,19 +400,26 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button className="btn btn-primary btn-lg" onClick={handleSchedulePost} disabled={savingPost}>
+              <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handleSchedulePost} disabled={savingPost}>
                 {savingPost ? 'Agendando...' : 'Agendar Publicações'}
               </button>
             </div>
           </div>
 
-          {/* PREVIEW PANEL (Direita) */}
+          {/* COLUNA 3: Preview */}
           <div className={styles.previewPanel}>
             <div className={styles.stepTitle} style={{ justifyContent: 'center' }}>
-              Preview do Post
+              Preview: {postForm.formato}
             </div>
             
-            <div className={styles.previewMobile}>
+            <div 
+              className={styles.previewMobile} 
+              style={
+                (postForm.formato === 'Reels' || postForm.formato === 'Stories') 
+                ? { aspectRatio: '9/16', maxWidth: '300px', margin: '0 auto' } 
+                : {}
+              }
+            >
               <div className={styles.previewHeader}>
                 {empresa.avatarUrl ? (
                   <img src={empresa.avatarUrl} alt="avatar" className={styles.previewAvatar} />
@@ -366,16 +428,18 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                 )}
                 <span className={styles.previewName}>{empresa.name}</span>
               </div>
-              <div className={styles.previewImage}>
+              <div className={styles.previewImage} style={(postForm.formato === 'Reels' || postForm.formato === 'Stories') ? { height: '100%', flex: 1 } : {}}>
                 {postForm.midiaUrl ? (
-                  <img src={postForm.midiaUrl} alt="media" />
+                  <img src={postForm.midiaUrl} alt="media" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                 ) : (
                   <ImageIcon size={48} opacity={0.5} />
                 )}
               </div>
-              <div className={styles.previewBody}>
-                <span style={{ fontWeight: 600 }}>{empresa.name}</span> {postForm.legenda || 'O texto do seu post aparecerá aqui...'}
-              </div>
+              {postForm.formato !== 'Stories' && (
+                <div className={styles.previewBody} style={(postForm.formato === 'Reels' || postForm.formato === 'Stories') ? { position: 'absolute', bottom: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' } : {}}>
+                  <span style={{ fontWeight: 600 }}>{empresa.name}</span> {postForm.legenda || 'O texto do seu post aparecerá aqui...'}
+                </div>
+              )}
             </div>
           </div>
         </div>

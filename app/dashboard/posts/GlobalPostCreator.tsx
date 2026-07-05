@@ -11,7 +11,7 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
   const [postForm, setPostForm] = useState({ 
     legenda: '', 
     dataHora: '', 
-    rede: 'Instagram', 
+    canais: { instagram: true, facebook: false }, 
     formato: 'Feed', // Feed, Reels, Stories, Carrossel
     midiaUrl: '' 
   })
@@ -47,19 +47,27 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
     e.preventDefault()
     if (!selectedEmpresaId) return toast.error('Selecione uma empresa primeiro!')
     if (!postForm.midiaUrl && postForm.formato !== 'Text') return toast.error('Anexe uma mídia!')
+    if (!postForm.canais.instagram && !postForm.canais.facebook) return toast.error('Selecione pelo menos um canal!')
     
+    // Converter estado para compatibilidade com API atual
+    let redeFinal = 'Instagram'
+    if (postForm.canais.instagram && postForm.canais.facebook) redeFinal = 'Ambas'
+    else if (postForm.canais.facebook) redeFinal = 'Facebook'
+
+    const payload = { ...postForm, rede: redeFinal }
+
     setSavingPost(true)
     try {
       const res = await fetch(`/api/empresas/${selectedEmpresaId}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(postForm)
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) throw new Error('Erro ao agendar o post')
       
       toast.success('Post agendado com sucesso!')
-      setPostForm({ legenda: '', dataHora: '', rede: 'Instagram', formato: 'Feed', midiaUrl: '' })
+      setPostForm({ legenda: '', dataHora: '', canais: { instagram: true, facebook: false }, formato: 'Feed', midiaUrl: '' })
     } catch (err: any) {
       toast.error(err.message)
     } finally {
@@ -69,9 +77,8 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
 
   return (
     <div className={`${styles.postCreatorLayout} anim-fade-up`}>
-      {/* EDITOR PANEL (Esquerda) */}
+      {/* COLUNA 1: Cliente e Legenda */}
       <div className={styles.editorPanel}>
-        
         <div>
           <div className={styles.stepTitle}>
             <span className={styles.stepNumber}>1</span> Cliente / Conta
@@ -91,29 +98,49 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
 
         <div>
           <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>2</span> Selecione canais
+            <span className={styles.stepNumber}>2</span> Texto do post
+          </div>
+          <textarea 
+            className={styles.postTextarea}
+            placeholder="Digite o seu texto aqui..."
+            style={{ minHeight: '300px' }}
+            value={postForm.legenda}
+            onChange={e => setPostForm({...postForm, legenda: e.target.value})}
+          />
+        </div>
+      </div>
+
+      {/* COLUNA 2: Canais, Formato, Mídias e Agendamento */}
+      <div className={styles.editorPanel}>
+        <div>
+          <div className={styles.stepTitle}>
+            <span className={styles.stepNumber}>3</span> Selecione canais
           </div>
           <div className={styles.channelSelector}>
             <button 
               className={styles.channelBtn} 
-              data-active={postForm.rede === 'Instagram' || postForm.rede === 'Ambas'}
-              onClick={() => setPostForm({...postForm, rede: postForm.rede === 'Facebook' ? 'Ambas' : 'Instagram'})}
+              data-active={postForm.canais.instagram}
+              onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
+              style={{ padding: '0.8rem', borderRadius: '50%' }}
+              title="Instagram"
             >
-              <FaInstagram size={18} /> Instagram
+              <FaInstagram size={24} />
             </button>
             <button 
               className={styles.channelBtn} 
-              data-active={postForm.rede === 'Facebook' || postForm.rede === 'Ambas'}
-              onClick={() => setPostForm({...postForm, rede: postForm.rede === 'Instagram' ? 'Ambas' : 'Facebook'})}
+              data-active={postForm.canais.facebook}
+              onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
+              style={{ padding: '0.8rem', borderRadius: '50%' }}
+              title="Facebook"
             >
-              <FaFacebook size={18} /> Facebook
+              <FaFacebook size={24} />
             </button>
           </div>
         </div>
 
         <div>
           <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>3</span> Formato do Post
+            <span className={styles.stepNumber}>4</span> Formato do Post
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {['Feed', 'Reels', 'Stories', 'Carrossel'].map(fmt => (
@@ -137,18 +164,6 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
               </button>
             ))}
           </div>
-        </div>
-
-        <div>
-          <div className={styles.stepTitle}>
-            <span className={styles.stepNumber}>4</span> Texto do post
-          </div>
-          <textarea 
-            className={styles.postTextarea}
-            placeholder="Digite o seu texto aqui..."
-            value={postForm.legenda}
-            onChange={e => setPostForm({...postForm, legenda: e.target.value})}
-          />
         </div>
 
         <div>
@@ -182,13 +197,13 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button className="btn btn-primary btn-lg" onClick={handleSchedulePost} disabled={savingPost}>
+          <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handleSchedulePost} disabled={savingPost}>
             {savingPost ? 'Agendando...' : 'Agendar Publicações'}
           </button>
         </div>
       </div>
 
-      {/* PREVIEW PANEL (Direita) */}
+      {/* COLUNA 3: Preview */}
       <div className={styles.previewPanel}>
         <div className={styles.stepTitle} style={{ justifyContent: 'center' }}>
           Preview: {postForm.formato}
