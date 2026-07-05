@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import styles from './page.module.css'
 
 export default function PlanejamentosPage() {
@@ -30,7 +31,6 @@ export default function PlanejamentosPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setCreating(true)
-    setError('')
     try {
       const res = await fetch('/api/planejamentos', {
         method: 'POST',
@@ -41,8 +41,9 @@ export default function PlanejamentosPage() {
       const novo = await res.json()
       setQuadros([novo, ...quadros])
       setForm({ titulo: '', descricao: '' })
+      toast.success('Quadro criado com sucesso!')
     } catch (err: any) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setCreating(false)
     }
@@ -61,7 +62,6 @@ export default function PlanejamentosPage() {
         {/* Formulário de Criação */}
         <div className={`${styles.card} anim-fade-up anim-delay-1`}>
           <h2>Novo Quadro</h2>
-          {error && <p className="text-error" style={{ color: 'var(--error)' }}>{error}</p>}
           <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
             <div>
               <label className={styles.label}>Título</label>

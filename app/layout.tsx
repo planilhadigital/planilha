@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import AuthProvider from '@/components/AuthProvider'
 import './globals.css'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'planILHA — Gestão de Marketing Digital',
@@ -33,7 +34,21 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Toaster 
+            position="bottom-right" 
+            toastOptions={{
+              style: {
+                background: '#1a1a1a',
+                color: '#fff',
+                border: '1px solid #333'
+              },
+              success: { iconTheme: { primary: '#22C55E', secondary: '#fff' } },
+              error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } }
+            }}
+          />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import toast from 'react-hot-toast'
 import styles from './page.module.css'
 
 export default function EmpresaSettingsPage({ params }: { params: { id: string } }) {
@@ -100,8 +101,6 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
 
   const handleSave = async () => {
     setSaving(true)
-    setError('')
-    setSuccess('')
 
     try {
       // Se selecionou uma página, vamos descobrir se ela tem Instagram vinculado
@@ -119,10 +118,12 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
 
       if (!res.ok) throw new Error('Erro ao salvar as configurações')
       
-      setSuccess('Configurações salvas com sucesso!')
+      const updated = await res.json()
+      setEmpresa(updated.empresa)
+      toast.success('Configurações salvas com sucesso!')
       router.refresh()
     } catch (err: any) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setSaving(false)
     }
@@ -131,8 +132,6 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
   const handleSchedulePost = async (e: React.FormEvent) => {
     e.preventDefault()
     setSavingPost(true)
-    setError('')
-    setSuccess('')
 
     try {
       const res = await fetch(`/api/empresas/${params.id}/posts`, {
@@ -145,10 +144,10 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
       
       const newPost = await res.json()
       setPosts([...posts, newPost])
-      setSuccess('Post agendado com sucesso!')
+      toast.success('Post agendado com sucesso!')
       setPostForm({ legenda: '', dataHora: '', rede: 'Instagram', midiaUrl: '' })
     } catch (err: any) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setSavingPost(false)
     }
@@ -168,9 +167,6 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
           ← Voltar ao Dashboard
         </Link>
       </div>
-
-      {error && <div className={styles.error}>{error}</div>}
-      {success && <div className={styles.success}>{success}</div>}
 
       <div className={styles.tabs}>
         <button 
