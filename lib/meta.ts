@@ -43,12 +43,29 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     const impressionsData = data.data.find((m: any) => m.name === 'impressions')?.values || []
     const totalImpressions = impressionsData.reduce((acc: number, val: any) => acc + val.value, 0)
 
+    // Formata o histórico diário para o gráfico
+    const history = reachData.map((reachItem: any, index: number) => {
+      const impItem = impressionsData[index]
+      
+      // end_time vem no formato ISO, ex: 2024-10-05T07:00:00+0000
+      const dateStr = new Date(reachItem.end_time).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+
+      return {
+        date: dateStr,
+        reach: reachItem.value,
+        impressions: impItem ? impItem.value : 0
+      }
+    })
+
     return {
-      reach: totalReach,
-      impressions: totalImpressions
+      total: {
+        reach: totalReach,
+        impressions: totalImpressions
+      },
+      history
     }
   } catch (error) {
     console.error('Erro ao buscar Insights IG:', error)
-    return { reach: 0, impressions: 0 }
+    return { total: { reach: 0, impressions: 0 }, history: [] }
   }
 }

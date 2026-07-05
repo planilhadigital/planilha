@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import styles from './page.module.css'
 
 export default function EmpresaSettingsPage({ params }: { params: { id: string } }) {
@@ -157,12 +158,60 @@ export default function EmpresaSettingsPage({ params }: { params: { id: string }
               <div className={styles.kpiGrid}>
                 <div className={styles.kpiCard}>
                   <div className={styles.kpiLabel}>Alcance (28d)</div>
-                  <div className={styles.kpiValue}>{insightsData.insights?.reach || 0}</div>
+                  <div className={styles.kpiValue}>{insightsData.insights?.total?.reach || 0}</div>
                 </div>
                 <div className={styles.kpiCard}>
                   <div className={styles.kpiLabel}>Impressões (28d)</div>
-                  <div className={styles.kpiValue}>{insightsData.insights?.impressions || 0}</div>
+                  <div className={styles.kpiValue}>{insightsData.insights?.total?.impressions || 0}</div>
                 </div>
+              </div>
+
+              {/* GRÁFICO RECHARTS */}
+              <div className={styles.chartContainer}>
+                <h3 className={styles.chartTitle}>Crescimento de Alcance e Impressões</h3>
+                {insightsData.insights?.history && insightsData.insights.history.length > 0 ? (
+                  <div style={{ width: '100%', height: 350 }}>
+                    <ResponsiveContainer>
+                      <LineChart data={insightsData.insights.history} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="#666" 
+                          tick={{ fill: '#666', fontSize: 12 }} 
+                          tickMargin={10} 
+                        />
+                        <YAxis 
+                          stroke="#666" 
+                          tick={{ fill: '#666', fontSize: 12 }} 
+                          tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(1)}k` : val}
+                        />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#111', borderColor: '#333', borderRadius: '8px' }}
+                          itemStyle={{ color: '#fff' }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="reach" 
+                          name="Alcance"
+                          stroke="#FA4616" 
+                          strokeWidth={3} 
+                          dot={false}
+                          activeDot={{ r: 6, fill: '#FA4616', stroke: '#050505', strokeWidth: 2 }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="impressions" 
+                          name="Impressões"
+                          stroke="#4A90E2" 
+                          strokeWidth={3} 
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className={styles.loading}>Nenhum dado de histórico disponível para os últimos 28 dias.</div>
+                )}
               </div>
             </div>
           ) : (
