@@ -113,7 +113,30 @@ export async function POST(req: Request) {
                   properties: {
                     component_type: { type: SchemaType.STRING, description: "HeroHighlight, TimelineCrisis, ou StandardGrid" },
                     title: { type: SchemaType.STRING },
-                    properties: { type: SchemaType.OBJECT, description: "Dados estruturados do bloco" }
+                    properties: { 
+                      type: SchemaType.OBJECT, 
+                      description: "Dados estruturados do bloco",
+                      properties: {
+                        metric: { type: SchemaType.STRING },
+                        label: { type: SchemaType.STRING },
+                        delta: { type: SchemaType.STRING },
+                        narrative: { type: SchemaType.STRING },
+                        severity: { type: SchemaType.STRING },
+                        steps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                        recommendation: { type: SchemaType.STRING },
+                        kpis: { 
+                          type: SchemaType.ARRAY, 
+                          items: { 
+                            type: SchemaType.OBJECT, 
+                            properties: {
+                              title: { type: SchemaType.STRING },
+                              value: { type: SchemaType.STRING },
+                              trend: { type: SchemaType.STRING }
+                            }
+                          }
+                        }
+                      }
+                    }
                   },
                   required: ["component_type", "title", "properties"]
                 }
