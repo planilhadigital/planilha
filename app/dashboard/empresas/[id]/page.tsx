@@ -144,6 +144,27 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
         setEmpresa(updated)
         toast.success(`${target === 'avatar' ? 'Avatar' : 'Capa'} atualizada!`, { id: loadingToast })
       }
+    } catch (e: any) {
+      toast.error(e.message || 'Erro no upload', { id: loadingToast })
+    }
+  }
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm('Tem certeza que deseja deletar este relatório?')) return
+    const loadingToast = toast.loading('Deletando relatório...')
+    try {
+      const res = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Erro ao deletar relatório')
+      
+      setEmpresa({
+        ...empresa,
+        relatoriosGerados: empresa.relatoriosGerados.filter((r: any) => r.id !== reportId)
+      })
+      toast.success('Relatório deletado!', { id: loadingToast })
+    } catch (e: any) {
+      toast.error(e.message || 'Erro ao deletar', { id: loadingToast })
+    }
+  }
     } catch (err: any) {
       toast.error(err.message, { id: loadingToast })
     }
@@ -561,9 +582,14 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                             Gerado em {new Date(relatorio.createdAt).toLocaleDateString('pt-BR')} às {new Date(relatorio.createdAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
                           </div>
                         </div>
-                        <a href={`/report/${relatorio.id}`} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Eye size={16} /> Ver
-                        </a>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <a href={`/report/${relatorio.id}`} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Eye size={16} /> Ver
+                          </a>
+                          <button onClick={() => handleDeleteReport(relatorio.id)} className="btn btn-secondary btn-sm" style={{ padding: '0 0.5rem', color: 'var(--danger)', borderColor: 'var(--danger)' }}>
+                            X
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
