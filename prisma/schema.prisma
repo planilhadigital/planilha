@@ -279,6 +279,8 @@ model RelatorioGerado {
   id            String   @id @default(cuid())
   empresaId     String
   dias          Int
+  platform      String   @default("INSTAGRAM")
+  aiAnalysis    Json?
   dadosCongelados Json
   criadoPor     String?
   createdAt     DateTime @default(now())

@@ -1,5 +1,5 @@
 // lib/meta.ts
-// Funções auxiliares para buscar dados reais da Graph API da Meta
+// Funes auxiliares para buscar dados reais da Graph API da Meta
 
 export async function getInstagramAccountId(pageId: string, accessToken: string) {
   try {
@@ -30,7 +30,7 @@ export async function getInstagramProfile(igAccountId: string, accessToken: stri
 
 export async function getInstagramInsights(igAccountId: string, accessToken: string, days: number = 28) {
   try {
-    // Calculando timestamps (limite do Facebook para 'day' é 30 dias por request, então travamos no max 28 por segurança).
+    // Calculando timestamps (limite do Facebook para 'day'  30 dias por request, ento travamos no max 28 por segurana).
     const safeDays = Math.min(days, 30);
     const until = Math.floor(Date.now() / 1000);
     const since = until - (safeDays * 86400); // 86400s = 1 dia
@@ -41,7 +41,7 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     
     if (data.error) throw new Error(data.error.message)
       
-    // Simplificando o cálculo sumariando todos os valores do período retornado
+    // Simplificando o clculo sumariando todos os valores do perodo retornado
     const reachData = data.data.find((m: any) => m.name === 'reach')?.values || []
     const totalReach = reachData.reduce((acc: number, val: any) => acc + val.value, 0)
     
@@ -54,8 +54,8 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     const clicksData = data.data.find((m: any) => m.name === 'website_clicks')?.values || []
     const totalClicks = clicksData.reduce((acc: number, val: any) => acc + val.value, 0)
 
-    // PERÍODO ANTERIOR (DELTA)
-    const prevUntil = since; // O até do anterior é o desde do atual
+    // PERODO ANTERIOR (DELTA)
+    const prevUntil = since; // O at do anterior  o desde do atual
     const prevSince = prevUntil - (safeDays * 86400);
     const prevUrl = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&since=${prevSince}&until=${prevUntil}&access_token=${accessToken}`
     
@@ -90,11 +90,11 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
 
     const reachDelta = calcDelta(totalReach, prevTotalReach);
     const impressionsDelta = calcDelta(totalImpressions, prevTotalImpressions);
-    // Para simplificar o Delta, vamos usar 0 caso falhe a query de prevTotalViews que não declarei escopo fora
+    // Para simplificar o Delta, vamos usar 0 caso falhe a query de prevTotalViews que no declarei escopo fora
     const viewsDelta = calcDelta(totalViews, 0); 
     const clicksDelta = calcDelta(totalClicks, 0);
 
-    // Formata o histórico diário para o gráfico
+    // Formata o histrico dirio para o grfico
     const history = reachData.map((reachItem: any, index: number) => {
       const impItem = impressionsData[index]
       const viewsItem = viewsData[index]
@@ -126,5 +126,82 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
   } catch (error) {
     console.error('Erro ao buscar Insights IG:', error)
     return { total: { reach: 0, reachDelta: 0, impressions: 0, impressionsDelta: 0 }, history: [] }
+  }
+}
+
+export async function getFacebookPageInsights(pageId: string, accessToken: string, days: number = 28) {
+  try {
+    const safeDays = Math.min(days, 30);
+    const until = Math.floor(Date.now() / 1000);
+    const since = until - (safeDays * 86400);
+
+    const url = `https://graph.facebook.com/v19.0/${pageId}/insights?metric=page_engaged_users,page_impressions,page_fan_adds&period=day&since=${since}&until=${until}&access_token=${accessToken}`
+    const res = await fetch(url)
+    const data = await res.json()
+    
+    if (data.error) throw new Error(data.error.message)
+      
+    const engagedData = data.data.find((m: any) => m.name === 'page_engaged_users')?.values || []
+    const totalEngaged = engagedData.reduce((acc: number, val: any) => acc + val.value, 0)
+    
+    const impressionsData = data.data.find((m: any) => m.name === 'page_impressions')?.values || []
+    const totalImpressions = impressionsData.reduce((acc: number, val: any) => acc + val.value, 0)
+    
+    const fanAddsData = data.data.find((m: any) => m.name === 'page_fan_adds')?.values || []
+    const totalFanAdds = fanAddsData.reduce((acc: number, val: any) => acc + val.value, 0)
+
+    const prevUntil = since;
+    const prevSince = prevUntil - (safeDays * 86400);
+    const prevUrl = `https://graph.facebook.com/v19.0/${pageId}/insights?metric=page_engaged_users,page_impressions,page_fan_adds&period=day&since=${prevSince}&until=${prevUntil}&access_token=${accessToken}`
+    
+    let prevTotalEngaged = 0;
+    let prevTotalImpressions = 0;
+    
+    try {
+      const prevRes = await fetch(prevUrl)
+      const prevData = await prevRes.json()
+      if (!prevData.error && prevData.data) {
+        const pEngaged = prevData.data.find((m: any) => m.name === 'page_engaged_users')?.values || []
+        prevTotalEngaged = pEngaged.reduce((a: number, v: any) => a + v.value, 0)
+        
+        const pImp = prevData.data.find((m: any) => m.name === 'page_impressions')?.values || []
+        prevTotalImpressions = pImp.reduce((a: number, v: any) => a + v.value, 0)
+      }
+    } catch(e) {
+      console.error('Erro ao buscar periodo anterior FB', e)
+    }
+
+    const calcDelta = (current: number, prev: number) => {
+      if (prev === 0) return current > 0 ? 100 : 0;
+      return ((current - prev) / prev) * 100;
+    }
+
+    const engagedDelta = calcDelta(totalEngaged, prevTotalEngaged);
+    const impressionsDelta = calcDelta(totalImpressions, prevTotalImpressions);
+
+    const history = engagedData.map((engagedItem: any, index: number) => {
+      const impItem = impressionsData[index]
+      const dateStr = new Date(engagedItem.end_time).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+
+      return {
+        date: dateStr,
+        engaged_users: engagedItem.value,
+        impressions: impItem ? impItem.value : 0
+      }
+    })
+
+    return {
+      total: {
+        engagedUsers: totalEngaged,
+        engagedDelta: engagedDelta,
+        impressions: totalImpressions,
+        impressionsDelta: impressionsDelta,
+        newFans: totalFanAdds
+      },
+      history
+    }
+  } catch (error) {
+    console.error('Erro getFacebookPageInsights:', error)
+    return null
   }
 }

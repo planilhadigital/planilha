@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
-import { getInstagramInsights, getInstagramProfile } from '@/lib/meta'
+import { getInstagramInsights, getInstagramProfile, getFacebookPageInsights } from '@/lib/meta'
 import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai'
 
 const apiKey = process.env.GEMINI_API_KEY || ''
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { empresaId, days = 28 } = await req.json()
+    const { empresaId, days = 28, platform = 'INSTAGRAM' } = await req.json()
 
     if (!empresaId) {
       return NextResponse.json({ error: 'empresaId é obrigatório' }, { status: 400 })
@@ -39,8 +39,9 @@ export async function POST(req: Request) {
     let profile: any = null
     let insights: any = null
     let isDemo = false
+    const isFacebook = platform === 'FACEBOOK'
 
-    if (empresa.igAccountId) {
+    if (empresa.igAccountId && !isFacebook) {
       const dono = await prisma.user.findUnique({
         where: { id: session.user.id },
         select: { metaAccessToken: true }
@@ -51,7 +52,30 @@ export async function POST(req: Request) {
           profile = await getInstagramProfile(empresa.igAccountId, dono.metaAccessToken)
           insights = await getInstagramInsights(empresa.igAccountId, dono.metaAccessToken, days)
         } catch (err) {
-          console.error('Erro ao buscar dados reais:', err)
+          console.error('Erro ao buscar dados reais IG:', err)
+          isDemo = true
+        }
+      } else {
+        isDemo = true
+      }
+    } else if (empresa.metaPageId && isFacebook) {
+      const dono = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { metaAccessToken: true }
+      })
+
+      if (dono && dono.metaAccessToken) {
+        try {
+          // FB doesn't have a simple profile method in our meta.ts, we mock profile basics for FB page
+          profile = {
+            username: empresa.name.toLowerCase().replace(/\s+/g, ''),
+            avatar: empresa.avatarUrl || 'https://via.placeholder.com/150',
+            followers: 0, // Not fetching page fans right now
+            postsCount: 0
+          }
+          insights = await getFacebookPageInsights(empresa.metaPageId, dono.metaAccessToken, days)
+        } catch (err) {
+          console.error('Erro ao buscar dados reais FB:', err)
           isDemo = true
         }
       } else {
@@ -91,6 +115,8 @@ export async function POST(req: Request) {
           reachDelta: 12.5,
           impressions: 78900,
           impressionsDelta: 8.2,
+          profileViews: 1200,
+          websiteClicks: 50
         },
         history
       }
@@ -156,9 +182,23 @@ export async function POST(req: Request) {
         }
       })
 
+      const igMetrics = `
+- Seguidores Atuais: ${profile?.followers || 0}
+- Número de Publicações: ${profile?.postsCount || 0}
+- Alcance Total Acumulado (últimos ${days} dias): ${insights?.total?.reach || 0} (Variação de ${insights?.total?.reachDelta || 0}%)
+- Impressões Totais (últimos ${days} dias): ${insights?.total?.impressions || 0} (Variação de ${insights?.total?.impressionsDelta || 0}%)
+- Visualizações do Perfil (últimos ${days} dias): ${insights?.total?.profileViews || 0}
+- Cliques no Site/Link (últimos ${days} dias): ${insights?.total?.websiteClicks || 0}
+`
+      const fbMetrics = `
+- Fãs Adicionados (últimos ${days} dias): ${insights?.total?.newFans || 0}
+- Usuários Engajados (últimos ${days} dias): ${insights?.total?.engagedUsers || 0} (Variação de ${insights?.total?.engagedDelta || 0}%)
+- Impressões Totais (últimos ${days} dias): ${insights?.total?.impressions || 0} (Variação de ${insights?.total?.impressionsDelta || 0}%)
+`
+
       const prompt = `
 Atuarás como um Diretor de Marketing Estratégico (CMO) e Engenheiro de Design Generativo.
-O teu objetivo exclusivo é analisar os seguintes dados da empresa "${empresa.name}" e estruturar um relatório na nossa arquitetura A2UI (Componentes Declarativos em JSON).
+O teu objetivo exclusivo é analisar os seguintes dados da empresa "${empresa.name}" na plataforma ${platform} e estruturar um relatório na nossa arquitetura A2UI (Componentes Declarativos em JSON).
 
 REGRAS OBRIGATÓRIAS (Camadas de Curadoria e Design):
 1. Avalia o estado geral. Se houver crescimento acelerado (anomalia orgânica positiva), define theme_mode como 'THEME_SUCCESS_GLOW'. Se houver queda acentuada, usa 'THEME_ALERT_DARK'. Se for estabilidade, usa 'THEME_NEUTRAL_GLASS'.
@@ -168,13 +208,8 @@ REGRAS OBRIGATÓRIAS (Camadas de Curadoria e Design):
    - 'TimelineCrisis': Usa para anomalias ou quedas. Exige em 'properties': { "severity": "...", "steps": ["...", "..."], "recommendation": "..." }
    - 'StandardGrid': Usa para listar de 1 a 4 métricas comuns (como grid de KPIs). Exige em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo" }] }
 
-DADOS BRUTOS:
-- Seguidores Atuais: ${profile.followers}
-- Número de Publicações: ${profile.postsCount}
-- Alcance Total Acumulado (últimos ${days} dias): ${insights.total.reach} (Variação de ${insights.total.reachDelta}%)
-- Impressões Totais (últimos ${days} dias): ${insights.total.impressions} (Variação de ${insights.total.impressionsDelta}%)
-- Visualizações do Perfil (últimos ${days} dias): ${insights.total.profileViews || 0}
-- Cliques no Site/Link (últimos ${days} dias): ${insights.total.websiteClicks || 0}
+DADOS BRUTOS (${platform}):
+${isFacebook ? fbMetrics : igMetrics}
 `
       const result = await model.generateContent(prompt)
       const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
@@ -225,6 +260,7 @@ DADOS BRUTOS:
       data: {
         empresaId: empresa.id,
         dias: days,
+        platform: platform,
         dadosCongelados: dadosCongelados,
         criadoPor: session.user.id
       }

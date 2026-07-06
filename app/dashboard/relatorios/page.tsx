@@ -62,10 +62,8 @@ export default async function GlobalReportsPage() {
                 </div>
                 
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                  <GenerateReportButton empresaId={e.id} />
-                  <Link href={`/dashboard/empresas/${e.id}`} className="btn btn-secondary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>
-                    Ver Métricas
-                  </Link>
+                  <GenerateReportButton empresaId={e.id} platform="INSTAGRAM" />
+                  <GenerateReportButton empresaId={e.id} platform="FACEBOOK" />
                 </div>
               </div>
             ))}
@@ -101,7 +99,12 @@ export default async function GlobalReportsPage() {
                         <Calendar size={12} /> {date}
                       </div>
                     </div>
-                    <span className="badge badge-primary">{rel.dias} dias</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-end' }}>
+                      <span className="badge badge-primary">{rel.dias} dias</span>
+                      <span className={`badge ${rel.platform === 'FACEBOOK' ? 'badge-primary' : 'badge-neutral'}`} style={{ fontSize: '0.65rem' }}>
+                        {rel.platform}
+                      </span>
+                    </div>
                   </div>
                   
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>

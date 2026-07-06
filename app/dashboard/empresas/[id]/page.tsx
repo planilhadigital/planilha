@@ -564,8 +564,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               <p style={{ color: 'var(--text-muted)' }}>
                 Sua conta do Facebook está vinculada! Agora você pode gerar relatórios de desempenho e inteligência artificial atualizados com dados em tempo real.
               </p>
-              <div>
-                <GenerateReportButton empresaId={empresa.id} />
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <GenerateReportButton empresaId={empresa.id} platform="INSTAGRAM" />
+                <GenerateReportButton empresaId={empresa.id} platform="FACEBOOK" />
               </div>
               <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Histórico de Relatórios ({empresa.relatoriosGerados?.length || 0})</h3>
@@ -574,7 +575,12 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                     {empresa.relatoriosGerados.map((relatorio: any) => (
                       <div key={relatorio.id} className={styles.reportHistoryCard}>
                         <div>
-                          <div style={{ fontWeight: 500 }}>Relatório de {relatorio.dias} dias</div>
+                          <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            Relatório de {relatorio.dias} dias
+                            <span className={`badge ${relatorio.platform === 'FACEBOOK' ? 'badge-primary' : 'badge-neutral'}`} style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
+                              {relatorio.platform || 'INSTAGRAM'}
+                            </span>
+                          </div>
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                             Gerado em {new Date(relatorio.createdAt).toLocaleDateString('pt-BR')} às {new Date(relatorio.createdAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
                           </div>

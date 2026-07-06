@@ -3,8 +3,14 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FileText, Loader2 } from 'lucide-react'
+import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
-export default function GenerateReportButton({ empresaId }: { empresaId: string }) {
+interface Props {
+  empresaId: string;
+  platform?: 'INSTAGRAM' | 'FACEBOOK';
+}
+
+export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM' }: Props) {
   const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {
@@ -13,7 +19,7 @@ export default function GenerateReportButton({ empresaId }: { empresaId: string 
       const res = await fetch('/api/reports/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ empresaId, days: 28 })
+        body: JSON.stringify({ empresaId, days: 28, platform })
       })
       
       const data = await res.json()
@@ -25,7 +31,6 @@ export default function GenerateReportButton({ empresaId }: { empresaId: string 
       toast.success('Relatório gerado! Abrindo...')
       window.open(`/report/${data.relatorioId}`, '_blank')
       
-      // Atualizar a página para exibir na galeria
       setTimeout(() => window.location.reload(), 1000)
     } catch (err: any) {
       toast.error(err.message)
@@ -34,10 +39,24 @@ export default function GenerateReportButton({ empresaId }: { empresaId: string 
     }
   }
 
+  const isInsta = platform === 'INSTAGRAM'
+  const bgColor = isInsta ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : '#1877F2'
+
   return (
-    <button onClick={handleGenerate} disabled={loading} className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>
-      {loading ? <Loader2 size={16} className="anim-spin" /> : <FileText size={16} />}
-      {loading ? 'Gerando IA...' : 'Gerar Relatório'}
+    <button 
+      onClick={handleGenerate} 
+      disabled={loading} 
+      className="btn btn-primary btn-sm" 
+      style={{ 
+        flex: 1, 
+        justifyContent: 'center', 
+        background: loading ? 'var(--bg-elevated)' : bgColor,
+        borderColor: 'transparent'
+      }}
+      title={`Gerar Relatório de ${isInsta ? 'Instagram' : 'Facebook'}`}
+    >
+      {loading ? <Loader2 size={16} className="anim-spin" /> : (isInsta ? <FaInstagram size={16} /> : <FaFacebook size={16} />)}
+      {loading ? 'Gerando IA...' : (isInsta ? 'IG Report' : 'FB Report')}
     </button>
   )
 }
