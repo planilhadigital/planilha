@@ -162,7 +162,8 @@ export async function POST(req: Request) {
                 title: { type: SchemaType.STRING },
                 properties: { 
                   type: SchemaType.OBJECT, 
-                  description: "Dados estruturados do bloco (kpis, posts, narrative, etc)"
+                  description: "Dados estruturados do bloco (kpis, posts, narrative, etc)",
+                  properties: {}
                 }
               },
               required: ["component_type", "title", "properties"]

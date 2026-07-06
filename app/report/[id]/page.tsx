@@ -5,7 +5,6 @@ import PrintButton from './PrintButton'
 import CopyLinkButton from '@/components/reports/CopyLinkButton'
 import HeroHighlight from '@/components/reports/blocks/HeroHighlight'
 import StandardGrid from '@/components/reports/blocks/StandardGrid'
-import TimelineCrisis from '@/components/reports/blocks/TimelineCrisis'
 import PostShowcase from '@/components/reports/blocks/PostShowcase'
 
 export default async function PublicReportPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ days?: string }> }) {
