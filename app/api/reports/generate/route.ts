@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { empresaId, days = 28, platform = 'INSTAGRAM' } = await req.json()
+    const { empresaId, days = 28, platform = 'INSTAGRAM', startDate, endDate } = await req.json()
 
     if (!empresaId) {
       return NextResponse.json({ error: 'empresaId é obrigatório' }, { status: 400 })
@@ -43,6 +43,13 @@ export async function POST(req: Request) {
     let postsData: any = []
     let isDemo = false
     const isFacebook = platform === 'FACEBOOK'
+    let effectiveDays = days;
+    
+    if (startDate && endDate) {
+      const s = new Date(startDate).getTime();
+      const e = new Date(endDate).getTime();
+      effectiveDays = Math.ceil((e - s) / (1000 * 3600 * 24));
+    }
 
     if (empresa.igAccountId && !isFacebook) {
       const dono = await prisma.user.findUnique({
@@ -53,7 +60,7 @@ export async function POST(req: Request) {
       if (dono && dono.metaAccessToken) {
         try {
           profile = await getInstagramProfile(empresa.igAccountId, dono.metaAccessToken)
-          insights = await getInstagramInsights(empresa.igAccountId, dono.metaAccessToken, days)
+          insights = await getInstagramInsights(empresa.igAccountId, dono.metaAccessToken, days, startDate, endDate)
           postsData = await getInstagramPosts(empresa.igAccountId, dono.metaAccessToken, days)
         } catch (err) {
           console.error('Erro ao buscar dados reais IG:', err)
@@ -74,10 +81,10 @@ export async function POST(req: Request) {
           profile = {
             username: empresa.name.toLowerCase().replace(/\s+/g, ''),
             avatar: empresa.avatarUrl || 'https://via.placeholder.com/150',
-            followers: 0, // Not fetching page fans right now
+            followers: 0,
             postsCount: 0
           }
-          insights = await getFacebookPageInsights(empresa.metaPageId, dono.metaAccessToken, days)
+          insights = await getFacebookPageInsights(empresa.metaPageId, dono.metaAccessToken, days, startDate, endDate)
           postsData = await getFacebookPosts(empresa.metaPageId, dono.metaAccessToken, days)
         } catch (err) {
           console.error('Erro ao buscar dados reais FB:', err)
@@ -142,7 +149,7 @@ export async function POST(req: Request) {
     });
 
     // 1. Normalização Determinística
-    const normalizedMetrics = normalizeMetrics(platform, days, profile, insights, postsData)
+    const normalizedMetrics = normalizeMetrics(platform, effectiveDays, profile, insights, postsData)
 
     // Análise IA
     let aiAnalysis = null
@@ -163,7 +170,41 @@ export async function POST(req: Request) {
                 properties: { 
                   type: SchemaType.OBJECT, 
                   description: "Dados estruturados do bloco (kpis, posts, narrative, etc)",
-                  properties: {}
+                  properties: {
+                    metric: { type: SchemaType.STRING },
+                    label: { type: SchemaType.STRING },
+                    delta: { type: SchemaType.STRING },
+                    narrative: { type: SchemaType.STRING },
+                    severity: { type: SchemaType.STRING },
+                    steps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                    recommendation: { type: SchemaType.STRING },
+                    kpis: { 
+                      type: SchemaType.ARRAY, 
+                      items: { 
+                        type: SchemaType.OBJECT, 
+                        properties: {
+                          title: { type: SchemaType.STRING },
+                          value: { type: SchemaType.STRING },
+                          trend: { type: SchemaType.STRING }
+                        }
+                      }
+                    },
+                    posts: {
+                      type: SchemaType.ARRAY,
+                      items: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                          caption: { type: SchemaType.STRING },
+                          media_url: { type: SchemaType.STRING },
+                          media_type: { type: SchemaType.STRING },
+                          permalink: { type: SchemaType.STRING },
+                          like_count: { type: SchemaType.NUMBER },
+                          comments_count: { type: SchemaType.NUMBER },
+                          plays_count: { type: SchemaType.NUMBER }
+                        }
+                      }
+                    }
+                  }
                 }
               },
               required: ["component_type", "title", "properties"]
@@ -224,7 +265,7 @@ ${JSON.stringify(normalizedMetrics, null, 2)}
     const relatorio = await prisma.relatorioGerado.create({
       data: {
         empresaId: empresa.id,
-        dias: days,
+        dias: effectiveDays,
         platform: platform,
         dadosCongelados: dadosCongelados,
         criadoPor: session.user.id

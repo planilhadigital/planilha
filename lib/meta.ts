@@ -28,12 +28,24 @@ export async function getInstagramProfile(igAccountId: string, accessToken: stri
   }
 }
 
-export async function getInstagramInsights(igAccountId: string, accessToken: string, days: number = 28) {
+export async function getInstagramInsights(igAccountId: string, accessToken: string, days: number = 28, startDate?: string, endDate?: string) {
   try {
-    // Calculando timestamps (limite do Facebook para 'day'  30 dias por request, ento travamos no max 28 por segurana).
-    const safeDays = Math.min(days, 30);
-    const until = Math.floor(Date.now() / 1000);
-    const since = until - (safeDays * 86400); // 86400s = 1 dia
+    let since: number;
+    let until: number;
+    let safeDays = days;
+    
+    if (startDate && endDate) {
+      since = Math.floor(new Date(startDate).getTime() / 1000);
+      // until should be end of the endDate day
+      const endD = new Date(endDate);
+      endD.setHours(23, 59, 59, 999);
+      until = Math.floor(endD.getTime() / 1000);
+      safeDays = Math.ceil((until - since) / 86400);
+    } else {
+      safeDays = Math.min(days, 30);
+      until = Math.floor(Date.now() / 1000);
+      since = until - (safeDays * 86400);
+    }
 
     const url = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&since=${since}&until=${until}&access_token=${accessToken}`
     const res = await fetch(url)
@@ -55,7 +67,7 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     const totalClicks = clicksData.reduce((acc: number, val: any) => acc + val.value, 0)
 
     // PERODO ANTERIOR (DELTA)
-    const prevUntil = since; // O at do anterior  o desde do atual
+    const prevUntil = since;
     const prevSince = prevUntil - (safeDays * 86400);
     const prevUrl = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&since=${prevSince}&until=${prevUntil}&access_token=${accessToken}`
     
@@ -129,11 +141,23 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
   }
 }
 
-export async function getFacebookPageInsights(pageId: string, accessToken: string, days: number = 28) {
+export async function getFacebookPageInsights(pageId: string, accessToken: string, days: number = 28, startDate?: string, endDate?: string) {
   try {
-    const safeDays = Math.min(days, 30);
-    const until = Math.floor(Date.now() / 1000);
-    const since = until - (safeDays * 86400);
+    let since: number;
+    let until: number;
+    let safeDays = days;
+    
+    if (startDate && endDate) {
+      since = Math.floor(new Date(startDate).getTime() / 1000);
+      const endD = new Date(endDate);
+      endD.setHours(23, 59, 59, 999);
+      until = Math.floor(endD.getTime() / 1000);
+      safeDays = Math.ceil((until - since) / 86400);
+    } else {
+      safeDays = Math.min(days, 30);
+      until = Math.floor(Date.now() / 1000);
+      since = until - (safeDays * 86400);
+    }
 
     const url = `https://graph.facebook.com/v19.0/${pageId}/insights?metric=page_engaged_users,page_impressions,page_fan_adds&period=day&since=${since}&until=${until}&access_token=${accessToken}`
     const res = await fetch(url)

@@ -8,11 +8,13 @@ import { FaInstagram, FaFacebook } from 'react-icons/fa'
 interface Props {
   empresaId: string;
   platform?: 'INSTAGRAM' | 'FACEBOOK';
-  days?: number;
+  days?: number | 'custom';
+  startDate?: string;
+  endDate?: string;
   onGenerating?: (generating: boolean) => void;
 }
 
-export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM', days = 28, onGenerating }: Props) {
+export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM', days = 28, startDate, endDate, onGenerating }: Props) {
   const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {
@@ -22,7 +24,7 @@ export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM'
       const res = await fetch('/api/reports/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ empresaId, days, platform })
+        body: JSON.stringify({ empresaId, days, platform, startDate, endDate })
       })
       
       const data = await res.json()
