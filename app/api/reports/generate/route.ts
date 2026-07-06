@@ -179,15 +179,28 @@ DADOS BRUTOS:
       const result = await model.generateContent(prompt)
       const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
       aiAnalysis = JSON.parse(responseText)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro na análise da IA:', error)
+      const errorMessage = error.message || String(error)
       aiAnalysis = {
-        theme_mode: "THEME_NEUTRAL_GLASS",
+        theme_mode: "THEME_ALERT_DARK",
         ui_blueprint: {
           slides: [
             {
+              component_type: "TimelineCrisis",
+              title: "Erro de Comunicação com a IA",
+              properties: {
+                severity: "FALHA NA API",
+                steps: [
+                  "O servidor tentou contactar o Google Gemini para gerar o relatório.",
+                  `Erro retornado: ${errorMessage}`
+                ],
+                recommendation: "Verifique se a variável GEMINI_API_KEY está configurada corretamente na Vercel e se a API tem limite disponível."
+              }
+            },
+            {
               component_type: "StandardGrid",
-              title: "Visão Geral de Estabilidade",
+              title: "Visão Geral de Estabilidade (Dados Brutos)",
               properties: {
                 kpis: [
                   { title: "Alcance", value: String(insights.total.reach), trend: "neutro" },

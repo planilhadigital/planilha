@@ -43,7 +43,7 @@ export default async function GlobalReportsPage() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {empresas.map(e => (
+            {empresas.map((e: any) => (
               <div key={e.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   {e.avatarUrl ? (
@@ -90,7 +90,7 @@ export default async function GlobalReportsPage() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-            {relatorios.map(rel => {
+            {relatorios.map((rel: any) => {
               const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(rel.createdAt))
               return (
                 <div key={rel.id} className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
