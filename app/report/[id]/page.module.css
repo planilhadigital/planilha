@@ -212,11 +212,27 @@
   min-height: 100vh;
   background: var(--bg-deep);
   color: var(--text-primary);
-  font-family: var(--font);
-  padding: 2rem;
-  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  /* Premium Glassmorphic style */
+  --report-accent: var(--accent);
+  --report-bg-glow: rgba(250, 70, 22, 0.05);
+  --report-border: rgba(255, 255, 255, 0.05);
 }
+
+.themeAlert {
+  --report-accent: var(--danger);
+  --report-bg-glow: rgba(220, 38, 38, 0.05);
+}
+
+.themeSuccess {
+  --report-accent: var(--success);
+  --report-bg-glow: rgba(22, 163, 74, 0.05);
+}
+
 .presentationHeader {
   display: flex;
   justify-content: space-between;

@@ -3,7 +3,9 @@ import styles from './page.module.css'
 import ClientChart from '@/app/report/[id]/ClientChart'
 import PrintButton from './PrintButton'
 import CopyLinkButton from '@/components/reports/CopyLinkButton'
-
+import HeroHighlight from '@/components/reports/blocks/HeroHighlight'
+import StandardGrid from '@/components/reports/blocks/StandardGrid'
+import TimelineCrisis from '@/components/reports/blocks/TimelineCrisis'
 export default async function PublicReportPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ days?: string }> }) {
   const { id } = await params
   const relatorio = await prisma.relatorioGerado.findUnique({
@@ -30,7 +32,7 @@ export default async function PublicReportPage({ params, searchParams }: { param
   const aiAnalysis = dados.aiAnalysis
 
   return (
-    <div className={styles.presentationPage}>
+    <div className={`${styles.presentationPage} ${aiAnalysis.theme_mode === 'THEME_ALERT_DARK' ? styles.themeAlert : aiAnalysis.theme_mode === 'THEME_SUCCESS_GLOW' ? styles.themeSuccess : ''}`}>
       <header className={styles.presentationHeader}>
         <div className={styles.headerBrand}>
           <img src={profile.avatar} alt="Avatar" className={styles.headerAvatar} />
@@ -47,43 +49,21 @@ export default async function PublicReportPage({ params, searchParams }: { param
       </header>
 
       <main className={styles.presentationBody}>
-        {/* Slide 1: O Grande Destaque (Gerado por IA) */}
-        <section className={`${styles.slide} ${styles.slideHighlight}`}>
-          <div className={styles.slideGlow}></div>
-          <h2 className={styles.punchline}>"{aiAnalysis.punchline}"</h2>
-          
-          <div className={styles.highlightBox}>
-            <span className={styles.highlightLabel}>{aiAnalysis.mainHighlight.label}</span>
-            <span className={styles.highlightValue}>{aiAnalysis.mainHighlight.value}</span>
-          </div>
-          
-          <p className={styles.narrative}>{aiAnalysis.narrative}</p>
-        </section>
+        {aiAnalysis.ui_blueprint?.slides?.map((slide: any, idx: number) => {
+          if (slide.component_type === 'HeroHighlight') {
+            return <HeroHighlight key={idx} title={slide.title} properties={slide.properties} />
+          }
+          if (slide.component_type === 'TimelineCrisis') {
+            return <TimelineCrisis key={idx} title={slide.title} properties={slide.properties} />
+          }
+          if (slide.component_type === 'StandardGrid') {
+            return <StandardGrid key={idx} title={slide.title} properties={slide.properties} />
+          }
+          return null
+        })}
 
-        {/* Slide 2: Números Reais (Grid de KPIs) */}
-        <section className={`${styles.slide} ${styles.slideMetrics}`}>
-          {aiAnalysis.dynamicKpis && aiAnalysis.dynamicKpis.map((kpi: any, idx: number) => (
-            <div key={idx} className={styles.kpiBox}>
-              <span className={styles.kpiTitle}>{kpi.title}</span>
-              <div className={styles.kpiNumber}>
-                {kpi.value}
-                {kpi.deltaText && (
-                  <span className={`${styles.delta} ${kpi.trend === 'positivo' ? styles.deltaUp : kpi.trend === 'negativo' ? styles.deltaDown : ''}`}>
-                    {kpi.deltaText}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-          {(!aiAnalysis.dynamicKpis || aiAnalysis.dynamicKpis.length === 0) && (
-            <div className={styles.kpiBox} style={{ gridColumn: '1 / -1', textAlign: 'center', opacity: 0.5 }}>
-              Sem dados numéricos relevantes neste período.
-            </div>
-          )}
-        </section>
-
-        {/* Slide 3: Gráfico Visual */}
-        {insights.history && insights.history.length > 0 && (
+        {/* Gráfico Visual de Suporte (Sempre renderizado se houver histórico e o tema não for alerta crítico) */}
+        {insights.history && insights.history.length > 0 && aiAnalysis.theme_mode !== 'THEME_ALERT_DARK' && (
           <section className={`${styles.slide} ${styles.slideChart}`}>
             <h3 className={styles.slideTitle}>Evolução Diária</h3>
             <div className={styles.chartContainer}>
@@ -91,16 +71,6 @@ export default async function PublicReportPage({ params, searchParams }: { param
             </div>
           </section>
         )}
-
-        {/* Slide 4: Plano de Ação IA */}
-        <section className={`${styles.slide} ${styles.slideAction}`}>
-          <h3 className={styles.slideTitle}>Próximos Passos (Plano de Ação)</h3>
-          <ul className={styles.actionList}>
-            {aiAnalysis.actionPlan.map((step: string, i: number) => (
-              <li key={i}><span className={styles.stepNumber}>{i + 1}</span> {step}</li>
-            ))}
-          </ul>
-        </section>
       </main>
 
       <footer className={styles.presentationFooter}>

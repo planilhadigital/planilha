@@ -102,35 +102,27 @@ export async function POST(req: Request) {
       const reportSchema: Schema = {
         type: SchemaType.OBJECT,
         properties: {
-          punchline: { type: SchemaType.STRING },
-          narrative: { type: SchemaType.STRING },
-          mainHighlight: {
+          theme_mode: { type: SchemaType.STRING, description: "THEME_SUCCESS_GLOW, THEME_ALERT_DARK, ou THEME_NEUTRAL_GLASS" },
+          ui_blueprint: {
             type: SchemaType.OBJECT,
             properties: {
-              label: { type: SchemaType.STRING },
-              value: { type: SchemaType.STRING }
+              slides: {
+                type: SchemaType.ARRAY,
+                items: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    component_type: { type: SchemaType.STRING, description: "HeroHighlight, TimelineCrisis, ou StandardGrid" },
+                    title: { type: SchemaType.STRING },
+                    properties: { type: SchemaType.OBJECT, description: "Dados estruturados do bloco" }
+                  },
+                  required: ["component_type", "title", "properties"]
+                }
+              }
             },
-            required: ["label", "value"]
-          },
-          dynamicKpis: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                title: { type: SchemaType.STRING, description: "O nome da métrica" },
-                value: { type: SchemaType.STRING, description: "O valor formatado" },
-                trend: { type: SchemaType.STRING, description: "Pode ser 'positivo', 'negativo' ou 'neutro'" },
-                deltaText: { type: SchemaType.STRING, description: "Opcional. Exemplo: '+12%'" }
-              },
-              required: ["title", "value", "trend"]
-            }
-          },
-          actionPlan: {
-            type: SchemaType.ARRAY,
-            items: { type: SchemaType.STRING }
+            required: ["slides"]
           }
         },
-        required: ["punchline", "narrative", "mainHighlight", "dynamicKpis", "actionPlan"]
+        required: ["theme_mode", "ui_blueprint"]
       }
 
       const model = genAI.getGenerativeModel({ 
@@ -142,17 +134,22 @@ export async function POST(req: Request) {
       })
 
       const prompt = `
-Você é um estrategista de marketing brilhante e criativo, montando uma apresentação executiva sobre o desempenho do Instagram da empresa "${empresa.name}".
-Analise os seguintes dados e preencha a estrutura JSON correspondente perfeitamente.
+Atuarás como um Diretor de Marketing Estratégico (CMO) e Engenheiro de Design Generativo.
+O teu objetivo exclusivo é analisar os seguintes dados da empresa "${empresa.name}" e estruturar um relatório na nossa arquitetura A2UI (Componentes Declarativos em JSON).
 
-ATENÇÃO: Se alguma métrica for 0, inválida ou ausente, IGNORE-A completamente. 
-Escolha até 4 métricas de maior destaque que mostrem a real situação da conta e adicione no array "dynamicKpis".
+REGRAS OBRIGATÓRIAS (Camadas de Curadoria e Design):
+1. Avalia o estado geral. Se houver crescimento acelerado (anomalia orgânica positiva), define theme_mode como 'THEME_SUCCESS_GLOW'. Se houver queda acentuada, usa 'THEME_ALERT_DARK'. Se for estabilidade, usa 'THEME_NEUTRAL_GLASS'.
+2. Omite canais com resultados nulos ou sem relevância estatística.
+3. Cria a estrutura da UI no array 'slides' utilizando os seguintes componentes disponíveis:
+   - 'HeroHighlight': Usa para vitórias massivas. Exige em 'properties': { "metric": "...", "label": "...", "delta": "...", "narrative": "..." }
+   - 'TimelineCrisis': Usa para anomalias ou quedas. Exige em 'properties': { "severity": "...", "steps": ["...", "..."], "recommendation": "..." }
+   - 'StandardGrid': Usa para listar de 1 a 4 métricas comuns (como grid de KPIs). Exige em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo" }] }
 
-DADOS:
-- Seguidores: ${profile.followers}
-- Publicações: ${profile.postsCount}
-- Alcance Total (${days} dias): ${insights.total.reach} (Crescimento/Queda de ${insights.total.reachDelta}%)
-- Impressões Totais (${days} dias): ${insights.total.impressions} (Crescimento/Queda de ${insights.total.impressionsDelta}%)
+DADOS BRUTOS:
+- Seguidores Atuais: ${profile.followers}
+- Número de Publicações: ${profile.postsCount}
+- Alcance Total Acumulado (últimos ${days} dias): ${insights.total.reach} (Variação de ${insights.total.reachDelta}%)
+- Impressões Totais (últimos ${days} dias): ${insights.total.impressions} (Variação de ${insights.total.impressionsDelta}%)
 `
       const result = await model.generateContent(prompt)
       const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
@@ -160,14 +157,21 @@ DADOS:
     } catch (error) {
       console.error('Erro na análise da IA:', error)
       aiAnalysis = {
-        punchline: "Consistência de Resultados no Período",
-        narrative: "A estratégia atual mantém um fluxo constante de alcance e engajamento. Notamos uma base sólida de impressões, indicando que a audiência continua interagindo com os conteúdos principais da marca.",
-        mainHighlight: { label: "Alcance Mantido", value: String(insights.total.reach) },
-        dynamicKpis: [
-          { title: "Alcance Total", value: String(insights.total.reach), trend: "positivo", deltaText: "Estável" },
-          { title: "Seguidores", value: String(profile.followers), trend: "neutro" }
-        ],
-        actionPlan: ["Manter a cadência de postagens", "Investir em Reels para mais alcance", "Criar chamadas para ação nos Stories"]
+        theme_mode: "THEME_NEUTRAL_GLASS",
+        ui_blueprint: {
+          slides: [
+            {
+              component_type: "StandardGrid",
+              title: "Visão Geral de Estabilidade",
+              properties: {
+                kpis: [
+                  { title: "Alcance", value: String(insights.total.reach), trend: "neutro" },
+                  { title: "Seguidores", value: String(profile.followers), trend: "neutro" }
+                ]
+              }
+            }
+          ]
+        }
       }
     }
 
