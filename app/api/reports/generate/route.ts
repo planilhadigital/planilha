@@ -173,6 +173,8 @@ DADOS BRUTOS:
 - Número de Publicações: ${profile.postsCount}
 - Alcance Total Acumulado (últimos ${days} dias): ${insights.total.reach} (Variação de ${insights.total.reachDelta}%)
 - Impressões Totais (últimos ${days} dias): ${insights.total.impressions} (Variação de ${insights.total.impressionsDelta}%)
+- Visualizações do Perfil (últimos ${days} dias): ${insights.total.profileViews || 0}
+- Cliques no Site/Link (últimos ${days} dias): ${insights.total.websiteClicks || 0}
 `
       const result = await model.generateContent(prompt)
       const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()

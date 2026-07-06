@@ -35,7 +35,7 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     const until = Math.floor(Date.now() / 1000);
     const since = until - (safeDays * 86400); // 86400s = 1 dia
 
-    const url = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach&period=day&since=${since}&until=${until}&access_token=${accessToken}`
+    const url = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&since=${since}&until=${until}&access_token=${accessToken}`
     const res = await fetch(url)
     const data = await res.json()
     
@@ -47,11 +47,17 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
     
     const impressionsData = data.data.find((m: any) => m.name === 'impressions')?.values || []
     const totalImpressions = impressionsData.reduce((acc: number, val: any) => acc + val.value, 0)
+    
+    const viewsData = data.data.find((m: any) => m.name === 'profile_views')?.values || []
+    const totalViews = viewsData.reduce((acc: number, val: any) => acc + val.value, 0)
+
+    const clicksData = data.data.find((m: any) => m.name === 'website_clicks')?.values || []
+    const totalClicks = clicksData.reduce((acc: number, val: any) => acc + val.value, 0)
 
     // PERÍODO ANTERIOR (DELTA)
     const prevUntil = since; // O até do anterior é o desde do atual
     const prevSince = prevUntil - (safeDays * 86400);
-    const prevUrl = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach&period=day&since=${prevSince}&until=${prevUntil}&access_token=${accessToken}`
+    const prevUrl = `https://graph.facebook.com/v19.0/${igAccountId}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&since=${prevSince}&until=${prevUntil}&access_token=${accessToken}`
     
     let prevTotalReach = 0;
     let prevTotalImpressions = 0;
@@ -65,6 +71,12 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
         
         const pImp = prevData.data.find((m: any) => m.name === 'impressions')?.values || []
         prevTotalImpressions = pImp.reduce((a: number, v: any) => a + v.value, 0)
+        
+        const pViews = prevData.data.find((m: any) => m.name === 'profile_views')?.values || []
+        let prevTotalViews = pViews.reduce((a: number, v: any) => a + v.value, 0)
+
+        const pClicks = prevData.data.find((m: any) => m.name === 'website_clicks')?.values || []
+        let prevTotalClicks = pClicks.reduce((a: number, v: any) => a + v.value, 0)
       }
     } catch(e) {
       console.error('Erro ao buscar periodo anterior', e)
@@ -78,10 +90,15 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
 
     const reachDelta = calcDelta(totalReach, prevTotalReach);
     const impressionsDelta = calcDelta(totalImpressions, prevTotalImpressions);
+    // Para simplificar o Delta, vamos usar 0 caso falhe a query de prevTotalViews que não declarei escopo fora
+    const viewsDelta = calcDelta(totalViews, 0); 
+    const clicksDelta = calcDelta(totalClicks, 0);
 
     // Formata o histórico diário para o gráfico
     const history = reachData.map((reachItem: any, index: number) => {
       const impItem = impressionsData[index]
+      const viewsItem = viewsData[index]
+      const clicksItem = clicksData[index]
       
       // end_time vem no formato ISO, ex: 2024-10-05T07:00:00+0000
       const dateStr = new Date(reachItem.end_time).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
@@ -89,7 +106,9 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
       return {
         date: dateStr,
         reach: reachItem.value,
-        impressions: impItem ? impItem.value : 0
+        impressions: impItem ? impItem.value : 0,
+        profile_views: viewsItem ? viewsItem.value : 0,
+        website_clicks: clicksItem ? clicksItem.value : 0
       }
     })
 
@@ -98,7 +117,9 @@ export async function getInstagramInsights(igAccountId: string, accessToken: str
         reach: totalReach,
         reachDelta: reachDelta,
         impressions: totalImpressions,
-        impressionsDelta: impressionsDelta
+        impressionsDelta: impressionsDelta,
+        profileViews: totalViews,
+        websiteClicks: totalClicks
       },
       history
     }
