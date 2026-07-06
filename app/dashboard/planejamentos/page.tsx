@@ -141,7 +141,9 @@ export default function PlanejamentosPage() {
           acc[empName].boards.push(q)
           return acc
         }, {} as Record<string, { name: string, avatarUrl: string | null, boards: any[] }>)
-      ).map(({ name, avatarUrl, boards }) => (
+      ).map((group: any) => {
+        const { name, avatarUrl, boards } = group
+        return (
         <div key={name} className="anim-fade-up anim-delay-2" style={{ marginTop: '2rem' }}>
           <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
             {avatarUrl ? (
@@ -170,7 +172,7 @@ export default function PlanejamentosPage() {
             ))}
           </div>
         </div>
-      ))}
+      )})}
     </div>
   )
 }
