@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import GenerateReportButton from '@/components/reports/GenerateReportButton'
+import DeleteReportButton from '@/components/reports/DeleteReportButton'
 import { ExternalLink, Calendar } from 'lucide-react'
 
 export default async function GlobalReportsPage() {
@@ -107,6 +108,7 @@ export default async function GlobalReportsPage() {
                     <a href={`/report/${rel.id}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>
                       <ExternalLink size={14} /> Abrir Link
                     </a>
+                    <DeleteReportButton reportId={rel.id} />
                   </div>
                 </div>
               )
