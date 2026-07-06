@@ -1,0 +1,47 @@
+.mobileHeader {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-h);
+  padding: 0 1rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-mobile-nav);
+}
+
+.menuButton {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border-radius: var(--r-md);
+  transition: var(--t-fast);
+}
+
+.menuButton:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.logoWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.placeholder {
+  width: 40px;
+}
+
+@media (max-width: 768px) {
+  .mobileHeader {
+    display: flex;
+  }
+}
