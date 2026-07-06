@@ -4,6 +4,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import { getInstagramInsights, getInstagramProfile, getFacebookPageInsights, getInstagramPosts, getFacebookPosts } from '@/lib/meta'
 import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai'
+import { z } from 'zod'
+import { normalizeMetrics, buildDeterministicFallback } from '@/lib/report-normalizer'
 
 const apiKey = process.env.GEMINI_API_KEY || ''
 const genAI = new GoogleGenerativeAI(apiKey)
@@ -125,71 +127,49 @@ export async function POST(req: Request) {
       }
     }
 
+    // Define o schema Zod para validação da IA
+    const reportBlueprintSchema = z.object({
+      template: z.enum(["GROWTH_HERO", "NEUTRAL_GRID", "ALERT_COMPACT", "SHOWCASE_FOCUS"]),
+      headline: z.string(),
+      insight_summary: z.string(),
+      slides: z.array(
+        z.object({
+          component_type: z.enum(["HeroHighlight", "StandardGrid", "PostShowcase"]),
+          title: z.string(),
+          properties: z.any()
+        })
+      )
+    });
+
+    // 1. Normalização Determinística
+    const normalizedMetrics = normalizeMetrics(platform, days, profile, insights, postsData)
+
     // Análise IA
     let aiAnalysis = null
     try {
       const reportSchema: Schema = {
         type: SchemaType.OBJECT,
         properties: {
-          theme_mode: { type: SchemaType.STRING, description: "THEME_SUCCESS_GLOW, THEME_ALERT_DARK, ou THEME_NEUTRAL_GLASS" },
-          ui_blueprint: {
-            type: SchemaType.OBJECT,
-            properties: {
-              slides: {
-                type: SchemaType.ARRAY,
-                items: {
-                  type: SchemaType.OBJECT,
-                  properties: {
-                    component_type: { type: SchemaType.STRING, description: "HeroHighlight, StandardGrid, ou PostShowcase" },
-                    title: { type: SchemaType.STRING },
-                    properties: { 
-                      type: SchemaType.OBJECT, 
-                      description: "Dados estruturados do bloco",
-                      properties: {
-                        metric: { type: SchemaType.STRING },
-                        label: { type: SchemaType.STRING },
-                        delta: { type: SchemaType.STRING },
-                        narrative: { type: SchemaType.STRING },
-                        severity: { type: SchemaType.STRING },
-                        steps: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-                        recommendation: { type: SchemaType.STRING },
-                        kpis: { 
-                          type: SchemaType.ARRAY, 
-                          items: { 
-                            type: SchemaType.OBJECT, 
-                            properties: {
-                              title: { type: SchemaType.STRING },
-                              value: { type: SchemaType.STRING },
-                              trend: { type: SchemaType.STRING }
-                            }
-                          }
-                        },
-                        posts: {
-                          type: SchemaType.ARRAY,
-                          items: {
-                            type: SchemaType.OBJECT,
-                            properties: {
-                              caption: { type: SchemaType.STRING },
-                              media_url: { type: SchemaType.STRING },
-                              media_type: { type: SchemaType.STRING },
-                              permalink: { type: SchemaType.STRING },
-                              like_count: { type: SchemaType.NUMBER },
-                              comments_count: { type: SchemaType.NUMBER },
-                              plays_count: { type: SchemaType.NUMBER }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  required: ["component_type", "title", "properties"]
+          template: { type: SchemaType.STRING, description: "GROWTH_HERO, NEUTRAL_GRID, ALERT_COMPACT ou SHOWCASE_FOCUS" },
+          headline: { type: SchemaType.STRING, description: "Título impactante para o relatório" },
+          insight_summary: { type: SchemaType.STRING, description: "Resumo em 1 ou 2 frases sobre o desempenho geral" },
+          slides: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                component_type: { type: SchemaType.STRING, description: "HeroHighlight, StandardGrid, ou PostShowcase" },
+                title: { type: SchemaType.STRING },
+                properties: { 
+                  type: SchemaType.OBJECT, 
+                  description: "Dados estruturados do bloco (kpis, posts, narrative, etc)"
                 }
-              }
-            },
-            required: ["slides"]
+              },
+              required: ["component_type", "title", "properties"]
+            }
           }
         },
-        required: ["theme_mode", "ui_blueprint"]
+        required: ["template", "headline", "insight_summary", "slides"]
       }
 
       const model = genAI.getGenerativeModel({ 
@@ -200,78 +180,36 @@ export async function POST(req: Request) {
         }
       })
 
-      const igMetrics = `
-- Seguidores Atuais: ${profile?.followers || 0}
-- Número de Publicações: ${profile?.postsCount || 0}
-- Alcance Total Acumulado (últimos ${days} dias): ${insights?.total?.reach || 0} (Variação de ${insights?.total?.reachDelta || 0}%)
-- Impressões Totais (últimos ${days} dias): ${insights?.total?.impressions || 0} (Variação de ${insights?.total?.impressionsDelta || 0}%)
-- Visualizações do Perfil (últimos ${days} dias): ${insights?.total?.profileViews || 0}
-- Cliques no Site/Link (últimos ${days} dias): ${insights?.total?.websiteClicks || 0}
-`
-      const fbMetrics = `
-- Fãs Adicionados (últimos ${days} dias): ${insights?.total?.newFans || 0}
-- Usuários Engajados (últimos ${days} dias): ${insights?.total?.engagedUsers || 0} (Variação de ${insights?.total?.engagedDelta || 0}%)
-- Impressões Totais (últimos ${days} dias): ${insights?.total?.impressions || 0} (Variação de ${insights?.total?.impressionsDelta || 0}%)
-`
-
       const prompt = `
 Você é um Especialista em Apresentação de Resultados de Marketing e Design Generativo.
-O teu objetivo exclusivo é analisar os seguintes dados da empresa "${empresa.name}" na plataforma ${platform} e estruturar uma Apresentação Descritiva e Celebrativa usando a arquitetura A2UI (Componentes Declarativos em JSON).
+O teu objetivo exclusivo é analisar os seguintes dados normalizados da empresa "${empresa.name}" na plataforma ${platform} e estruturar uma Apresentação Descritiva usando a arquitetura A2UI (Componentes Declarativos em JSON).
 
-REGRAS OBRIGATÓRIAS (Camadas de Curadoria e Design):
-1. Avalia o estado geral. Se houver crescimento acelerado, define theme_mode como 'THEME_SUCCESS_GLOW'. Caso contrário, use 'THEME_NEUTRAL_GLASS'.
-2. O Tom de Voz da narrativa deve ser PURAMENTE DESCRITIVO e de prestação de contas. Descreva os números, mostre o que aconteceu e as vitórias do período.
-3. NÃO tire conclusões. NÃO dê recomendações. NÃO dê dicas do que fazer no futuro.
-4. Cria a estrutura da UI no array 'slides' utilizando os seguintes componentes disponíveis:
-   - 'HeroHighlight': Usa para dar o título da apresentação ou destacar o maior número. Exige em 'properties': { "metric": "...", "label": "...", "narrative": "..." }
-   - 'StandardGrid': Usa para listar os KPIs de forma objetiva. Exige em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo" }] }
-   - 'PostShowcase': Usa para mostrar os melhores posts do período. Exige em 'properties': { "title": "...", "posts": [{ "caption": "...", "media_url": "...", "media_type": "...", "permalink": "...", "like_count": 0, "comments_count": 0, "plays_count": 0 }] }
+REGRAS OBRIGATÓRIAS:
+1. Escolha um 'template' baseado no 'trend' geral. Se for crescimento forte, use GROWTH_HERO. Se estável, NEUTRAL_GRID. Se queda, ALERT_COMPACT. Se tiver muitos posts bons, SHOWCASE_FOCUS.
+2. Crie um 'headline' curto e impactante.
+3. Crie um 'insight_summary' profissional e puramente descritivo resumindo o desempenho.
+4. Monte a estrutura em 'slides' usando apenas: HeroHighlight, StandardGrid e PostShowcase.
+5. Em 'StandardGrid', exija em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo|neutro" }] }.
+6. Use APENAS os dados fornecidos. NÃO faça cálculos.
 
-INSTRUÇÕES IMPORTANTES:
-- Inclua pelo menos um slide do tipo 'PostShowcase' com os posts fornecidos nos dados brutos, se houver.
-- Seja profissional e direto na narrativa.
-
-DADOS BRUTOS (${platform}):
-${isFacebook ? fbMetrics : igMetrics}
-
-POSTS DE DESTAQUE (${platform}):
-${JSON.stringify(postsData, null, 2)}
+DADOS NORMALIZADOS:
+${JSON.stringify(normalizedMetrics, null, 2)}
 `
       const result = await model.generateContent(prompt)
       const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
-      aiAnalysis = JSON.parse(responseText)
-    } catch (error: any) {
-      console.error('Erro na análise da IA:', error)
-      const errorMessage = error.message || String(error)
-      aiAnalysis = {
-        theme_mode: "THEME_ALERT_DARK",
-        ui_blueprint: {
-          slides: [
-            {
-              component_type: "TimelineCrisis",
-              title: "Erro de Comunicação com a IA",
-              properties: {
-                severity: "FALHA NA API",
-                steps: [
-                  "O servidor tentou contactar o Google Gemini para gerar o relatório.",
-                  `Erro retornado: ${errorMessage}`
-                ],
-                recommendation: "Verifique se a variável GEMINI_API_KEY está configurada corretamente na Vercel e se a API tem limite disponível."
-              }
-            },
-            {
-              component_type: "StandardGrid",
-              title: "Visão Geral de Estabilidade (Dados Brutos)",
-              properties: {
-                kpis: [
-                  { title: "Alcance", value: String(insights.total.reach), trend: "neutro" },
-                  { title: "Seguidores", value: String(profile.followers), trend: "neutro" }
-                ]
-              }
-            }
-          ]
-        }
+      const rawAiAnalysis = JSON.parse(responseText)
+
+      // Validação Zod e Fallback
+      const parsed = reportBlueprintSchema.safeParse(rawAiAnalysis)
+      if (parsed.success) {
+        aiAnalysis = parsed.data
+      } else {
+        console.error("Blueprint inválido da IA", parsed.error)
+        aiAnalysis = buildDeterministicFallback(normalizedMetrics)
       }
+    } catch (error: any) {
+      console.error('Erro na análise da IA ou Timeout:', error)
+      aiAnalysis = buildDeterministicFallback(normalizedMetrics)
     }
 
     const dadosCongelados = {
