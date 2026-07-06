@@ -2,19 +2,21 @@
 
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { FileText, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 interface Props {
   empresaId: string;
   platform?: 'INSTAGRAM' | 'FACEBOOK';
+  onGenerating?: (generating: boolean) => void;
 }
 
-export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM' }: Props) {
+export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM', onGenerating }: Props) {
   const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {
     setLoading(true)
+    if (onGenerating) onGenerating(true)
     try {
       const res = await fetch('/api/reports/generate', {
         method: 'POST',
@@ -36,6 +38,7 @@ export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM'
       toast.error(err.message)
     } finally {
       setLoading(false)
+      if (onGenerating) onGenerating(false)
     }
   }
 
@@ -50,12 +53,13 @@ export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM'
       style={{ 
         justifyContent: 'center', 
         background: loading ? 'var(--bg-elevated)' : bgColor,
-        borderColor: 'transparent'
+        borderColor: 'transparent',
+        flex: 1
       }}
       title={`Gerar Relatório de ${isInsta ? 'Instagram' : 'Facebook'}`}
     >
       {loading ? <Loader2 size={16} className="anim-spin" /> : (isInsta ? <FaInstagram size={16} /> : <FaFacebook size={16} />)}
-      {loading ? 'Gerando IA...' : (isInsta ? 'IG Report' : 'FB Report')}
+      {loading ? 'Processando...' : (isInsta ? 'IG REPORT' : 'FB REPORT')}
     </button>
   )
 }

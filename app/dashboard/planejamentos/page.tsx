@@ -154,7 +154,7 @@ export default function PlanejamentosPage() {
             {name}
           </h2>
           <div className={styles.grid}>
-            {boards.map(q => (
+            {boards.map((q: any) => (
               <Link key={q.id} href={`/dashboard/planejamentos/${q.id}`} className={`card ${styles.boardCard}`}>
                 <div>
                   <h3 className={styles.boardTitle}>{q.titulo}</h3>

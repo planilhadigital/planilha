@@ -37,12 +37,6 @@
   padding: 1.5rem;
 }
 
-.card:hover {
-  /* Effects handled by global .card class */
-}
-
-/* Removed custom hover before effect */
-
 .avatar {
   width: 72px;
   height: 72px;

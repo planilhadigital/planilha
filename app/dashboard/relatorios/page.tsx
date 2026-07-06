@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import GenerateReportButton from '@/components/reports/GenerateReportButton'
 import DeleteReportButton from '@/components/reports/DeleteReportButton'
+import ReportGeneratorCard from '@/components/reports/ReportGeneratorCard'
 import { ExternalLink, Calendar } from 'lucide-react'
 
 export default async function GlobalReportsPage() {
@@ -44,28 +45,7 @@ export default async function GlobalReportsPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {empresas.map((e: any) => (
-              <div key={e.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  {e.avatarUrl ? (
-                    <img src={e.avatarUrl} alt={e.name} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
-                  ) : (
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-deep)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                      {e.name.charAt(0)}
-                    </div>
-                  )}
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{e.name}</h3>
-                    <span className={`badge badge-${e.status === 'Ativo' ? 'success' : 'neutral'}`} style={{ marginTop: '0.25rem' }}>
-                      {e.status}
-                    </span>
-                  </div>
-                </div>
-                
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                  <GenerateReportButton empresaId={e.id} platform="INSTAGRAM" />
-                  <GenerateReportButton empresaId={e.id} platform="FACEBOOK" />
-                </div>
-              </div>
+              <ReportGeneratorCard key={e.id} empresa={e} />
             ))}
           </div>
         )}
@@ -88,10 +68,15 @@ export default async function GlobalReportsPage() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-            {relatorios.map((rel: any) => {
+            {relatorios.map((rel: any, index: number) => {
               const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(rel.createdAt))
               return (
-                <div key={rel.id} className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div key={rel.id} className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', overflow: 'visible' }}>
+                  {index === 0 && (
+                    <div style={{ position: 'absolute', top: -10, right: -10, background: 'var(--accent)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, padding: '2px 8px', borderRadius: 'var(--r-full)', boxShadow: '0 0 10px rgba(250,70,22,0.5)', zIndex: 5, letterSpacing: '1px' }}>
+                      NEW
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>{rel.empresa.name}</h4>
