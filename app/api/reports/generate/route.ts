@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         try {
           profile = await getInstagramProfile(empresa.igAccountId, dono.metaAccessToken)
           insights = await getInstagramInsights(empresa.igAccountId, dono.metaAccessToken, days, startDate, endDate)
-          postsData = await getInstagramPosts(empresa.igAccountId, dono.metaAccessToken, days)
+          postsData = await getInstagramPosts(empresa.igAccountId, dono.metaAccessToken, effectiveDays)
         } catch (err) {
           console.error('Erro ao buscar dados reais IG:', err)
           isDemo = true
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
             postsCount: 0
           }
           insights = await getFacebookPageInsights(empresa.metaPageId, dono.metaAccessToken, days, startDate, endDate)
-          postsData = await getFacebookPosts(empresa.metaPageId, dono.metaAccessToken, days)
+          postsData = await getFacebookPosts(empresa.metaPageId, dono.metaAccessToken, effectiveDays)
         } catch (err) {
           console.error('Erro ao buscar dados reais FB:', err)
           isDemo = true
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
       insight_summary: z.string(),
       slides: z.array(
         z.object({
-          component_type: z.enum(["HeroHighlight", "StandardGrid", "PostShowcase"]),
+          component_type: z.enum(["HeroHighlight", "StandardGrid", "PostShowcase", "NarrativeFlow"]),
           title: z.string(),
           properties: z.any()
         })
@@ -167,7 +167,7 @@ export async function POST(req: Request) {
             items: {
               type: SchemaType.OBJECT,
               properties: {
-                component_type: { type: SchemaType.STRING, description: "HeroHighlight, StandardGrid, ou PostShowcase" },
+                component_type: { type: SchemaType.STRING, description: "HeroHighlight, StandardGrid, PostShowcase ou NarrativeFlow" },
                 title: { type: SchemaType.STRING },
                 properties: { 
                   type: SchemaType.OBJECT, 
@@ -232,9 +232,10 @@ REGRAS OBRIGATÓRIAS:
 1. Escolha um 'template' baseado no 'trend' geral. Se for crescimento forte, use GROWTH_HERO. Se estável, NEUTRAL_GRID. Se queda, ALERT_COMPACT. Se tiver muitos posts bons, SHOWCASE_FOCUS.
 2. Crie um 'headline' curto e impactante.
 3. Crie um 'insight_summary' profissional e puramente descritivo resumindo o desempenho.
-4. Monte a estrutura em 'slides' usando apenas: HeroHighlight, StandardGrid e PostShowcase.
-5. Em 'StandardGrid', exija em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo|neutro" }] }.
-6. Use APENAS os dados fornecidos. NÃO faça cálculos.
+4. Monte a estrutura em 'slides' usando apenas: NarrativeFlow, HeroHighlight, StandardGrid e PostShowcase.
+5. OBRIGATÓRIO: O PRIMEIRO slide deve ser SEMPRE um 'NarrativeFlow'. Em 'properties' exija: { "steps": ["O Cenário antes", "A Ação feita", "O Resultado"] }. Deduza a Ação baseada no trend dos números (ex: se alcance subiu, deduza que focaram em topo de funil).
+6. Em 'StandardGrid', exija em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo|neutro" }] }.
+7. Use APENAS os dados fornecidos. NÃO faça cálculos.
 
 DADOS NORMALIZADOS:
 ${JSON.stringify(normalizedMetrics, null, 2)}

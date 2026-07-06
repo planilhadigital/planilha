@@ -83,6 +83,17 @@ export function buildDeterministicFallback(metrics: MetricsPayload): any {
     insight_summary: `Resumo gerado automaticamente para o período. A tendência geral é de ${metrics.trend}.`,
     slides: [
       {
+        component_type: "NarrativeFlow",
+        title: "Evolução Estratégica",
+        properties: {
+          steps: [
+            "Necessidade de consolidação da marca na rede",
+            metrics.trend === 'crescimento' ? "Estratégia de alcance expandida" : "Otimização de rotina de postagens",
+            metrics.trend === 'crescimento' ? "Resultados positivos em alcance" : "Estabilidade na entrega"
+          ]
+        }
+      },
+      {
         component_type: "StandardGrid",
         title: "Visão Geral",
         properties: {

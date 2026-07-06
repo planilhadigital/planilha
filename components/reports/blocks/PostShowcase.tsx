@@ -18,7 +18,21 @@ export default function PostShowcase({ properties }: { properties: any }) {
               <div className={styles.postMediaWrapper}>
                 {post.media_url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={post.media_url} alt="Post Thumbnail" className={styles.postMedia} />
+                  <img 
+                    src={post.media_url} 
+                    alt="Post Thumbnail" 
+                    className={styles.postMedia} 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      const parent = (e.target as HTMLImageElement).parentElement;
+                      if (parent) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = styles.postMediaPlaceholder;
+                        placeholder.innerText = 'Vídeo Indisponível';
+                        parent.appendChild(placeholder);
+                      }
+                    }} 
+                  />
                 ) : (
                   <div className={styles.postMediaPlaceholder}>Nenhuma mídia</div>
                 )}
