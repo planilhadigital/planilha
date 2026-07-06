@@ -385,7 +385,8 @@
    CALENDAR
    ========================================================= */
 .calendarWrapper {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding: 0 !important; /* Override card padding */
 }
 
@@ -395,6 +396,8 @@
   align-items: center;
   padding: 1.5rem;
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  left: 0;
 }
 
 .calendarGrid {
@@ -402,6 +405,7 @@
   grid-template-columns: repeat(7, 1fr);
   background: rgba(255, 255, 255, 0.05); /* very subtle grid lines */
   gap: 1px;
+  min-width: 700px;
 }
 
 .calendarDayHeader {
@@ -566,6 +570,7 @@
   border-radius: var(--r-md);
   border: 1px solid var(--border);
   transition: all 0.25s ease;
+  gap: 1rem;
 }
 
 .reportHistoryCard:hover {
@@ -573,4 +578,35 @@
   border-color: var(--accent);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 640px) {
+  .reportHistoryCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.postGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+}
+
+.postInnerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .postGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .postInnerGrid {
+    grid-template-columns: 1fr;
+  }
 }

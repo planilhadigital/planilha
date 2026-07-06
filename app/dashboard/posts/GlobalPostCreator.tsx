@@ -160,12 +160,12 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
       {/* EDITOR PANEL */}
       <div className={`card-plain ${styles.editorPanel}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', gridColumn: 'span 2' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
+        <div className={styles.postGrid}>
           {/* Lado Esquerdo do Editor */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minWidth: 0 }}>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div>
+            <div className={styles.postInnerGrid}>
+              <div style={{ minWidth: 0 }}>
                 <div className={styles.stepTitle}>
                   <span className={styles.stepNumber}>1</span> {empresas.length === 1 ? 'Conta Selecionada' : 'Selecione as contas'}
                 </div>

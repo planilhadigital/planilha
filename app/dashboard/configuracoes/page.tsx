@@ -89,13 +89,13 @@ export default async function ConfiguracoesPage() {
                   <p className="text-muted text-sm" style={{ marginBottom: '1.5rem' }}>
                     Para que novas páginas apareçam, é necessário desconectar e conectar novamente selecionando todas as páginas no popup do Facebook.
                   </p>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <form action={disconnectMeta} style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <form action={disconnectMeta} style={{ flex: '1 1 200px' }}>
                       <button className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', color: '#ff4444', borderColor: '#ff4444' }}>
                         Desconectar e Resetar
                       </button>
                     </form>
-                    <a href="/api/meta/login" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', textDecoration: 'none' }}>
+                    <a href="/api/meta/login" className="btn btn-primary" style={{ flex: '1 1 200px', justifyContent: 'center', textDecoration: 'none' }}>
                       Reconectar Meta
                     </a>
                   </div>

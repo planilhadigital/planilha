@@ -505,29 +505,29 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
                 </select>
                 
                 {selectedPageId && metaPages.find(p => p.id === selectedPageId) && (
-                  <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <div className={styles.socialIntegrationCard}>
                     {(() => {
                       const page = metaPages.find(p => p.id === selectedPageId)
                       return (
                         <>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                          <div className={styles.socialIntegrationItem}>
                             <img src={page.picture?.data?.url || 'https://via.placeholder.com/40'} alt="FB" style={{ width: 40, height: 40, borderRadius: '50%' }} />
-                            <div>
-                              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{page.name}</div>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{page.name}</div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Página do Facebook</div>
                             </div>
                           </div>
                           
                           {page.instagram_business_account ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, borderLeft: '1px solid var(--border)', paddingLeft: '1rem' }}>
+                            <div className={`${styles.socialIntegrationItem} ${styles.socialIntegrationDivider}`}>
                               <img src={page.instagram_business_account.profile_picture_url || 'https://via.placeholder.com/40'} alt="IG" style={{ width: 40, height: 40, borderRadius: '50%' }} />
-                              <div>
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>@{page.instagram_business_account.username || 'instagram'}</div>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{page.instagram_business_account.username || 'instagram'}</div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Instagram Business</div>
                               </div>
                             </div>
                           ) : (
-                            <div style={{ flex: 1, borderLeft: '1px solid var(--border)', paddingLeft: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            <div className={`${styles.socialIntegrationItem} ${styles.socialIntegrationDivider}`} style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                               Nenhuma conta do Instagram vinculada a esta página.
                             </div>
                           )}
