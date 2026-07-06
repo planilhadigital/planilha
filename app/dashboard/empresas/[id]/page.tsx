@@ -165,10 +165,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       toast.error(e.message || 'Erro ao deletar', { id: loadingToast })
     }
   }
-    } catch (err: any) {
-      toast.error(err.message, { id: loadingToast })
-    }
-  }
+
 
   const handleSaveConfig = async () => {
     setSaving(true)
