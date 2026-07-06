@@ -6,6 +6,7 @@ import GenerateReportButton from './GenerateReportButton'
 
 export default function ReportGeneratorCard({ empresa }: { empresa: any }) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const [days, setDays] = useState(28)
 
   return (
     <div 
@@ -42,9 +43,23 @@ export default function ReportGeneratorCard({ empresa }: { empresa: any }) {
         </div>
       </div>
       
-      <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-        <GenerateReportButton empresaId={empresa.id} platform="INSTAGRAM" onGenerating={setIsGenerating} />
-        <GenerateReportButton empresaId={empresa.id} platform="FACEBOOK" onGenerating={setIsGenerating} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-sm)', border: '1px solid var(--border)', marginRight: 'auto' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Período:</span>
+          <select 
+            value={days} 
+            onChange={e => setDays(Number(e.target.value))}
+            style={{ background: 'transparent', color: 'var(--text-primary)', border: 'none', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+          >
+            <option value={7}>7 dias</option>
+            <option value={14}>14 dias</option>
+            <option value={28}>28 dias</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', flex: 1, minWidth: '100%' }}>
+          <GenerateReportButton empresaId={empresa.id} platform="INSTAGRAM" days={days} onGenerating={setIsGenerating} />
+          <GenerateReportButton empresaId={empresa.id} platform="FACEBOOK" days={days} onGenerating={setIsGenerating} />
+        </div>
       </div>
     </div>
   )
