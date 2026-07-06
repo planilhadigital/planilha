@@ -49,7 +49,7 @@ export default async function EmpresasPage() {
               <div className={styles.info}>
                 <h3 className={styles.name}>{e.name}</h3>
                 <span className={styles.integrationStatus}>
-                  Integração Meta: <span className={`${styles.statusDot} ${e.metaPageId ? styles.dotActive : styles.dotInactive}`}></span>
+                  Meta: <span className={`${styles.statusDot} ${e.metaPageId ? styles.dotActive : styles.dotInactive}`}></span>
                 </span>
               </div>
               
