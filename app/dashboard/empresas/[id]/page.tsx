@@ -552,9 +552,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
               <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Histórico de Relatórios ({empresa.relatoriosGerados?.length || 0})</h3>
                 {empresa.relatoriosGerados && empresa.relatoriosGerados.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {empresa.relatoriosGerados.map((relatorio: any) => (
-                      <div key={relatorio.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'var(--surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+                      <div key={relatorio.id} className={styles.reportHistoryCard}>
                         <div>
                           <div style={{ fontWeight: 500 }}>Relatório de {relatorio.dias} dias</div>
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
