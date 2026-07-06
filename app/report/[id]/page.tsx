@@ -6,6 +6,8 @@ import CopyLinkButton from '@/components/reports/CopyLinkButton'
 import HeroHighlight from '@/components/reports/blocks/HeroHighlight'
 import StandardGrid from '@/components/reports/blocks/StandardGrid'
 import TimelineCrisis from '@/components/reports/blocks/TimelineCrisis'
+import PostShowcase from '@/components/reports/blocks/PostShowcase'
+
 export default async function PublicReportPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ days?: string }> }) {
   const { id } = await params
   const relatorio = await prisma.relatorioGerado.findUnique({
@@ -58,6 +60,9 @@ export default async function PublicReportPage({ params, searchParams }: { param
           }
           if (slide.component_type === 'StandardGrid') {
             return <StandardGrid key={idx} title={slide.title} properties={slide.properties} />
+          }
+          if (slide.component_type === 'PostShowcase') {
+            return <PostShowcase key={idx} properties={slide.properties} />
           }
           return null
         })}

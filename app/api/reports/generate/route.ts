@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
-import { getInstagramInsights, getInstagramProfile, getFacebookPageInsights } from '@/lib/meta'
+import { getInstagramInsights, getInstagramProfile, getFacebookPageInsights, getInstagramPosts, getFacebookPosts } from '@/lib/meta'
 import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai'
 
 const apiKey = process.env.GEMINI_API_KEY || ''
@@ -38,6 +38,7 @@ export async function POST(req: Request) {
 
     let profile: any = null
     let insights: any = null
+    let postsData: any = []
     let isDemo = false
     const isFacebook = platform === 'FACEBOOK'
 
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
         try {
           profile = await getInstagramProfile(empresa.igAccountId, dono.metaAccessToken)
           insights = await getInstagramInsights(empresa.igAccountId, dono.metaAccessToken, days)
+          postsData = await getInstagramPosts(empresa.igAccountId, dono.metaAccessToken, days)
         } catch (err) {
           console.error('Erro ao buscar dados reais IG:', err)
           isDemo = true
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
             postsCount: 0
           }
           insights = await getFacebookPageInsights(empresa.metaPageId, dono.metaAccessToken, days)
+          postsData = await getFacebookPosts(empresa.metaPageId, dono.metaAccessToken, days)
         } catch (err) {
           console.error('Erro ao buscar dados reais FB:', err)
           isDemo = true
@@ -137,7 +140,7 @@ export async function POST(req: Request) {
                 items: {
                   type: SchemaType.OBJECT,
                   properties: {
-                    component_type: { type: SchemaType.STRING, description: "HeroHighlight, TimelineCrisis, ou StandardGrid" },
+                    component_type: { type: SchemaType.STRING, description: "HeroHighlight, StandardGrid, ou PostShowcase" },
                     title: { type: SchemaType.STRING },
                     properties: { 
                       type: SchemaType.OBJECT, 
@@ -158,6 +161,19 @@ export async function POST(req: Request) {
                               title: { type: SchemaType.STRING },
                               value: { type: SchemaType.STRING },
                               trend: { type: SchemaType.STRING }
+                            }
+                          }
+                        },
+                        posts: {
+                          type: SchemaType.ARRAY,
+                          items: {
+                            type: SchemaType.OBJECT,
+                            properties: {
+                              caption: { type: SchemaType.STRING },
+                              media_url: { type: SchemaType.STRING },
+                              permalink: { type: SchemaType.STRING },
+                              like_count: { type: SchemaType.NUMBER },
+                              comments_count: { type: SchemaType.NUMBER }
                             }
                           }
                         }
@@ -197,19 +213,27 @@ export async function POST(req: Request) {
 `
 
       const prompt = `
-Atuarás como um Diretor de Marketing Estratégico (CMO) e Engenheiro de Design Generativo.
-O teu objetivo exclusivo é analisar os seguintes dados da empresa "${empresa.name}" na plataforma ${platform} e estruturar um relatório na nossa arquitetura A2UI (Componentes Declarativos em JSON).
+Você é um Especialista em Apresentação de Resultados de Marketing e Design Generativo.
+O teu objetivo exclusivo é analisar os seguintes dados da empresa "${empresa.name}" na plataforma ${platform} e estruturar uma Apresentação Descritiva e Celebrativa usando a arquitetura A2UI (Componentes Declarativos em JSON).
 
 REGRAS OBRIGATÓRIAS (Camadas de Curadoria e Design):
-1. Avalia o estado geral. Se houver crescimento acelerado (anomalia orgânica positiva), define theme_mode como 'THEME_SUCCESS_GLOW'. Se houver queda acentuada, usa 'THEME_ALERT_DARK'. Se for estabilidade, usa 'THEME_NEUTRAL_GLASS'.
-2. Omite canais com resultados nulos ou sem relevância estatística.
-3. Cria a estrutura da UI no array 'slides' utilizando os seguintes componentes disponíveis:
-   - 'HeroHighlight': Usa para vitórias massivas. Exige em 'properties': { "metric": "...", "label": "...", "delta": "...", "narrative": "..." }
-   - 'TimelineCrisis': Usa para anomalias ou quedas. Exige em 'properties': { "severity": "...", "steps": ["...", "..."], "recommendation": "..." }
-   - 'StandardGrid': Usa para listar de 1 a 4 métricas comuns (como grid de KPIs). Exige em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo" }] }
+1. Avalia o estado geral. Se houver crescimento acelerado, define theme_mode como 'THEME_SUCCESS_GLOW'. Caso contrário, use 'THEME_NEUTRAL_GLASS'.
+2. O Tom de Voz da narrativa deve ser PURAMENTE DESCRITIVO e de prestação de contas. Descreva os números, mostre o que aconteceu e as vitórias do período.
+3. NÃO tire conclusões. NÃO dê recomendações. NÃO dê dicas do que fazer no futuro.
+4. Cria a estrutura da UI no array 'slides' utilizando os seguintes componentes disponíveis:
+   - 'HeroHighlight': Usa para dar o título da apresentação ou destacar o maior número. Exige em 'properties': { "metric": "...", "label": "...", "narrative": "..." }
+   - 'StandardGrid': Usa para listar os KPIs de forma objetiva. Exige em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo" }] }
+   - 'PostShowcase': Usa para mostrar os melhores posts do período. Exige em 'properties': { "title": "...", "posts": [{ "caption": "...", "media_url": "...", "permalink": "...", "like_count": 0, "comments_count": 0 }] }
+
+INSTRUÇÕES IMPORTANTES:
+- Inclua pelo menos um slide do tipo 'PostShowcase' com os posts fornecidos nos dados brutos, se houver.
+- Seja profissional e direto na narrativa.
 
 DADOS BRUTOS (${platform}):
 ${isFacebook ? fbMetrics : igMetrics}
+
+POSTS DE DESTAQUE (${platform}):
+${JSON.stringify(postsData, null, 2)}
 `
       const result = await model.generateContent(prompt)
       const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim()

@@ -205,3 +205,69 @@ export async function getFacebookPageInsights(pageId: string, accessToken: strin
     return null
   }
 }
+
+export async function getInstagramPosts(igAccountId: string, accessToken: string, days: number = 28) {
+  try {
+    const url = `https://graph.facebook.com/v19.0/${igAccountId}/media?fields=id,caption,media_type,media_url,permalink,timestamp,like_count,comments_count&limit=50&access_token=${accessToken}`
+    const res = await fetch(url)
+    const data = await res.json()
+    
+    if (data.error) throw new Error(data.error.message)
+    if (!data.data || data.data.length === 0) return []
+
+    const thresholdDate = new Date()
+    thresholdDate.setDate(thresholdDate.getDate() - days)
+
+    const recentPosts = data.data.filter((post: any) => new Date(post.timestamp) >= thresholdDate)
+    
+    // Sort by total engagement (likes + comments)
+    const sorted = recentPosts.sort((a: any, b: any) => {
+      const engA = (a.like_count || 0) + (a.comments_count || 0)
+      const engB = (b.like_count || 0) + (b.comments_count || 0)
+      return engB - engA
+    })
+
+    // Return top 3
+    return sorted.slice(0, 3)
+  } catch (error) {
+    console.error('Erro getInstagramPosts:', error)
+    return []
+  }
+}
+
+export async function getFacebookPosts(pageId: string, accessToken: string, days: number = 28) {
+  try {
+    const url = `https://graph.facebook.com/v19.0/${pageId}/published_posts?fields=id,message,created_time,full_picture,permalink_url,likes.summary(true),comments.summary(true)&limit=50&access_token=${accessToken}`
+    const res = await fetch(url)
+    const data = await res.json()
+    
+    if (data.error) throw new Error(data.error.message)
+    if (!data.data || data.data.length === 0) return []
+
+    const thresholdDate = new Date()
+    thresholdDate.setDate(thresholdDate.getDate() - days)
+
+    const recentPosts = data.data.filter((post: any) => new Date(post.created_time) >= thresholdDate)
+    
+    // Sort by total engagement
+    const sorted = recentPosts.sort((a: any, b: any) => {
+      const engA = (a.likes?.summary?.total_count || 0) + (a.comments?.summary?.total_count || 0)
+      const engB = (b.likes?.summary?.total_count || 0) + (b.comments?.summary?.total_count || 0)
+      return engB - engA
+    })
+
+    // Return top 3 formatados de forma parecida com IG
+    return sorted.slice(0, 3).map((p: any) => ({
+      id: p.id,
+      caption: p.message,
+      media_url: p.full_picture,
+      permalink: p.permalink_url,
+      timestamp: p.created_time,
+      like_count: p.likes?.summary?.total_count || 0,
+      comments_count: p.comments?.summary?.total_count || 0
+    }))
+  } catch (error) {
+    console.error('Erro getFacebookPosts:', error)
+    return []
+  }
+}
