@@ -62,6 +62,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       where: {
         id,
         usuarios: { some: { id: session.user.id } }
+      },
+      include: {
+        relatoriosGerados: {
+          orderBy: { createdAt: 'desc' }
+        }
       }
     })
 
