@@ -38,13 +38,25 @@ export async function GET(request: Request) {
     const profileRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,picture.width(200)&access_token=${longLivedData.access_token}`)
     const profileData = await profileRes.json()
 
+    let base64Photo = null
+    try {
+      if (profileData.picture?.data?.url) {
+        const imgRes = await fetch(profileData.picture.data.url)
+        const arrayBuffer = await imgRes.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+        base64Photo = `data:${imgRes.headers.get('content-type') || 'image/jpeg'};base64,${buffer.toString('base64')}`
+      }
+    } catch (err) {
+      console.error('Erro ao baixar foto Meta:', err)
+    }
+
     // 4. Salvar o Token + Nome + Foto diretamente no Usuário logado
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
         metaAccessToken: longLivedData.access_token,
         metaName: profileData.name ?? null,
-        metaPhoto: `https://graph.facebook.com/${profileData.id}/picture?type=large`,
+        metaPhoto: base64Photo,
       }
     })
 
