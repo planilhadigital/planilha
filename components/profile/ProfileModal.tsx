@@ -90,7 +90,7 @@ export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProp
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 9999, padding: '1rem'
     }}>
-      <div className="card anim-scale-in" style={{ 
+      <div className="card-plain anim-scale-in" style={{ 
         width: '100%', maxWidth: '500px', padding: 0, 
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
         maxHeight: '90vh'
@@ -129,7 +129,7 @@ export default function ProfileModal({ isOpen, onClose, user }: ProfileModalProp
               </div>
               <div>
                 <h4 style={{ margin: '0 0 0.5rem 0' }}>Foto de Perfil</h4>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => fileInputRef.current?.click()}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => fileInputRef.current?.click()}>
                   <UploadCloud size={16} /> Fazer Upload
                 </button>
                 <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" style={{ display: 'none' }} />

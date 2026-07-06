@@ -51,7 +51,7 @@ export default async function ConfiguracoesPage() {
 
       <div className={styles.mainGrid}>
         {!isAdmin ? (
-          <section className="card anim-fade-up">
+          <section className="card-plain anim-fade-up">
             <div className="card-header">
               <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--warning)' }}>
                 <Shield size={18} /> Acesso Restrito
@@ -64,7 +64,7 @@ export default async function ConfiguracoesPage() {
         ) : (
           <>
             {/* Integração Meta */}
-            <section className="card anim-fade-up anim-delay-1">
+            <section className="card-plain anim-fade-up anim-delay-1">
               <div className="card-header">
                 <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <LinkIcon size={18} /> Integração Meta (Global)
@@ -117,7 +117,7 @@ export default async function ConfiguracoesPage() {
             </section>
 
             {/* Segurança e Acesso */}
-            <section className="card anim-fade-up anim-delay-2">
+            <section className="card-plain anim-fade-up anim-delay-2">
               <div className="card-header">
                 <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Shield size={18} /> Segurança
@@ -133,7 +133,7 @@ export default async function ConfiguracoesPage() {
             </section>
 
             {/* Gerenciamento de Equipe */}
-            <section className="card anim-fade-up anim-delay-3" style={{ gridColumn: '1 / -1' }}>
+            <section className="card-plain anim-fade-up anim-delay-3" style={{ gridColumn: '1 / -1' }}>
               <div className="card-header">
                 <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Users size={18} /> Equipe Interna

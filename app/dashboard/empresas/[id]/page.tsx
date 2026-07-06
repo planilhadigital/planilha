@@ -394,7 +394,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       )}
 
       {activeTab === 'calendario' && (
-        <div className={`card ${styles.calendarWrapper} anim-fade-up`}>
+        <div className={`card-plain ${styles.calendarWrapper} anim-fade-up`}>
           <div className={styles.calendarHeader}>
             <button className="btn btn-icon" onClick={() => {
               const d = new Date(currentDate)
@@ -439,9 +439,9 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       )}
 
       {activeTab === 'config' && (
-        <div className={`${styles.configLayout} anim-fade-up`}>
-          <div className={`card ${styles.configSection}`}>
-            <h2 className={styles.stepTitle}>Imagens da Empresa</h2>
+        <div className={styles.configGrid}>
+          <div className={`card-plain ${styles.configSection}`}>
+            <h3>Dados Básicos</h3>
             
             <input type="file" hidden ref={coverInputRef} onChange={e => handleUpload(e, 'cover')} accept="image/*" />
             <input type="file" hidden ref={avatarInputRef} onChange={e => handleUpload(e, 'avatar')} accept="image/*" />
@@ -449,26 +449,36 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
               <div>
                 <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Capa da Página</label>
-                <div className={styles.uploadZone} onClick={() => coverInputRef.current?.click()}>
-                  <UploadCloud size={24} color="var(--text-muted)" />
-                  <span style={{ fontSize: '0.85rem' }}>Upload de Capa</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                  {empresa.coverUrl ? (
+                    <img src={empresa.coverUrl} className={styles.uploadPreviewCover} alt="Capa" />
+                  ) : (
+                    <div style={{ width: '100%', height: '100px', background: 'var(--bg-deep)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)' }} />
+                  )}
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => coverInputRef.current?.click()} style={{ marginTop: '0.25rem' }}>
+                    <UploadCloud size={16} /> Fazer Upload
+                  </button>
                 </div>
-                {empresa.coverUrl && <img src={empresa.coverUrl} className={styles.uploadPreviewCover} alt="Capa" />}
               </div>
               
               <div>
                 <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Foto de Perfil</label>
-                <div className={styles.uploadZone} onClick={() => avatarInputRef.current?.click()}>
-                  <UploadCloud size={24} color="var(--text-muted)" />
-                  <span style={{ fontSize: '0.85rem' }}>Upload de Avatar</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                  {empresa.avatarUrl ? (
+                    <img src={empresa.avatarUrl} className={styles.uploadPreview} alt="Avatar" />
+                  ) : (
+                    <div style={{ width: '64px', height: '64px', background: 'var(--bg-deep)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)' }} />
+                  )}
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => avatarInputRef.current?.click()} style={{ marginTop: '0.25rem' }}>
+                    <UploadCloud size={16} /> Fazer Upload
+                  </button>
                 </div>
-                {empresa.avatarUrl && <img src={empresa.avatarUrl} className={styles.uploadPreview} alt="Avatar" />}
               </div>
             </div>
           </div>
 
-          <div className={`card ${styles.configSection}`}>
-            <h2 className={styles.stepTitle}>Integração com Meta (Automação de Links)</h2>
+          <div className={`card-plain ${styles.configSection}`}>
+            <h3>Redes Sociais & Integrações</h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
               Vincule a página do Facebook para puxarmos os links e acessos automaticamente. Não é mais necessário colar URLs manualmente!
             </p>
@@ -552,7 +562,7 @@ export default function EmpresaSettingsPage({ params }: { params: Promise<{ id: 
       
       {/* Fallback silencioso para métricas (Mantivemos a lógica, mas simplifiquei a renderização pra caber no arquivo se o user pedir) */}
       {activeTab === 'metricas' && (
-        <div className="anim-fade-up card">
+        <div className="anim-fade-up card-plain">
           <h2 style={{ marginBottom: '1rem' }}>Métricas e Relatórios</h2>
           {!empresa?.metaPageId ? (
             <div style={{ color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)' }}>

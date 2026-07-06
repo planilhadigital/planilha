@@ -48,7 +48,6 @@ export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM'
       disabled={loading} 
       className="btn btn-primary btn-sm" 
       style={{ 
-        flex: 1, 
         justifyContent: 'center', 
         background: loading ? 'var(--bg-elevated)' : bgColor,
         borderColor: 'transparent'

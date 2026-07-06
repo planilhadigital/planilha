@@ -75,11 +75,17 @@
 }
 
 .platform {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  margin-top: 0.5rem;
+  font-weight: 500;
 }
 
 .meta {

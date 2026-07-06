@@ -89,7 +89,7 @@
   color: inherit;
 }
 .empresaItem:hover {
-  background: rgba(255,255,255,.04);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .empresaAvatar {
