@@ -220,10 +220,28 @@ export async function getInstagramPosts(igAccountId: string, accessToken: string
 
     const recentPosts = data.data.filter((post: any) => new Date(post.timestamp) >= thresholdDate)
     
-    // Sort by total engagement (likes + comments)
-    const sorted = recentPosts.sort((a: any, b: any) => {
-      const engA = (a.like_count || 0) + (a.comments_count || 0)
-      const engB = (b.like_count || 0) + (b.comments_count || 0)
+    // Fetch plays for videos concurrently
+    const enrichedPosts = await Promise.all(recentPosts.map(async (post: any) => {
+      let playsCount = 0
+      if (post.media_type === 'VIDEO') {
+        try {
+          const insightsUrl = `https://graph.facebook.com/v19.0/${post.id}/insights?metric=plays&access_token=${accessToken}`
+          const insightsRes = await fetch(insightsUrl)
+          const insightsData = await insightsRes.json()
+          if (insightsData.data && insightsData.data.length > 0) {
+            playsCount = insightsData.data[0].values[0].value
+          }
+        } catch (e) {
+          console.warn(`Could not fetch plays for video ${post.id}`)
+        }
+      }
+      return { ...post, plays_count: playsCount }
+    }))
+    
+    // Sort by total engagement (likes + comments + plays)
+    const sorted = enrichedPosts.sort((a: any, b: any) => {
+      const engA = (a.like_count || 0) + (a.comments_count || 0) + (a.plays_count || 0)
+      const engB = (b.like_count || 0) + (b.comments_count || 0) + (b.plays_count || 0)
       return engB - engA
     })
 
@@ -232,10 +250,12 @@ export async function getInstagramPosts(igAccountId: string, accessToken: string
       id: p.id,
       caption: p.caption,
       media_url: p.thumbnail_url || p.media_url,
+      media_type: p.media_type,
       permalink: p.permalink,
       timestamp: p.timestamp,
       like_count: p.like_count,
-      comments_count: p.comments_count
+      comments_count: p.comments_count,
+      plays_count: p.plays_count
     }))
   } catch (error) {
     console.error('Erro getInstagramPosts:', error)

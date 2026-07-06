@@ -171,9 +171,11 @@ export async function POST(req: Request) {
                             properties: {
                               caption: { type: SchemaType.STRING },
                               media_url: { type: SchemaType.STRING },
+                              media_type: { type: SchemaType.STRING },
                               permalink: { type: SchemaType.STRING },
                               like_count: { type: SchemaType.NUMBER },
-                              comments_count: { type: SchemaType.NUMBER }
+                              comments_count: { type: SchemaType.NUMBER },
+                              plays_count: { type: SchemaType.NUMBER }
                             }
                           }
                         }
@@ -223,7 +225,7 @@ REGRAS OBRIGATÓRIAS (Camadas de Curadoria e Design):
 4. Cria a estrutura da UI no array 'slides' utilizando os seguintes componentes disponíveis:
    - 'HeroHighlight': Usa para dar o título da apresentação ou destacar o maior número. Exige em 'properties': { "metric": "...", "label": "...", "narrative": "..." }
    - 'StandardGrid': Usa para listar os KPIs de forma objetiva. Exige em 'properties': { "kpis": [{ "title": "...", "value": "...", "trend": "positivo|negativo" }] }
-   - 'PostShowcase': Usa para mostrar os melhores posts do período. Exige em 'properties': { "title": "...", "posts": [{ "caption": "...", "media_url": "...", "permalink": "...", "like_count": 0, "comments_count": 0 }] }
+   - 'PostShowcase': Usa para mostrar os melhores posts do período. Exige em 'properties': { "title": "...", "posts": [{ "caption": "...", "media_url": "...", "media_type": "...", "permalink": "...", "like_count": 0, "comments_count": 0, "plays_count": 0 }] }
 
 INSTRUÇÕES IMPORTANTES:
 - Inclua pelo menos um slide do tipo 'PostShowcase' com os posts fornecidos nos dados brutos, se houver.
