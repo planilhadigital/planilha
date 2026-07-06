@@ -45,12 +45,12 @@ export async function POST(req: Request) {
     let postsData: any = []
     let isDemo = false
     const isFacebook = platform === 'FACEBOOK'
-    let effectiveDays = days;
+    let effectiveDays = parseInt(String(days)) || 28;
     
     if (startDate && endDate) {
       const s = new Date(startDate).getTime();
       const e = new Date(endDate).getTime();
-      effectiveDays = Math.ceil((e - s) / (1000 * 3600 * 24));
+      effectiveDays = Math.max(1, Math.ceil((e - s) / (1000 * 3600 * 24)));
     }
 
     if (empresa.igAccountId && !isFacebook) {

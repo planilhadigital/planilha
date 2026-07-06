@@ -85,8 +85,14 @@ export default function ReportGeneratorCard({ empresa }: { empresa: any }) {
         )}
 
         <div style={{ display: 'flex', gap: '0.5rem', flex: 1, minWidth: '100%', marginTop: days === 'custom' ? '0' : '0' }}>
-          <GenerateReportButton empresaId={empresa.id} platform="INSTAGRAM" days={days} startDate={startDate} endDate={endDate} onGenerating={setIsGenerating} />
-          <GenerateReportButton empresaId={empresa.id} platform="FACEBOOK" days={days} startDate={startDate} endDate={endDate} onGenerating={setIsGenerating} />
+          {days === 'custom' && (!startDate || !endDate) ? (
+            <button disabled className="btn btn-primary btn-sm" style={{ flex: 1, opacity: 0.5 }}>Preencha as datas</button>
+          ) : (
+            <>
+              <GenerateReportButton empresaId={empresa.id} platform="INSTAGRAM" days={days} startDate={startDate} endDate={endDate} onGenerating={setIsGenerating} />
+              <GenerateReportButton empresaId={empresa.id} platform="FACEBOOK" days={days} startDate={startDate} endDate={endDate} onGenerating={setIsGenerating} />
+            </>
+          )}
         </div>
       </div>
     </div>
