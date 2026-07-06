@@ -133,20 +133,28 @@ export default function PlanejamentosPage() {
       )}
 
       {/* Lista de Quadros Existentes Agrupados */}
-      {!loading && Object.entries(
+      {!loading && Object.values(
         quadros.reduce((acc, q) => {
-          const emp = q.empresa?.name || 'Gerais'
-          if (!acc[emp]) acc[emp] = []
-          acc[emp].push(q)
+          const empName = q.empresa?.name || 'Gerais'
+          const empAvatar = q.empresa?.avatarUrl || null
+          if (!acc[empName]) acc[empName] = { name: empName, avatarUrl: empAvatar, boards: [] }
+          acc[empName].boards.push(q)
           return acc
-        }, {} as Record<string, any[]>)
-      ).map(([empresaName, boards]) => (
-        <div key={empresaName} className="anim-fade-up anim-delay-2" style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
-            {empresaName}
+        }, {} as Record<string, { name: string, avatarUrl: string | null, boards: any[] }>)
+      ).map(({ name, avatarUrl, boards }) => (
+        <div key={name} className="anim-fade-up anim-delay-2" style={{ marginTop: '2rem' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+            ) : name !== 'Gerais' ? (
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 700, color: 'var(--accent)' }}>
+                {name.charAt(0).toUpperCase()}
+              </div>
+            ) : null}
+            {name}
           </h2>
           <div className={styles.grid}>
-            {(boards as any[]).map(q => (
+            {boards.map(q => (
               <Link key={q.id} href={`/dashboard/planejamentos/${q.id}`} className={`card ${styles.boardCard}`}>
                 <div>
                   <h3 className={styles.boardTitle}>{q.titulo}</h3>

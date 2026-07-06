@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { UploadCloud, Image as ImageIcon, Film, Layout, Copy, Settings, Calendar } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, Film, Layout, Copy, Settings, Calendar, Plus } from 'lucide-react'
 import { FaInstagram, FaFacebook } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import styles from '../empresas/[id]/page.module.css'
@@ -163,68 +163,71 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
           {/* Lado Esquerdo do Editor */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div>
-              <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>1</span> {empresas.length === 1 ? 'Conta Selecionada' : 'Selecione as contas'}
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div>
+                <div className={styles.stepTitle}>
+                  <span className={styles.stepNumber}>1</span> {empresas.length === 1 ? 'Conta Selecionada' : 'Selecione as contas'}
+                </div>
+                {empresas.length > 1 && (
+                  <select 
+                    className="input" 
+                    value=""
+                    onChange={e => {
+                      const val = e.target.value
+                      if (val && !selectedEmpresaIds.includes(val)) {
+                        setSelectedEmpresaIds([...selectedEmpresaIds, val])
+                      }
+                    }}
+                    style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
+                  >
+                    <option value="">-- Adicionar empresa --</option>
+                    {empresas.map(e => (
+                      <option key={e.id} value={e.id}>{e.name}</option>
+                    ))}
+                  </select>
+                )}
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {selectedEmpresaIds.map(id => {
+                    const emp = empresas.find(e => e.id === id)
+                    if(!emp) return null
+                    return (
+                      <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-full)', border: '1px solid var(--border)' }}>
+                        {emp.avatarUrl ? <img src={emp.avatarUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} /> : <div style={{width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold'}}>{emp.name.charAt(0).toUpperCase()}</div>}
+                        <span style={{ fontSize: '0.85rem' }}>{emp.name}</span>
+                        {empresas.length > 1 && (
+                          <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-              {empresas.length > 1 && (
-                <select 
-                  className="input" 
-                  value=""
-                  onChange={e => {
-                    const val = e.target.value
-                    if (val && !selectedEmpresaIds.includes(val)) {
-                      setSelectedEmpresaIds([...selectedEmpresaIds, val])
-                    }
-                  }}
-                  style={{ width: '100%', padding: '0.8rem', background: 'var(--bg-deep)', color: '#fff', marginBottom: '0.5rem' }}
-                >
-                  <option value="">-- Adicionar empresa --</option>
-                  {empresas.map(e => (
-                    <option key={e.id} value={e.id}>{e.name}</option>
-                  ))}
-                </select>
-              )}
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {selectedEmpresaIds.map(id => {
-                  const emp = empresas.find(e => e.id === id)
-                  if(!emp) return null
-                  return (
-                    <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.25rem 0.5rem', borderRadius: 'var(--r-full)', border: '1px solid var(--border)' }}>
-                      {emp.avatarUrl ? <img src={emp.avatarUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} /> : <div style={{width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold'}}>{emp.name.charAt(0).toUpperCase()}</div>}
-                      <span style={{ fontSize: '0.85rem' }}>{emp.name}</span>
-                      {empresas.length > 1 && (
-                        <button className="btn-icon" style={{ padding: 2, background: 'var(--danger-dim)', color: 'var(--danger)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedEmpresaIds(selectedEmpresaIds.filter(i => i !== id))}>✕</button>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
 
-            <div>
-              <div className={styles.stepTitle}>
-                <span className={styles.stepNumber}>2</span> Selecione canais
-              </div>
-              <div className={styles.channelSelector} style={{ gap: '0.5rem' }}>
-                <button 
-                  className={styles.channelBtn} 
-                  data-active={postForm.canais.instagram}
-                  onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
-                  style={{ padding: '0.5rem', borderRadius: '50%' }}
-                  title="Instagram"
-                >
-                  <FaInstagram size={18} />
-                </button>
-                <button 
-                  className={styles.channelBtn} 
-                  data-active={postForm.canais.facebook}
-                  onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
-                  style={{ padding: '0.5rem', borderRadius: '50%' }}
-                  title="Facebook"
-                >
-                  <FaFacebook size={18} />
-                </button>
+              <div>
+                <div className={styles.stepTitle}>
+                  <span className={styles.stepNumber}>2</span> Selecione canais
+                </div>
+                <div className={styles.channelSelector} style={{ gap: '0.5rem' }}>
+                  <button 
+                    className={styles.channelBtn} 
+                    data-active={postForm.canais.instagram}
+                    onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, instagram: !postForm.canais.instagram }})}
+                    style={{ padding: '0.5rem', borderRadius: '50%' }}
+                    title="Instagram"
+                  >
+                    <FaInstagram size={18} />
+                  </button>
+                  <button 
+                    className={styles.channelBtn} 
+                    data-active={postForm.canais.facebook}
+                    onClick={() => setPostForm({...postForm, canais: { ...postForm.canais, facebook: !postForm.canais.facebook }})}
+                    style={{ padding: '0.5rem', borderRadius: '50%' }}
+                    title="Facebook"
+                  >
+                    <FaFacebook size={18} />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -239,11 +242,19 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
                     <button 
                       key={fmt}
                       onClick={() => {
+                        let newFormatos = [...postForm.formatos];
                         if (isActive) {
-                          setPostForm({...postForm, formatos: postForm.formatos.filter(f => f !== fmt)})
+                          newFormatos = newFormatos.filter(f => f !== fmt);
                         } else {
-                          setPostForm({...postForm, formatos: [...postForm.formatos, fmt]})
+                          if (fmt === 'Reels' || fmt === 'Carrossel') {
+                            newFormatos = [fmt]; // Exclusivo
+                          } else {
+                            newFormatos = newFormatos.filter(f => f !== 'Reels' && f !== 'Carrossel');
+                            newFormatos.push(fmt);
+                          }
                         }
+                        if(newFormatos.length === 0) newFormatos = ['Feed'];
+                        setPostForm({...postForm, formatos: newFormatos});
                       }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -270,12 +281,49 @@ export default function GlobalPostCreator({ empresas }: { empresas: any[] }) {
                 <span className={styles.stepNumber}>4</span> Mídias
               </div>
               <input type="file" hidden multiple={postForm.formatos.includes('Carrossel')} ref={postMediaInputRef} onChange={handleUpload} accept="image/*,video/*" />
-              <div className={styles.uploadZone} onClick={() => postMediaInputRef.current?.click()} style={{ padding: '1rem', minHeight: '120px' }}>
+              <div className={styles.uploadZone} onClick={(e) => {
+                if ((e.target as HTMLElement).tagName !== 'BUTTON') {
+                  postMediaInputRef.current?.click()
+                }
+              }} style={{ padding: '1rem', minHeight: '120px' }}>
                 {postForm.midiaUrls.length > 0 ? (
-                  <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', width: '100%' }}>
                     {postForm.midiaUrls.map((url, i) => (
-                      <img key={i} src={url} alt="Preview" style={{ height: '80px', borderRadius: '8px', objectFit: 'contain' }} />
+                      <div key={i} style={{ position: 'relative', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                        <img src={url} alt={`Preview ${i}`} style={{ height: '100px', borderRadius: '8px', objectFit: 'contain', background: '#000' }} />
+                        {postForm.formatos.includes('Carrossel') && postForm.midiaUrls.length > 1 && (
+                          <div style={{ display: 'flex', gap: '0.25rem' }}>
+                            <button className="btn btn-secondary btn-sm" style={{ padding: '2px 8px' }} onClick={(e) => {
+                              e.stopPropagation();
+                              if (i > 0) {
+                                const newUrls = [...postForm.midiaUrls];
+                                [newUrls[i-1], newUrls[i]] = [newUrls[i], newUrls[i-1]];
+                                setPostForm({...postForm, midiaUrls: newUrls});
+                              }
+                            }} disabled={i === 0}>←</button>
+                            <span style={{ fontSize: '0.75rem', alignSelf: 'center', color: 'var(--text-muted)' }}>{i+1}</span>
+                            <button className="btn btn-secondary btn-sm" style={{ padding: '2px 8px' }} onClick={(e) => {
+                              e.stopPropagation();
+                              if (i < postForm.midiaUrls.length - 1) {
+                                const newUrls = [...postForm.midiaUrls];
+                                [newUrls[i+1], newUrls[i]] = [newUrls[i], newUrls[i+1]];
+                                setPostForm({...postForm, midiaUrls: newUrls});
+                              }
+                            }} disabled={i === postForm.midiaUrls.length - 1}>→</button>
+                          </div>
+                        )}
+                        <button className="btn-icon" style={{ position: 'absolute', top: -5, right: -5, background: 'var(--danger)', color: '#fff', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => {
+                          e.stopPropagation();
+                          const newUrls = postForm.midiaUrls.filter((_, index) => index !== i);
+                          setPostForm({...postForm, midiaUrls: newUrls});
+                        }}>✕</button>
+                      </div>
                     ))}
+                    {postForm.formatos.includes('Carrossel') && (
+                      <button type="button" className="btn btn-ghost" onClick={(e) => { e.stopPropagation(); postMediaInputRef.current?.click(); }} style={{ height: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border)' }}>
+                        <Plus size={24} /> Add
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
