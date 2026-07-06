@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       data: {
         metaAccessToken: longLivedData.access_token,
         metaName: profileData.name ?? null,
-        metaPhoto: profileData.picture?.data?.url ?? null,
+        metaPhoto: `https://graph.facebook.com/${profileData.id}/picture?type=large`,
       }
     })
 
