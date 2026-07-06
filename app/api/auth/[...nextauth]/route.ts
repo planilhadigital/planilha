@@ -14,6 +14,7 @@ export const authOptions: AuthOptions = {
           prompt: 'select_account',
         },
       },
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   session: {
@@ -60,7 +61,10 @@ export const authOptions: AuthOptions = {
           where: { id: token.sub },
           include: { empresas: { select: { id: true } } }
         })
-        token.empresasCount = dbUser?.empresas?.length || 0
+        if (dbUser) {
+          token.empresasCount = dbUser.empresas.length
+          token.role = dbUser.role
+        }
       }
       return token
     }
