@@ -20,25 +20,58 @@ export default function GenerateReportButton({ empresaId, platform = 'INSTAGRAM'
   const handleGenerate = async () => {
     setLoading(true)
     if (onGenerating) onGenerating(true)
+    const toastId = toast.loading('Buscando dados...')
     try {
-      const res = await fetch('/api/reports/generate', {
+      // 1. Prepare (Fetch DB & Graph API)
+      const prepareRes = await fetch('/api/reports/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ empresaId, days, platform, startDate, endDate })
       })
+      const prepareData = await prepareRes.json()
+      if (!prepareRes.ok) throw new Error(prepareData.error || 'Erro ao buscar dados')
       
-      const data = await res.json()
+      toast.loading('Analisando com IA...', { id: toastId })
       
-      if (!res.ok) {
-        throw new Error(data.error || 'Erro ao gerar relatório')
-      }
+      // 2. AI (Edge Runtime, max 30s)
+      const aiRes = await fetch('/api/reports/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          normalizedMetrics: prepareData.normalizedMetrics,
+          empresaName: prepareData.empresaName,
+          platform: prepareData.platform
+        })
+      })
+      const aiData = await aiRes.json()
+      // Ignoramos throws rígidos da IA para que o fallback possa salvar
       
-      toast.success('Relatório gerado! Abrindo...')
-      window.open(`/report/${data.relatorioId}`, '_blank')
+      toast.loading('Salvando relatório...', { id: toastId })
+
+      // 3. Save (Node Runtime, fast save)
+      const saveRes = await fetch('/api/reports/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          empresaId: prepareData.empresaId,
+          platform: prepareData.platform,
+          effectiveDays: prepareData.effectiveDays,
+          isDemo: prepareData.isDemo,
+          profile: prepareData.profile,
+          insights: prepareData.insights,
+          aiAnalysis: aiData.success ? aiData.aiAnalysis : null,
+          normalizedMetrics: prepareData.normalizedMetrics
+        })
+      })
+      const saveData = await saveRes.json()
+      if (!saveRes.ok) throw new Error(saveData.error || 'Erro ao salvar relatório')
+      
+      toast.success('Relatório gerado! Abrindo...', { id: toastId })
+      window.open(`/report/${saveData.relatorioId}`, '_blank')
       
       setTimeout(() => window.location.reload(), 1000)
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(err.message, { id: toastId })
     } finally {
       setLoading(false)
       if (onGenerating) onGenerating(false)
