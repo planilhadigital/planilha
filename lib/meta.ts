@@ -208,7 +208,7 @@ export async function getFacebookPageInsights(pageId: string, accessToken: strin
 
 export async function getInstagramPosts(igAccountId: string, accessToken: string, days: number = 28) {
   try {
-    const url = `https://graph.facebook.com/v19.0/${igAccountId}/media?fields=id,caption,media_type,media_url,permalink,timestamp,like_count,comments_count&limit=50&access_token=${accessToken}`
+    const url = `https://graph.facebook.com/v19.0/${igAccountId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count&limit=50&access_token=${accessToken}`
     const res = await fetch(url)
     const data = await res.json()
     
@@ -227,8 +227,16 @@ export async function getInstagramPosts(igAccountId: string, accessToken: string
       return engB - engA
     })
 
-    // Return top 3
-    return sorted.slice(0, 3)
+    // Return top 3 formatados
+    return sorted.slice(0, 3).map((p: any) => ({
+      id: p.id,
+      caption: p.caption,
+      media_url: p.thumbnail_url || p.media_url,
+      permalink: p.permalink,
+      timestamp: p.timestamp,
+      like_count: p.like_count,
+      comments_count: p.comments_count
+    }))
   } catch (error) {
     console.error('Erro getInstagramPosts:', error)
     return []
