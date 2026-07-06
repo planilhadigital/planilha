@@ -10,6 +10,8 @@ import { normalizeMetrics, buildDeterministicFallback } from '@/lib/report-norma
 const apiKey = process.env.GEMINI_API_KEY || ''
 const genAI = new GoogleGenerativeAI(apiKey)
 
+export const maxDuration = 60; // Evita timeout na Vercel (Hobby max 60s)
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -145,7 +147,7 @@ export async function POST(req: Request) {
           title: z.string(),
           properties: z.any()
         })
-      )
+      ).min(1)
     });
 
     // 1. Normalização Determinística
